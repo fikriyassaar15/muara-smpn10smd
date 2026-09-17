@@ -150,6 +150,17 @@
   .step-list li::before { content: counter(step); position: absolute; left: 0; top: 6px; width: 28px; height: 28px; background: #6a1b9a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
   .unduh-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
   .unduh-row button { flex: 1; min-width: 180px; }
+  .toggle-line { display:flex; align-items:center; gap:10px; padding: 10px 14px; background:#f7fafc; border:2px solid #e2e8f0; border-radius:10px; cursor:pointer; margin-top:10px; }
+  .toggle-line:hover { border-color:#0d47a1; background:#e3f2fd; }
+  .toggle-line input[type="checkbox"] { width: 20px; height: 20px; margin: 0; cursor: pointer; accent-color: #0d47a1; }
+  .toggle-line .txt { font-size: 0.88rem; font-weight: 600; color: #0d47a1; }
+  .toggle-line .sub { font-size: 0.75rem; color: #718096; font-weight: 400; margin-top: 2px; }
+  .timer-banner { background: linear-gradient(135deg, #0d47a1, #00695c); color: #fff; padding: 12px 18px; border-radius: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 0.9rem; }
+  .timer-banner .label { opacity: 0.9; font-size: 0.8rem; }
+  .timer-banner .value { font-weight: 800; font-size: 1.15rem; letter-spacing: 1px; }
+  .timer-banner.warning { background: linear-gradient(135deg, #dd6b20, #c05621); }
+  .timer-banner.danger { background: linear-gradient(135deg, #e53e3e, #c53030); animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: 0.85; } }
   @media (max-width: 600px) {
     .tabs { flex-direction: column; }
     .score-big { font-size: 2rem; }
@@ -209,6 +220,7 @@
   <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></symbol>
   <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></symbol>
   <symbol id="i-file-pdf" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6"/><path d="M9 14h1.5a1.5 1.5 0 0 1 0 3H9v-3ZM9 17v3M14 14v6M14 14h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
 </svg>
 
 <!-- ==================== LOGIN ==================== -->
@@ -294,6 +306,7 @@
     <div class="card">
       <h2 id="previewJudul"><svg class="ico"><use href="#i-book"/></svg> Judul Tugas</h2>
       <div class="info" id="previewInfo"></div>
+      <div id="previewWaktuInfo"></div>
       <h3><svg class="ico"><use href="#i-doc"/></svg> Ketentuan Tugas</h3>
       <div class="ketentuan-box" id="previewKetentuan"></div>
       <h3><svg class="ico"><use href="#i-edit"/></svg> Data Peserta</h3>
@@ -328,6 +341,7 @@
     <div class="card">
       <h2 id="tugasJudul"></h2>
       <div class="info warning" id="tugasKetentuanSingkat"></div>
+      <div id="examTimerWrap"></div>
       <div id="jawabanContainer"></div>
       <button class="full success" onclick="kirimJawaban()" id="btnKirim"><svg class="ico"><use href="#i-upload"/></svg> Kumpulkan & Nilai Otomatis</button>
     </div>
@@ -458,7 +472,6 @@ Contoh:
 Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama..."></textarea>
           </div>
 
-          <!-- ====== MODE KEDUANYA — SEKARANG 1 KOTAK SAJA ====== -->
           <div id="tempelBoxKeduanya" class="hidden" style="margin-top:14px;">
             <div style="background:#fffaf0; border-left:4px solid #dd6b20; padding:10px 12px; border-radius:6px; margin-bottom:14px; font-size:0.82rem; color:#7b341e; line-height:1.6;">
               <b>Mode Keduanya (1 Kotak):</b> Paste soal <b>Pilihan Ganda</b> dan <b>Uraian</b> dalam satu kotak. Sistem otomatis mendeteksi jenis tiap soal — soal PG dikenali dari adanya opsi <code>A. B. C. D.</code>, soal Uraian dikenali dari label <code>Jawaban Ideal:</code> / <code>Kunci:</code> / <code>Pembahasan:</code>.
@@ -477,7 +490,6 @@ Kunci Jawaban: B
 2. Jelaskan pengertian gotong royong!
 Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
           </div>
-          <!-- ====== END MODE KEDUANYA ====== -->
 
           <div class="row" style="margin-top:14px;">
             <button class="success" onclick="prosesTempelSoal()"><svg class="ico"><use href="#i-play"/></svg> Proses & Ubah ke Bentuk Soal</button>
@@ -517,9 +529,32 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
                 <optgroup label="Kelas IX"><option>IX A</option><option>IX B</option><option>IX C</option><option>IX D</option><option>IX E</option><option>IX F</option><option>IX G</option><option>IX H</option><option>IX I</option><option>IX J</option></optgroup>
               </select>
             </div>
-            <div><label>Durasi (menit) — isi 0 jika tidak ada batas</label><input type="number" id="exDurasi" value="0" min="0" max="300"></div>
             <div><label>KKM</label><input type="number" id="exKkm" value="75" min="0" max="100"></div>
           </div>
+        </div>
+
+        <div class="card">
+          <h2><svg class="ico"><use href="#i-clock"/></svg> Pengatur Waktu Pengerjaan</h2>
+          <div class="info teal"><svg class="ico"><use href="#i-info"/></svg><span>Atur rentang waktu kapan siswa boleh mengerjakan. Kosongkan jika tidak ada batas waktu. Selama ujian, siswa melihat <b>countdown otomatis</b> dan jawaban dikumpulkan otomatis saat waktu habis.</span></div>
+          <div class="row">
+            <div>
+              <label>Waktu Mulai (opsional)</label>
+              <input type="datetime-local" id="exWaktuMulai">
+            </div>
+            <div>
+              <label>Waktu Selesai (opsional)</label>
+              <input type="datetime-local" id="exWaktuSelesai">
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <div>
+              <label>Durasi Pengerjaan (menit) — isi 0 jika tidak ada batas durasi</label>
+              <input type="number" id="exDurasi" value="0" min="0" max="600">
+            </div>
+          </div>
+          <small style="color:#718096; font-size:0.78rem; display:block; margin-top:6px;">
+            <b>Catatan:</b> Jika "Waktu Mulai" dan "Waktu Selesai" diisi, siswa hanya bisa login & mengerjakan pada rentang tersebut. Durasi = batas waktu dari saat siswa mulai mengerjakan. Waktu yang paling cepat tercapai akan dipakai sebagai batas akhir.
+          </small>
         </div>
 
         <div class="card">
@@ -546,6 +581,14 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
           <label style="margin-top:14px;">Teks Ketentuan (bisa diedit)</label>
           <textarea id="exKetentuan" rows="6" placeholder="Pilih jenis tugas dulu, atau tulis ketentuan manual di sini..."></textarea>
           <button class="secondary sm" onclick="isiTemplateKetentuan()"><svg class="ico"><use href="#i-refresh"/></svg> Isi Ulang Sesuai Jenis</button>
+
+          <label class="toggle-line" style="margin-top:16px;">
+            <input type="checkbox" id="exAktifkanFoto" checked>
+            <div>
+              <div class="txt"><svg class="ico" style="vertical-align:-0.15em;"><use href="#i-camera"/></svg> Aktifkan fitur unggah/foto jawaban</div>
+              <div class="sub">Jika dimatikan, siswa hanya bisa mengetik jawaban uraian (tidak bisa upload foto).</div>
+            </div>
+          </label>
         </div>
 
         <div class="card">
@@ -734,6 +777,51 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
         <h2><svg class="ico"><use href="#i-download"/></svg> Backup Data Guru</h2>
         <button class="success" onclick="exportGuruCSV()"><svg class="ico"><use href="#i-download"/></svg> Export Daftar Guru (CSV)</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL DUPLIKAT ==================== -->
+<div id="duplikatModal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; overflow-y:auto;">
+  <div class="card" style="max-width:540px; width:100%; margin:0;">
+    <h2><svg class="ico"><use href="#i-copy"/></svg> Duplikat Tugas ke Kelas Lain</h2>
+    <div id="duplikatInfo" style="margin-bottom:12px;"></div>
+
+    <label>Kelas Tujuan</label>
+    <select id="duplikatKelas">
+      <option value="">-- Pilih Kelas Tujuan --</option>
+      <optgroup label="Kelas VII"><option>VII A</option><option>VII B</option><option>VII C</option><option>VII D</option><option>VII E</option><option>VII F</option><option>VII G</option><option>VII H</option><option>VII I</option><option>VII J</option></optgroup>
+      <optgroup label="Kelas VIII"><option>VIII A</option><option>VIII B</option><option>VIII C</option><option>VIII D</option><option>VIII E</option><option>VIII F</option><option>VIII G</option><option>VIII H</option><option>VIII I</option><option>VIII J</option></optgroup>
+      <optgroup label="Kelas IX"><option>IX A</option><option>IX B</option><option>IX C</option><option>IX D</option><option>IX E</option><option>IX F</option><option>IX G</option><option>IX H</option><option>IX I</option><option>IX J</option></optgroup>
+    </select>
+
+    <label>Judul Tugas Baru</label>
+    <input type="text" id="duplikatJudul" placeholder="Judul tugas baru">
+
+    <div class="row" style="margin-top:10px;">
+      <div>
+        <label>Waktu Mulai Baru (opsional)</label>
+        <input type="datetime-local" id="duplikatWaktuMulai">
+      </div>
+      <div>
+        <label>Waktu Selesai Baru (opsional)</label>
+        <input type="datetime-local" id="duplikatWaktuSelesai">
+      </div>
+    </div>
+
+    <label class="toggle-line" style="margin-top:12px;">
+      <input type="checkbox" id="duplikatBukaSekarang" checked>
+      <div>
+        <div class="txt">Langsung aktifkan tugas baru</div>
+        <div class="sub">Jika dimatikan, tugas baru disimpan sebagai draf (tidak aktif).</div>
+      </div>
+    </label>
+
+    <div class="info" style="margin-top:12px;"><svg class="ico"><use href="#i-info"/></svg><span>Seluruh soal, kunci, rubrik, ketentuan, API Key, dan pengaturan foto akan ikut diduplikat. <b>Kode tugas baru akan digenerate otomatis.</b></span></div>
+
+    <div class="row" style="margin-top:14px;">
+      <button class="success" onclick="konfirmasiDuplikat()"><svg class="ico"><use href="#i-copy"/></svg> Duplikat Sekarang</button>
+      <button class="secondary" onclick="tutupDuplikat()"><svg class="ico"><use href="#i-close"/></svg> Batal</button>
     </div>
   </div>
 </div>
@@ -977,10 +1065,19 @@ let editorSoal = [];
 let jawabanSementara = {};
 let rubrikTabAktif = 'pilgan';
 let promptTabAktif = 'pilgan';
+let duplikatTugasId = null;
+let examTimerInterval = null;
+let examStartTime = null;
 
 function simpanState() { try { localStorage.setItem('MUARA_v7', JSON.stringify(state)); } catch (e) { console.error(e); } }
 function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escapeAttr(s) { return String(s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function formatWaktu(iso) {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  } catch (e) { return iso; }
+}
 
 function generateKodeUnik() {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -1089,12 +1186,42 @@ function validasiKode() {
   if (!tugas) { err.textContent = 'Kode tidak valid.'; return; }
   if (!tugas.aktif) { err.textContent = 'Tugas ini sudah ditutup.'; return; }
   if (!tugas.apiKey) { err.textContent = 'Tugas belum memiliki API Key.'; return; }
+
+  // Cek jendela waktu
+  const now = new Date();
+  if (tugas.waktuMulai && now < new Date(tugas.waktuMulai)) {
+    err.textContent = `Tugas baru bisa dikerjakan mulai ${formatWaktu(tugas.waktuMulai)}.`;
+    return;
+  }
+  if (tugas.waktuSelesai && now > new Date(tugas.waktuSelesai)) {
+    err.textContent = `Waktu pengerjaan sudah berakhir (${formatWaktu(tugas.waktuSelesai)}).`;
+    return;
+  }
+
   err.textContent = '';
   currentTugas = tugas;
   document.getElementById('loginPage').classList.add('hidden');
   document.getElementById('previewPage').classList.remove('hidden');
   document.getElementById('previewJudul').innerHTML = '<svg class="ico"><use href="#i-book"/></svg> ' + escapeHtml(tugas.judul || 'Tugas');
-  document.getElementById('previewInfo').innerHTML = `<svg class="ico"><use href="#i-info"/></svg><span><b>${escapeHtml(tugas.mapel || '-')}</b> | Kelas: <b>${escapeHtml(tugas.kelas || '-')}</b> | KKM: <b>${tugas.kkm}</b> | Jumlah soal: <b>${tugas.soal.length}</b>` + (tugas.durasi > 0 ? ` | Durasi: <b>${tugas.durasi} menit</b>` : '') + '</span>';
+
+  let infoStr = `<b>${escapeHtml(tugas.mapel || '-')}</b> | Kelas: <b>${escapeHtml(tugas.kelas || '-')}</b> | KKM: <b>${tugas.kkm}</b> | Jumlah soal: <b>${tugas.soal.length}</b>`;
+  document.getElementById('previewInfo').innerHTML = `<svg class="ico"><use href="#i-info"/></svg><span>${infoStr}</span>`;
+
+  // Waktu pengerjaan info
+  const wrapWaktu = document.getElementById('previewWaktuInfo');
+  if (tugas.waktuMulai || tugas.waktuSelesai || (tugas.durasi && tugas.durasi > 0)) {
+    let wStr = '';
+    if (tugas.waktuMulai || tugas.waktuSelesai) {
+      wStr += `<b>Jendela Pengerjaan:</b> ${tugas.waktuMulai ? formatWaktu(tugas.waktuMulai) : 'sekarang'} &nbsp;s/d&nbsp; ${tugas.waktuSelesai ? formatWaktu(tugas.waktuSelesai) : 'selesai'}<br>`;
+    }
+    if (tugas.durasi && tugas.durasi > 0) {
+      wStr += `<b>Durasi Maksimal:</b> ${tugas.durasi} menit dari mulai mengerjakan`;
+    }
+    wrapWaktu.innerHTML = `<div class="info teal"><svg class="ico"><use href="#i-clock"/></svg><span>${wStr}</span></div>`;
+  } else {
+    wrapWaktu.innerHTML = '';
+  }
+
   document.getElementById('previewKetentuan').textContent = tugas.ketentuan || '(Guru tidak menuliskan ketentuan khusus.)';
   document.getElementById('siswaNama').focus();
 }
@@ -1246,6 +1373,7 @@ function logout() {
   if (!confirm('Yakin keluar dari panel guru?')) return;
   currentUser = { role: null, nama: '', kelas: '', email: '' };
   currentTugas = null; editingTugasId = null; editorSoal = []; jawabanSementara = {};
+  hentikanTimerUjian();
   document.getElementById('guruPage').classList.add('hidden');
   document.getElementById('tugasPage').classList.add('hidden');
   document.getElementById('previewPage').classList.add('hidden');
@@ -1259,21 +1387,99 @@ function mulaiKerjakan() {
   const kelas = document.getElementById('siswaKelas').value;
   if (!nama) return alert('Isi nama lengkap Anda.');
   if (!kelas) return alert('Pilih kelas Anda.');
+
+  // Cek ulang waktu
+  const now = new Date();
+  if (currentTugas.waktuMulai && now < new Date(currentTugas.waktuMulai)) {
+    return alert(`Tugas baru bisa dikerjakan mulai ${formatWaktu(currentTugas.waktuMulai)}.`);
+  }
+  if (currentTugas.waktuSelesai && now > new Date(currentTugas.waktuSelesai)) {
+    return alert(`Waktu pengerjaan sudah berakhir (${formatWaktu(currentTugas.waktuSelesai)}).`);
+  }
+
   currentUser = { role: 'siswa', nama, kelas };
   jawabanSementara = {};
   document.getElementById('previewPage').classList.add('hidden');
   document.getElementById('tugasPage').classList.remove('hidden');
   document.getElementById('tugasUserInfo').innerHTML = `<svg class="ico"><use href="#i-student"/></svg> <b>${escapeHtml(nama)}</b> <small>(${escapeHtml(kelas)}) - Kode: ${currentTugas.kode}</small>`;
   document.getElementById('tugasJudul').innerHTML = '<svg class="ico"><use href="#i-book"/></svg> ' + escapeHtml(currentTugas.judul || 'Tugas');
-  document.getElementById('tugasKetentuanSingkat').innerHTML = `<svg class="ico"><use href="#i-info"/></svg><span>${escapeHtml(currentTugas.mapel || '-')} | Kelas: ${escapeHtml(currentTugas.kelas || '-')} | KKM: ${currentTugas.kkm}` + (currentTugas.durasi > 0 ? ` | Durasi: ${currentTugas.durasi} menit` : '') + '</span>';
+  document.getElementById('tugasKetentuanSingkat').innerHTML = `<svg class="ico"><use href="#i-info"/></svg><span>${escapeHtml(currentTugas.mapel || '-')} | Kelas: ${escapeHtml(currentTugas.kelas || '-')} | KKM: ${currentTugas.kkm}</span>`;
   renderSoalSiswa();
+  mulaiTimerUjian();
 }
 
+// ============================================================
+// TIMER UJIAN
+// ============================================================
+function hentikanTimerUjian() {
+  if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
+  examStartTime = null;
+  const wrap = document.getElementById('examTimerWrap');
+  if (wrap) wrap.innerHTML = '';
+}
+
+function mulaiTimerUjian() {
+  hentikanTimerUjian();
+  examStartTime = Date.now();
+  const hasWaktuSelesai = !!currentTugas.waktuSelesai;
+  const hasDurasi = currentTugas.durasi && currentTugas.durasi > 0;
+  if (!hasWaktuSelesai && !hasDurasi) {
+    const wrap = document.getElementById('examTimerWrap');
+    if (wrap) wrap.innerHTML = '';
+    return;
+  }
+  tickTimerUjian();
+  examTimerInterval = setInterval(tickTimerUjian, 1000);
+}
+
+function tickTimerUjian() {
+  const wrap = document.getElementById('examTimerWrap');
+  if (!wrap) return;
+  const now = Date.now();
+  let endTime = null;
+  if (currentTugas.waktuSelesai) {
+    const ws = new Date(currentTugas.waktuSelesai).getTime();
+    if (endTime === null || ws < endTime) endTime = ws;
+  }
+  if (currentTugas.durasi > 0 && examStartTime) {
+    const durasiEnd = examStartTime + currentTugas.durasi * 60000;
+    if (endTime === null || durasiEnd < endTime) endTime = durasiEnd;
+  }
+  if (endTime === null) { wrap.innerHTML = ''; return; }
+
+  const sisa = endTime - now;
+  if (sisa <= 0) {
+    wrap.innerHTML = `<div class="timer-banner danger"><div><div class="label">Waktu Habis</div><div class="value">00:00</div></div><div style="font-size:0.85rem;">Mengumpulkan jawaban otomatis...</div></div>`;
+    if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
+    autoSubmitWaktuHabis();
+    return;
+  }
+  const mnt = Math.floor(sisa / 60000);
+  const dtk = Math.floor((sisa % 60000) / 1000);
+  let cls = 'timer-banner';
+  if (sisa <= 60000) cls += ' danger';
+  else if (sisa <= 300000) cls += ' warning';
+  wrap.innerHTML = `<div class="${cls}"><div><div class="label">Sisa Waktu Pengerjaan</div><div class="value">${String(mnt).padStart(2,'0')}:${String(dtk).padStart(2,'0')}</div></div><div style="font-size:0.78rem; opacity:0.9;">${currentTugas.waktuSelesai ? 'Batas: ' + formatWaktu(currentTugas.waktuSelesai) : ''}${currentTugas.durasi > 0 ? (currentTugas.waktuSelesai ? ' • ' : '') + 'Durasi: ' + currentTugas.durasi + ' menit' : ''}</div></div>`;
+}
+
+async function autoSubmitWaktuHabis() {
+  if (!currentTugas) return;
+  // Hindari double
+  if (document.getElementById('btnKirim')?.disabled) return;
+  alert('Waktu pengerjaan telah habis. Jawaban Anda akan dikumpulkan otomatis.');
+  await kirimJawaban(true);
+}
+
+// ============================================================
+// RENDER SOAL SISWA
+// ============================================================
 function renderSoalSiswa() {
   const c = document.getElementById('jawabanContainer');
   c.innerHTML = '';
+  const allowFoto = currentTugas.aktifkanFoto !== false;
   currentTugas.soal.forEach((s, i) => {
     const jawab = jawabanSementara[i] || { mode: 'teks', teks: '', fotoData: '', mimeType: '', pilgan: '' };
+    if (!allowFoto && jawab.mode === 'foto') jawab.mode = 'teks';
     jawabanSementara[i] = jawab;
 
     if (s.jenis === 'pilgan') {
@@ -1294,21 +1500,15 @@ function renderSoalSiswa() {
           </div>
         </div>`;
     } else {
-      const teksClass = jawab.mode === 'teks' ? 'active' : '';
-      const fotoClass = jawab.mode === 'foto' ? 'active' : '';
       const showTeks = jawab.mode === 'teks';
-      const showFoto = jawab.mode === 'foto';
-      c.innerHTML += `
-        <div class="question-box">
-          <b>Soal #${i+1}</b> <span class="badge">Uraian</span> <span class="badge">Bobot ${s.bobot}</span>
-          <p style="margin:8px 0; white-space:pre-wrap;">${escapeHtml(s.pertanyaan) || '(Soal kosong)'}</p>
-          <div class="answer-tabs">
-            <div class="answer-tab ${teksClass}" onclick="gantiMode(${i}, 'teks')"><svg class="ico"><use href="#i-edit"/></svg> Ketik Jawaban</div>
-            <div class="answer-tab ${fotoClass}" onclick="gantiMode(${i}, 'foto')"><svg class="ico"><use href="#i-camera"/></svg> Foto / Upload Gambar</div>
-          </div>
-          <div id="modeTeks-${i}" class="${showTeks ? '' : 'hidden'}">
-            <textarea id="jw-${i}" placeholder="Tulis jawaban Anda di sini..." onchange="simpanTeks(${i}, this.value)">${escapeHtml(jawab.teks)}</textarea>
-          </div>
+      const showFoto = allowFoto && jawab.mode === 'foto';
+      let tabsHtml = `<div class="answer-tab ${showTeks ? 'active' : ''}" onclick="gantiMode(${i}, 'teks')"><svg class="ico"><use href="#i-edit"/></svg> Ketik Jawaban</div>`;
+      if (allowFoto) {
+        tabsHtml += `<div class="answer-tab ${showFoto ? 'active' : ''}" onclick="gantiMode(${i}, 'foto')"><svg class="ico"><use href="#i-camera"/></svg> Foto / Upload Gambar</div>`;
+      }
+      let fotoHtml = '';
+      if (allowFoto) {
+        fotoHtml = `
           <div id="modeFoto-${i}" class="${showFoto ? '' : 'hidden'}">
             <div class="photo-note">
               <svg class="ico"><use href="#i-warn"/></svg>
@@ -1321,7 +1521,17 @@ function renderSoalSiswa() {
             </div>
             <input type="file" id="foto-${i}" class="file-input-hidden" accept="image/*" capture="environment" onchange="prosesFoto(${i}, event)">
             <div id="preview-${i}">${jawab.fotoData ? `<img src="${jawab.fotoData}" class="photo-preview" alt="Preview">` : ''}</div>
+          </div>`;
+      }
+      c.innerHTML += `
+        <div class="question-box">
+          <b>Soal #${i+1}</b> <span class="badge">Uraian</span> <span class="badge">Bobot ${s.bobot}</span>
+          <p style="margin:8px 0; white-space:pre-wrap;">${escapeHtml(s.pertanyaan) || '(Soal kosong)'}</p>
+          <div class="answer-tabs">${tabsHtml}</div>
+          <div id="modeTeks-${i}" class="${showTeks ? '' : 'hidden'}">
+            <textarea id="jw-${i}" placeholder="Tulis jawaban Anda di sini..." onchange="simpanTeks(${i}, this.value)">${escapeHtml(jawab.teks)}</textarea>
           </div>
+          ${fotoHtml}
         </div>`;
     }
   });
@@ -1333,15 +1543,18 @@ function pilihJawabanPilgan(i, val) {
 }
 
 function gantiMode(i, mode) {
+  const allowFoto = currentTugas.aktifkanFoto !== false;
+  if (mode === 'foto' && !allowFoto) return;
   jawabanSementara[i].mode = mode;
-  document.getElementById('modeTeks-' + i).classList.toggle('hidden', mode !== 'teks');
-  document.getElementById('modeFoto-' + i).classList.toggle('hidden', mode !== 'foto');
-  const qBox = document.getElementById('modeTeks-' + i).closest('.question-box');
+  const elTeks = document.getElementById('modeTeks-' + i);
+  const elFoto = document.getElementById('modeFoto-' + i);
+  if (elTeks) elTeks.classList.toggle('hidden', mode !== 'teks');
+  if (elFoto) elFoto.classList.toggle('hidden', mode !== 'foto');
+  const qBox = elTeks.closest('.question-box');
   const tabs = qBox.querySelectorAll('.answer-tab');
-  if (tabs[0] && tabs[1]) {
-    tabs[0].classList.toggle('active', mode === 'teks');
-    tabs[1].classList.toggle('active', mode === 'foto');
-  }
+  tabs.forEach(t => t.classList.remove('active'));
+  if (mode === 'teks' && tabs[0]) tabs[0].classList.add('active');
+  if (mode === 'foto' && tabs[1]) tabs[1].classList.add('active');
 }
 
 function simpanTeks(i, val) { jawabanSementara[i].teks = val; }
@@ -1361,19 +1574,38 @@ function prosesFoto(i, event) {
   reader.readAsDataURL(file);
 }
 
-async function kirimJawaban() {
+async function kirimJawaban(paksa) {
   for (let i = 0; i < currentTugas.soal.length; i++) {
     const j = jawabanSementara[i];
     const soal = currentTugas.soal[i];
-    if (!j) return alert(`Soal #${i+1} belum dijawab.`);
+    if (!j) {
+      if (paksa) {
+        jawabanSementara[i] = { mode: 'teks', teks: '(tidak dijawab - waktu habis)', fotoData: '', mimeType: '', pilgan: '' };
+        continue;
+      }
+      return alert(`Soal #${i+1} belum dijawab.`);
+    }
     if (soal.jenis === 'pilgan') {
-      if (!j.pilgan) return alert(`Soal #${i+1} (pilihan ganda) belum dipilih jawabannya.`);
+      if (!j.pilgan) {
+        if (paksa) continue;
+        return alert(`Soal #${i+1} (pilihan ganda) belum dipilih jawabannya.`);
+      }
     } else {
-      if (j.mode === 'teks' && !j.teks.trim()) return alert(`Soal #${i+1} belum diisi.`);
-      if (j.mode === 'foto' && !j.fotoData) return alert(`Soal #${i+1} belum ada foto.`);
+      if (j.mode === 'teks' && !j.teks.trim()) {
+        if (paksa) { j.teks = '(tidak dijawab - waktu habis)'; continue; }
+        return alert(`Soal #${i+1} belum diisi.`);
+      }
+      if (j.mode === 'foto' && !j.fotoData) {
+        if (paksa) {
+          jawabanSementara[i] = { mode: 'teks', teks: '(tidak dijawab - waktu habis)', fotoData: '', mimeType: '', pilgan: '' };
+          continue;
+        }
+        return alert(`Soal #${i+1} belum ada foto.`);
+      }
     }
   }
-  if (!confirm('Kumpulkan jawaban sekarang?')) return;
+  if (!paksa && !confirm('Kumpulkan jawaban sekarang?')) return;
+  hentikanTimerUjian();
   const btn = document.getElementById('btnKirim');
   btn.disabled = true;
   document.getElementById('hasilSiswa').innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span><span class="msg">Silakan tunggu 1-5 menit, jawaban anda sedang dikoreksi</span><span class="sub">Mohon jangan menutup atau me-refresh halaman ini.</span></div></div>';
@@ -1382,12 +1614,14 @@ async function kirimJawaban() {
     if (hasil.perluUploadUlang && hasil.perluUploadUlang.length > 0) {
       const daftar = hasil.perluUploadUlang.map(x => `Soal #${x.nomor} (${x.alasan})`).join('<br>');
       document.getElementById('hasilSiswa').innerHTML = `<div class="card info warning"><svg class="ico"><use href="#i-warn"/></svg><div><b>Foto jawaban kurang jelas.</b><br>AI tidak dapat membaca dengan baik pada:<br>${daftar}<br><br><b>Silakan:</b><br>1. Upload ulang foto lebih baik, atau<br>2. Laporkan ke guru Anda.<br><br><button class="warning sm" onclick="cobaLagi()">Coba Lagi</button></div></div>`;
+      btn.disabled = false;
       return;
     }
     tampilkanHasilSiswa(hasil);
     state.hasil.push({ tugasId: currentTugas.id, tugasKode: currentTugas.kode, tugasJudul: currentTugas.judul, tugasMapel: currentTugas.mapel, tugasKelas: currentTugas.kelas, guruEmail: currentTugas.guruEmail, nama: currentUser.nama, kelas: currentUser.kelas, waktu: new Date().toISOString(), ...hasil });
     simpanState();
     document.getElementById('jawabanContainer').innerHTML = '';
+    document.getElementById('examTimerWrap').innerHTML = '';
     btn.classList.add('hidden');
   } catch (e) {
     document.getElementById('hasilSiswa').innerHTML = `<div class="card info red"><svg class="ico"><use href="#i-warn"/></svg><div><b>Terjadi kesalahan:</b><br>${escapeHtml(e.message)}</div></div>`;
@@ -1485,7 +1719,6 @@ function tampilkanHasilSiswa(hasil) {
 // ============================================================
 // UNDUH HASIL — PDF & GAMBAR
 // ============================================================
-
 function buildHasilRenderHTML(hasil) {
   const lulus = hasil.skorTotal >= currentTugas.kkm;
   const warna = lulus ? '#38a169' : '#e53e3e';
@@ -1566,119 +1799,73 @@ function showUnduhLoading(pesan) {
       <span>${pesan}</span>
     </div>`);
 }
-
 function hideUnduhLoading() {
   const el = document.getElementById('unduhLoading');
   if (el) el.remove();
 }
 
-// ============= UNDUH PDF =============
 async function unduhHasilPDF() {
   const hasil = getHasilSiswa();
   if (!hasil) return;
-
   if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
     alert('Pustaka PDF belum termuat. Periksa koneksi internet, lalu refresh halaman.');
     return;
   }
-
   showUnduhLoading('Menyiapkan PDF... Mohon tunggu.');
   try {
     const wrapper = document.createElement('div');
-    wrapper.style.position = 'fixed';
-    wrapper.style.left = '-9999px';
-    wrapper.style.top = '0';
-    wrapper.style.background = '#fff';
+    wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '0'; wrapper.style.background = '#fff';
     wrapper.innerHTML = buildHasilRenderHTML(hasil);
     document.body.appendChild(wrapper);
-
     const target = wrapper.firstElementChild;
-    const canvas = await html2canvas(target, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      useCORS: true,
-      logging: false
-    });
-
+    const canvas = await html2canvas(target, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
     document.body.removeChild(wrapper);
-
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
     const imgProps = pdf.getImageProperties(imgData);
     const imgWidth = pdfWidth;
     const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
+    let heightLeft = imgHeight; let position = 0;
     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
     heightLeft -= pdfHeight;
-
     while (heightLeft > 0) {
       position = heightLeft - imgHeight;
       pdf.addPage();
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pdfHeight;
     }
-
-    const namaFile = `Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.pdf`;
-    pdf.save(namaFile);
+    pdf.save(`Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.pdf`);
   } catch (e) {
-    console.error(e);
-    alert('Gagal membuat PDF: ' + e.message);
-  } finally {
-    hideUnduhLoading();
-  }
+    console.error(e); alert('Gagal membuat PDF: ' + e.message);
+  } finally { hideUnduhLoading(); }
 }
 
-// ============= UNDUH GAMBAR (PNG) =============
 async function unduhHasilGambar() {
   const hasil = getHasilSiswa();
   if (!hasil) return;
-
   if (typeof html2canvas === 'undefined') {
     alert('Pustaka gambar belum termuat. Periksa koneksi internet, lalu refresh halaman.');
     return;
   }
-
   showUnduhLoading('Menyiapkan gambar... Mohon tunggu.');
   try {
     const wrapper = document.createElement('div');
-    wrapper.style.position = 'fixed';
-    wrapper.style.left = '-9999px';
-    wrapper.style.top = '0';
-    wrapper.style.background = '#fff';
+    wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '0'; wrapper.style.background = '#fff';
     wrapper.innerHTML = buildHasilRenderHTML(hasil);
     document.body.appendChild(wrapper);
-
     const target = wrapper.firstElementChild;
-    const canvas = await html2canvas(target, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      useCORS: true,
-      logging: false
-    });
-
+    const canvas = await html2canvas(target, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
     document.body.removeChild(wrapper);
-
     const link = document.createElement('a');
     link.download = `Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   } catch (e) {
-    console.error(e);
-    alert('Gagal membuat gambar: ' + e.message);
-  } finally {
-    hideUnduhLoading();
-  }
+    console.error(e); alert('Gagal membuat gambar: ' + e.message);
+  } finally { hideUnduhLoading(); }
 }
 
 // ============================================================
@@ -1701,13 +1888,74 @@ function renderTugasList() {
     const pembuat = e.guruNama ? ` | Dibuat oleh: ${escapeHtml(e.guruNama)}` : '';
     const kelasInfo = e.kelas ? ` | Kelas: ${escapeHtml(e.kelas)}` : '';
     const jenisInfo = ` | ${jmlPilgan} pilgan + ${jmlUraian} uraian`;
-    return `<div class="exam-item"><h3><svg class="ico"><use href="#i-exam"/></svg> ${escapeHtml(e.judul) || '(Tanpa judul)'} <span class="badge ${e.aktif ? 'green' : 'gray'}">${e.aktif ? 'AKTIF' : 'DITUTUP'}</span></h3><div class="meta">${escapeHtml(e.mapel || '-')}${kelasInfo} | KKM: ${e.kkm}${jenisInfo} | ${jmlHasil} siswa${pembuat}</div><div style="font-size:0.82rem; color:#718096; margin-bottom:6px;">Kode Tugas:</div><div class="code-badge">${e.kode}</div><div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"><button class="sm secondary" onclick="salinKode('${e.kode}')"><svg class="ico"><use href="#i-copy"/></svg> Salin Kode</button><button class="sm secondary" onclick="bukaEditorTugas('${e.id}')"><svg class="ico"><use href="#i-edit"/></svg> Edit</button><button class="sm ${e.aktif ? 'warning' : 'success'}" onclick="toggleAktif('${e.id}')"><svg class="ico"><use href="${e.aktif ? '#i-pause' : '#i-play'}"/></svg> ${e.aktif ? 'Tutup' : 'Buka'}</button><button class="sm danger" onclick="hapusTugas('${e.id}')"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button></div></div>`;
+    // Info waktu
+    let waktuInfo = '';
+    if (e.waktuMulai || e.waktuSelesai) {
+      waktuInfo = ` | ⏰ ${e.waktuMulai ? formatWaktu(e.waktuMulai) : 'sekarang'} s/d ${e.waktuSelesai ? formatWaktu(e.waktuSelesai) : 'selesai'}`;
+    }
+    if (e.durasi > 0) waktuInfo += ` | ⏱ ${e.durasi} menit`;
+    // Info foto
+    const fotoInfo = e.aktifkanFoto === false ? ' | 🚫 Foto off' : ' | 📷 Foto on';
+    return `<div class="exam-item"><h3><svg class="ico"><use href="#i-exam"/></svg> ${escapeHtml(e.judul) || '(Tanpa judul)'} <span class="badge ${e.aktif ? 'green' : 'gray'}">${e.aktif ? 'AKTIF' : 'DITUTUP'}</span></h3><div class="meta">${escapeHtml(e.mapel || '-')}${kelasInfo} | KKM: ${e.kkm}${jenisInfo} | ${jmlHasil} siswa${pembuat}<br>${waktuInfo}${fotoInfo}</div><div style="font-size:0.82rem; color:#718096; margin-bottom:6px;">Kode Tugas:</div><div class="code-badge">${e.kode}</div><div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"><button class="sm secondary" onclick="salinKode('${e.kode}')"><svg class="ico"><use href="#i-copy"/></svg> Salin Kode</button><button class="sm purple" onclick="bukaDuplikat('${e.id}')"><svg class="ico"><use href="#i-copy"/></svg> Duplikat</button><button class="sm secondary" onclick="bukaEditorTugas('${e.id}')"><svg class="ico"><use href="#i-edit"/></svg> Edit</button><button class="sm ${e.aktif ? 'warning' : 'success'}" onclick="toggleAktif('${e.id}')"><svg class="ico"><use href="${e.aktif ? '#i-pause' : '#i-play'}"/></svg> ${e.aktif ? 'Tutup' : 'Buka'}</button><button class="sm danger" onclick="hapusTugas('${e.id}')"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button></div></div>`;
   }).join('');
 }
 
 function salinKode(code) { navigator.clipboard.writeText(code).then(() => alert('Kode ' + code + ' tersalin!')).catch(() => prompt('Salin manual:', code)); }
 function toggleAktif(id) { const e = state.tugas.find(x => x.id === id); e.aktif = !e.aktif; simpanState(); renderTugasList(); }
 function hapusTugas(id) { if (!confirm('Hapus tugas ini?')) return; state.tugas = state.tugas.filter(x => x.id !== id); simpanState(); renderTugasList(); }
+
+// ============================================================
+// DUPLIKAT TUGAS
+// ============================================================
+function bukaDuplikat(id) {
+  const e = state.tugas.find(x => x.id === id);
+  if (!e) return;
+  duplikatTugasId = id;
+  document.getElementById('duplikatInfo').innerHTML = `<div class="info"><svg class="ico"><use href="#i-info"/></svg><span><b>Asal:</b> ${escapeHtml(e.judul)} <br><b>Kode:</b> ${e.kode} | <b>Kelas:</b> ${escapeHtml(e.kelas || '-')} | <b>Soal:</b> ${e.soal.length}</span></div>`;
+  document.getElementById('duplikatJudul').value = (e.judul || 'Tugas') + ' (Copy)';
+  document.getElementById('duplikatKelas').value = '';
+  document.getElementById('duplikatWaktuMulai').value = e.waktuMulai || '';
+  document.getElementById('duplikatWaktuSelesai').value = e.waktuSelesai || '';
+  document.getElementById('duplikatBukaSekarang').checked = true;
+  document.getElementById('duplikatModal').classList.remove('hidden');
+}
+
+function tutupDuplikat() {
+  duplikatTugasId = null;
+  document.getElementById('duplikatModal').classList.add('hidden');
+}
+
+function konfirmasiDuplikat() {
+  const e = state.tugas.find(x => x.id === duplikatTugasId);
+  if (!e) return;
+  const kelasBaru = document.getElementById('duplikatKelas').value;
+  const judulBaru = document.getElementById('duplikatJudul').value.trim();
+  const waktuMulaiBaru = document.getElementById('duplikatWaktuMulai').value || '';
+  const waktuSelesaiBaru = document.getElementById('duplikatWaktuSelesai').value || '';
+  const bukaSekarang = document.getElementById('duplikatBukaSekarang').checked;
+
+  if (!kelasBaru) return alert('Pilih kelas tujuan dulu.');
+  if (!judulBaru) return alert('Isi judul tugas baru.');
+  if (waktuMulaiBaru && waktuSelesaiBaru && new Date(waktuMulaiBaru) >= new Date(waktuSelesaiBaru)) {
+    return alert('Waktu mulai harus lebih awal dari waktu selesai.');
+  }
+
+  const baru = JSON.parse(JSON.stringify(e));
+  baru.id = 'tg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+  baru.kode = generateKodeUnik();
+  baru.kelas = kelasBaru;
+  baru.judul = judulBaru;
+  baru.waktuMulai = waktuMulaiBaru;
+  baru.waktuSelesai = waktuSelesaiBaru;
+  baru.aktif = bukaSekarang;
+  baru.createdAt = new Date().toISOString();
+
+  state.tugas.push(baru);
+  simpanState();
+  renderTugasList();
+  tutupDuplikat();
+  alert(`Tugas berhasil diduplikat!\n\nKelas Baru: ${kelasBaru}\nKode Tugas Baru: ${baru.kode}\nStatus: ${bukaSekarang ? 'AKTIF' : 'DITUTUP (draf)'}\n\nBagikan kode baru ini ke siswa kelas ${kelasBaru}.`);
+}
 
 function mulaiInputSoal() {
   document.getElementById('tugasListView').classList.add('hidden');
@@ -1738,6 +1986,9 @@ function pilihModeBuat(mode) {
     document.getElementById('exJenisTugas').value = '';
     document.getElementById('exKetentuan').value = '';
     document.getElementById('exRubrik').value = '';
+    document.getElementById('exWaktuMulai').value = '';
+    document.getElementById('exWaktuSelesai').value = '';
+    document.getElementById('exAktifkanFoto').checked = true;
     editorSoal = [{ jenis: 'uraian', pertanyaan: '', kunci: '', bobot: 100 }];
     renderEditorSoal();
     switchRubrikTab('pilgan');
@@ -1869,7 +2120,6 @@ function prosesTempelSoal() {
       const hasil = parseTeksSoal(teksUraian.trim(), 'uraian');
       semuaSoal = hasil.soal;
     } else if (jenis === 'keduanya') {
-      // 1 KOTAK: parser otomatis memisahkan PG dan Uraian per blok soal
       const hasil = parseTeksSoal(teksKeduanya.trim(), 'keduanya');
       semuaSoal = hasil.soal;
     }
@@ -1906,6 +2156,9 @@ function prosesTempelSoal() {
     document.getElementById('exJenisTugas').value = jenis;
     document.getElementById('exKetentuan').value = KETENTUAN_PRESET[jenis] || '';
     document.getElementById('exRubrik').value = '';
+    document.getElementById('exWaktuMulai').value = '';
+    document.getElementById('exWaktuSelesai').value = '';
+    document.getElementById('exAktifkanFoto').checked = true;
     editorSoal = semuaSoal;
     renderEditorSoal();
 
@@ -1967,10 +2220,8 @@ function parseTeksSoal(teks, jenisMode) {
       }
     } else if (jenisMode === 'uraian') {
       const u = cobaParseUraian(blockText);
-      // FIX: kunci TIDAK dihapus lagi — inilah penyebab "Jawaban Ideal" hilang
       if (u) { u.jenis = 'uraian'; delete u.opsi; hasil.push(u); }
     } else {
-      // Mode 'keduanya' / 'gabungan': auto-detect tiap blok
       const pilgan = cobaParsePilgan(blockText);
       if (pilgan) hasil.push(pilgan);
       else {
@@ -2038,19 +2289,12 @@ function cobaParsePilgan(blockText) {
   return { jenis: 'pilgan', pertanyaan, opsi, kunci, bobot: 100 };
 }
 
-// ============================================================
-// cobaParseUraian — VERSI DIPERBAIKI
-// - Mendukung label inline: "1. Pertanyaan? Jawaban Ideal: ..." dalam 1 baris
-// - Mendukung pemisah : . - =
-// - Case-insensitive
-// ============================================================
 function cobaParseUraian(blockText) {
   const lines = blockText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   if (lines.length === 0) return null;
 
   const labelRegex = /(?:Jawaban\s+Ideal|Kunci\s+Jawaban|Jawaban|Kunci|Answer|Pembahasan)\s*[:.\-=]/i;
 
-  // Cari baris pertama yang memuat label kunci
   let kunciIdx = -1;
   let inlinePos = -1;
   let inlineLen = 0;
@@ -2137,6 +2381,9 @@ function bukaEditorTugas(id) {
   document.getElementById('exJenisTugas').value = e?.jenisTugas || '';
   document.getElementById('exKetentuan').value = e?.ketentuan || '';
   document.getElementById('exRubrik').value = e?.rubrik || '';
+  document.getElementById('exWaktuMulai').value = e?.waktuMulai || '';
+  document.getElementById('exWaktuSelesai').value = e?.waktuSelesai || '';
+  document.getElementById('exAktifkanFoto').checked = e?.aktifkanFoto !== false;
   editorSoal = e ? JSON.parse(JSON.stringify(e.soal)) : [{ jenis: 'uraian', pertanyaan: '', kunci: '', bobot: 100 }];
   editorSoal.forEach(s => {
     if (!s.jenis) s.jenis = (s.opsi && s.opsi.length > 0) ? 'pilgan' : 'uraian';
@@ -2236,6 +2483,9 @@ function simpanTugas() {
   const jenisTugas = document.getElementById('exJenisTugas').value;
   const ketentuan = document.getElementById('exKetentuan').value.trim();
   const rubrik = document.getElementById('exRubrik').value.trim();
+  const waktuMulai = document.getElementById('exWaktuMulai').value || '';
+  const waktuSelesai = document.getElementById('exWaktuSelesai').value || '';
+  const aktifkanFoto = document.getElementById('exAktifkanFoto').checked;
 
   if (!mapel) return alert('Pilih mata pelajaran.');
   if (!judul) return alert('Isi judul tugas.');
@@ -2243,6 +2493,9 @@ function simpanTugas() {
   if (!apiKey) return alert('Isi API Key untuk tugas ini.');
   if (!jenisTugas) return alert('Pilih jenis tugas.');
   if (!rubrik) return alert('Pilih atau tulis rubrik penilaian.');
+  if (waktuMulai && waktuSelesai && new Date(waktuMulai) >= new Date(waktuSelesai)) {
+    return alert('Waktu mulai harus lebih awal dari waktu selesai.');
+  }
 
   const adaPilgan = editorSoal.some(s => s.jenis === 'pilgan');
   const adaUraian = editorSoal.some(s => s.jenis !== 'pilgan');
@@ -2268,7 +2521,7 @@ function simpanTugas() {
 
   if (editingTugasId) {
     const e = state.tugas.find(x => x.id === editingTugasId);
-    Object.assign(e, { mapel, judul, kelas, durasi, kkm, apiKey, jenisTugas, ketentuan, rubrik, soal: editorSoal });
+    Object.assign(e, { mapel, judul, kelas, durasi, kkm, apiKey, jenisTugas, ketentuan, rubrik, soal: editorSoal, waktuMulai, waktuSelesai, aktifkanFoto });
     simpanState(); alert('Tugas diperbarui!');
   } else {
     const newTugas = {
@@ -2276,6 +2529,7 @@ function simpanTugas() {
       kode: generateKodeUnik(),
       mapel, judul, kelas, durasi, kkm, apiKey, jenisTugas, ketentuan, rubrik,
       soal: editorSoal, aktif: true,
+      waktuMulai, waktuSelesai, aktifkanFoto,
       guruNama: currentUser.nama, guruEmail: currentUser.email,
       createdAt: new Date().toISOString()
     };
@@ -2289,7 +2543,7 @@ function muatFilterTugas() {
   const sel = document.getElementById('filterTugas'); if (!sel) return;
   const current = sel.value;
   const tugasSaya = state.tugas.filter(e => e.guruEmail === currentUser.email);
-  sel.innerHTML = '<option value="">-- Semua Tugas Saya --</option>' + tugasSaya.map(e => `<option value="${e.id}">${escapeHtml(e.judul)} [${e.kode}]</option>`).join('');
+  sel.innerHTML = '<option value="">-- Semua Tugas Saya --</option>' + tugasSaya.map(e => `<option value="${e.id}">${escapeHtml(e.judul)} [${e.kode}] - ${escapeHtml(e.kelas || '-')}</option>`).join('');
   sel.value = current;
 }
 
@@ -2340,6 +2594,7 @@ function gantiPassword() {
 
 function konfirmasiKeluarTugas() {
   if (!confirm('Yakin keluar? Jawaban yang belum dikumpulkan akan hilang.')) return;
+  hentikanTimerUjian();
   currentTugas = null;
   currentUser = { role: null, nama: '', kelas: '', email: '' };
   jawabanSementara = {};
@@ -2356,7 +2611,7 @@ function konfirmasiKeluarTugas() {
 
 showLogin(null);
 switchPromptTab('pilgan');
-console.log('MUARA v7 siap. Total guru:', state.guruList.length);
+console.log('MUARA v8 siap. Total guru:', state.guruList.length);
 </script>
 </body>
 </html>
