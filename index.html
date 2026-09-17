@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>MUARA - Mesin Ujian & Analisis Respons Alternatif</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -23,17 +23,6 @@
   input:focus, textarea:focus, select:focus { outline: none; border-color: #0d47a1; }
   textarea { resize: vertical; min-height: 80px; }
   select { cursor: pointer; }
-  /* ============ BLOKIR LONG-PRESS MENU DI MOBILE UNTUK TEXTAREA JAWABAN ============ */
-  #jawabanContainer textarea {
-    -webkit-touch-callout: none;
-    -webkit-user-select: text;
-    -khtml-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-    -webkit-user-modify: read-write-plaintext-only;
-    caret-color: #0d47a1;
-  }
   button { background: linear-gradient(135deg, #0d47a1, #00695c); color: #fff; border: none; padding: 11px 18px; border-radius: 8px; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
   button:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(13,71,161,0.4); }
   button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
@@ -182,22 +171,6 @@
   .lockdown-badge { position: fixed; top: 12px; left: 12px; z-index: 99998; background: linear-gradient(135deg, #c62828, #e53935); color: #fff; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; box-shadow: 0 4px 14px rgba(198,40,40,0.45); letter-spacing: 0.4px; pointer-events: none; animation: pulse-lockdown 2s infinite; display: flex; align-items: center; gap: 6px; }
   .lockdown-badge.hidden { display: none; }
   @keyframes pulse-lockdown { 50% { opacity: 0.78; } }
-  /* ============ LOCKDOWN OVERLAY ============ */
-  #lockdownOverlay {
-    position: fixed; inset: 0; z-index: 2147483647;
-    background: linear-gradient(135deg, #b71c1c 0%, #c62828 100%);
-    color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 30px; text-align: center;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none; user-select: none;
-  }
-  #lockdownOverlay .lock-icon { font-size: 5rem; margin-bottom: 20px; animation: pulse-lockdown 1.2s infinite; }
-  #lockdownOverlay h2 { color: #fff !important; font-size: 1.6rem; margin-bottom: 16px; letter-spacing: 1px; }
-  #lockdownOverlay p { font-size: 0.98rem; line-height: 1.75; max-width: 500px; margin-bottom: 22px; }
-  #lockdownOverlay .cd { font-size: 2.5rem; font-weight: 800; display: inline-block; min-width: 60px; margin: 0 6px; }
-  #lockdownOverlay button { background: #fff; color: #b71c1c; font-size: 1rem; padding: 14px 30px; font-weight: 800; letter-spacing: 0.5px; border-radius: 10px; margin-top: 8px; }
-  #lockdownOverlay button:hover { background: #ffebee; transform: scale(1.03); }
-  #lockdownOverlay .alert-info { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); padding: 14px 20px; border-radius: 10px; max-width: 520px; font-size: 0.86rem; line-height: 1.6; margin-top: 20px; }
   @media (max-width: 600px) {
     .tabs { flex-direction: column; }
     .score-big { font-size: 2rem; }
@@ -209,6 +182,46 @@
     .admin-table th, .admin-table td { padding: 6px; }
     .choice-card { min-width: 100%; }
   }
+  /* ============================================================
+     ENHANCEMENT: BLOKIR PASTE & LOCKDOWN MODE (SEMUA DEVICE)
+     ============================================================ */
+  #jawabanContainer textarea,
+  #jawabanContainer input {
+    -webkit-touch-callout: none !important;
+    -webkit-user-drag: none !important;
+    -khtml-user-drag: none !important;
+    -moz-user-drag: none !important;
+    -o-user-drag: none !important;
+    user-drag: none !important;
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    -webkit-user-modify: read-write !important;
+    touch-action: manipulation;
+  }
+  body.lockdown-active {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation;
+  }
+  body.lockdown-active #jawabanContainer textarea,
+  body.lockdown-active #jawabanContainer input {
+    -webkit-touch-callout: none !important;
+  }
+  @supports (-webkit-touch-callout: none) {
+    #jawabanContainer textarea::-webkit-input-placeholder { pointer-events: none; }
+  }
+  #lockdownWarnOverlay {
+    position: fixed; inset: 0; z-index: 999999;
+    background: rgba(198,40,40,0.96); color: #fff;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 30px; text-align: center;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+  #lockdownWarnOverlay .big { font-size: 1.6rem; font-weight: 800; margin-bottom: 14px; letter-spacing: 0.5px; }
+  #lockdownWarnOverlay .sub { font-size: 0.95rem; line-height: 1.7; max-width: 480px; opacity: 0.95; }
+  #lockdownWarnOverlay .count { font-size: 3rem; font-weight: 800; margin: 18px 0; font-variant-numeric: tabular-nums; }
+  #lockdownWarnOverlay button { margin-top: 22px; background: #fff; color: #c62828; border: none; padding: 12px 26px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -260,20 +273,7 @@
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
 </svg>
 
-<!-- CLOUD STATUS INDICATOR -->
 <div id="cloudStatus" class="cloud-status loading"><span class="dot"></span><span id="cloudStatusText">Menghubungkan...</span></div>
-
-<!-- LOCKDOWN OVERLAY (hidden by default) -->
-<div id="lockdownOverlay" class="hidden">
-  <div class="lock-icon">🔒</div>
-  <h2>UJIAN TERKUNCI</h2>
-  <p>Anda keluar dari mode ujian. Kembali ke mode ujian dalam <span class="cd" id="lockdownCountdown">3</span> detik, atau jawaban Anda akan <b>otomatis dikumpulkan</b>.</p>
-  <button onclick="kembaliKeFullscreen()" type="button">🔙 KEMBALI KE MODE UJIAN</button>
-  <div class="alert-info">
-    Mode ini mencegah Anda keluar dari ujian. Jika Anda tidak sengaja keluar, segera tekan tombol di atas.<br>
-    Setelah waktu habis, jawaban yang telah terisi akan otomatis tersimpan dan dinilai.
-  </div>
-</div>
 
 <!-- ==================== LOGIN ==================== -->
 <div id="loginPage">
@@ -652,7 +652,7 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
             <input type="checkbox" id="exLockdownMode" style="accent-color:#c62828;">
             <div>
               <div class="txt" style="color:#c62828;">🔒 Lockdown Mode (Ujian Terkunci)</div>
-              <div class="sub">Saat aktif, siswa terkunci penuh — auto fullscreen, tidak bisa pindah tab/app, minimize, atau keluar browser. Keluar dari layar ujian → <b>auto-submit</b>. Berlaku di HP, tablet, iPad, dan desktop.</div>
+              <div class="sub">Saat aktif, siswa <b>terkunci di halaman ujian</b>. Tidak dapat pindah tab, minimize, atau keluar browser sebelum menyelesaikan tugas. Keluar dari halaman ujian → <b>jawaban otomatis dikumpulkan</b>.</div>
             </div>
           </label>
         </div>
@@ -883,7 +883,7 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
       </div>
     </label>
 
-    <div class="info" style="margin-top:12px;"><svg class="ico"><use href="#i-info"/></svg><span>Seluruh soal, kunci, rubrik, ketentuan, API Key, pengaturan foto, dan <b>Lockdown Mode</b> akan ikut diduplikat. Kode tugas baru akan digenerate otomatis.</span></div>
+    <div class="info" style="margin-top:12px;"><svg class="ico"><use href="#i-info"/></svg><span>Seluruh soal, kunci, rubrik, ketentuan, API Key, pengaturan foto, dan pengaturan <b>Lockdown Mode</b> akan ikut diduplikat. Kode tugas baru akan digenerate otomatis.</span></div>
 
     <div class="row" style="margin-top:14px;">
       <button class="success" onclick="konfirmasiDuplikat()"><svg class="ico"><use href="#i-copy"/></svg> Duplikat Sekarang</button>
@@ -996,17 +996,48 @@ function initFirebase() {
 
 function encEmail(e) { return String(e || '').toLowerCase().replace(/[.#$\[\]\/]/g, '_'); }
 
-async function cloudSaveGuru(guru) { if (!firebaseReady) return; try { await fbDb.ref('muara/guru/' + encEmail(guru.email)).set(guru); } catch (e) {} }
-async function cloudRemoveGuru(email) { if (!firebaseReady) return; try { await fbDb.ref('muara/guru/' + encEmail(email)).remove(); } catch (e) {} }
-async function cloudSavePassword(email, pass) { if (!firebaseReady) return; try { await fbDb.ref('muara/passwords/' + encEmail(email)).set(pass); } catch (e) {} }
-async function cloudRemovePassword(email) { if (!firebaseReady) return; try { await fbDb.ref('muara/passwords/' + encEmail(email)).remove(); } catch (e) {} }
-async function cloudSaveAdmin(admin) { if (!firebaseReady) return; try { await fbDb.ref('muara/admin').set(admin); } catch (e) {} }
-async function cloudSaveTugas(t) { if (!firebaseReady) return; try { await fbDb.ref('muara/tugas/' + t.id).set(t); } catch (e) {} }
-async function cloudRemoveTugas(id) { if (!firebaseReady) return; try { await fbDb.ref('muara/tugas/' + id).remove(); } catch (e) {} }
+async function cloudSaveGuru(guru) {
+  if (!firebaseReady) return;
+  try { await fbDb.ref('muara/guru/' + encEmail(guru.email)).set(guru); }
+  catch (e) { console.error('cloudSaveGuru', e); }
+}
+async function cloudRemoveGuru(email) {
+  if (!firebaseReady) return;
+  try { await fbDb.ref('muara/guru/' + encEmail(email)).remove(); }
+  catch (e) { console.error('cloudRemoveGuru', e); }
+}
+async function cloudSavePassword(email, pass) {
+  if (!firebaseReady) return;
+  try { await fbDb.ref('muara/passwords/' + encEmail(email)).set(pass); }
+  catch (e) { console.error('cloudSavePassword', e); }
+}
+async function cloudRemovePassword(email) {
+  if (!firebaseReady) return;
+  try { await fbDb.ref('muara/passwords/' + encEmail(email)).remove(); }
+  catch (e) { console.error('cloudRemovePassword', e); }
+}
+async function cloudSaveAdmin(admin) {
+  if (!firebaseReady) return;
+  try { await fbDb.ref('muara/admin').set(admin); }
+  catch (e) { console.error('cloudSaveAdmin', e); }
+}
+async function cloudSaveTugas(t) {
+  if (!firebaseReady) return;
+  try { await fbDb.ref('muara/tugas/' + t.id).set(t); }
+  catch (e) { console.error('cloudSaveTugas', e); }
+}
+async function cloudRemoveTugas(id) {
+  if (!firebaseReady) return;
+  try { await fbDb.ref('muara/tugas/' + id).remove(); }
+  catch (e) { console.error('cloudRemoveTugas', e); }
+}
 async function cloudAddHasil(hasil) {
   if (!firebaseReady) return null;
-  try { const ref = fbDb.ref('muara/hasil').push(); await ref.set(hasil); return ref.key; }
-  catch (e) { return null; }
+  try {
+    const ref = fbDb.ref('muara/hasil').push();
+    await ref.set(hasil);
+    return ref.key;
+  } catch (e) { console.error('cloudAddHasil', e); return null; }
 }
 async function cloudRemoveHasilGuru(guruEmail) {
   if (!firebaseReady) return;
@@ -1016,28 +1047,50 @@ async function cloudRemoveHasilGuru(guruEmail) {
     const updates = {};
     Object.keys(v).forEach(k => { if (v[k].guruEmail === guruEmail) updates['muara/hasil/' + k] = null; });
     if (Object.keys(updates).length) await fbDb.ref().update(updates);
-  } catch (e) {}
+  } catch (e) { console.error('cloudRemoveHasilGuru', e); }
 }
 
 function setupFirebaseListeners() {
   if (!firebaseReady) return;
+
   fbDb.ref('.info/connected').on('value', snap => {
     if (snap.val() === true) setCloudStatus('online', '☁️ Cloud tersinkron');
     else setCloudStatus('offline', '📴 Offline');
   });
-  fbDb.ref('muara/admin').on('value', snap => { const v = snap.val(); if (v) { state.admin = v; simpanLocal(); } });
+
+  fbDb.ref('muara/admin').on('value', snap => {
+    const v = snap.val();
+    if (v) { state.admin = v; simpanLocal(); }
+  });
+
   fbDb.ref('muara/guru').on('value', snap => {
-    const v = snap.val() || {}; state.guruList = Object.values(v); simpanLocal();
+    const v = snap.val() || {};
+    state.guruList = Object.values(v);
+    simpanLocal();
     if (currentUser.role === 'admin') renderGuruTable();
   });
-  fbDb.ref('muara/passwords').on('value', snap => { state.customPasswords = snap.val() || {}; simpanLocal(); });
-  fbDb.ref('muara/tugas').on('value', snap => {
-    const v = snap.val() || {}; state.tugas = Object.values(v); simpanLocal();
-    if (currentUser.role === 'guru') { try { renderTugasList(); muatFilterTugas(); } catch(e) {} }
+
+  fbDb.ref('muara/passwords').on('value', snap => {
+    state.customPasswords = snap.val() || {};
+    simpanLocal();
   });
+
+  fbDb.ref('muara/tugas').on('value', snap => {
+    const v = snap.val() || {};
+    state.tugas = Object.values(v);
+    simpanLocal();
+    if (currentUser.role === 'guru') {
+      try { renderTugasList(); muatFilterTugas(); } catch(e) {}
+    }
+  });
+
   fbDb.ref('muara/hasil').on('value', snap => {
-    const v = snap.val() || {}; state.hasil = Object.values(v); simpanLocal();
-    if (currentUser.role === 'guru') { try { muatHasil(); } catch(e) {} }
+    const v = snap.val() || {};
+    state.hasil = Object.values(v);
+    simpanLocal();
+    if (currentUser.role === 'guru') {
+      try { muatHasil(); } catch(e) {}
+    }
   });
 }
 
@@ -1047,6 +1100,7 @@ async function initialCloudLoad() {
     const snap = await fbDb.ref('muara').once('value');
     const data = snap.val() || {};
     const empty = !data.guru && !data.admin;
+
     if (empty) {
       const updates = {};
       state.guruList.forEach(g => { updates['muara/guru/' + encEmail(g.email)] = g; });
@@ -1060,7 +1114,9 @@ async function initialCloudLoad() {
       state.hasil = data.hasil ? Object.values(data.hasil) : [];
       simpanLocal();
     }
-  } catch (e) { console.error('initialCloudLoad', e); }
+  } catch (e) {
+    console.error('initialCloudLoad', e);
+  }
 }
 
 const PROMPT_AI = {
@@ -1085,4 +1141,2186 @@ Draf Soal:
 
 BAGIAN 1: PILIHAN GANDA
 - Penomoran berurutan (1., 2., 3., dst.).
-- Opsi A., B., C., D., E
+- Opsi A., B., C., D., E. berada di baris baru.
+- Sertakan "Kunci Jawaban: [Huruf]" di bawah opsi E.
+
+BAGIAN 2: URAIAN
+- Penomoran berurutan (1., 2., 3., dst.).
+- Sertakan "Jawaban Ideal: [Isi jawaban padat dan jelas]" tepat di bawah tiap soal.
+
+Draf Soal:
+[TEMPEL SEMUA DRAF SOAL DI SINI]`
+};
+
+const RUBRIK_PRESET = {
+  pilgan: `RUBRIK PENILAIAN — PILIHAN GANDA
+1. Jawaban benar: mendapat nilai penuh sesuai bobot soal.
+2. Jawaban salah atau kosong: 0 poin.
+3. Tidak perlu feedback panjang, cukup singkat.
+
+Total skor maksimal: 100 poin.`,
+  uraian: `RUBRIK PENILAIAN — URAIAN UMUM
+1. Kedalaman analisis dan pemahaman konsep (0-40 poin)
+2. Penggunaan bukti, data, atau contoh pendukung (0-30 poin)
+3. Koherensi dan struktur argumen (0-20 poin)
+4. Penggunaan bahasa Indonesia yang baik dan benar (0-10 poin)
+
+Total skor maksimal: 100 poin.`,
+  matematika: `RUBRIK PENILAIAN — URAIAN MATEMATIKA
+1. Pemahaman soal & penulisan yang diketahui/ditanya (0-10 poin)
+2. Ketepatan rumus atau konsep yang dipakai (0-30 poin)
+3. Langkah pengerjaan sistematis dan logis (0-35 poin)
+4. Ketepatan hasil akhir dan satuan (0-20 poin)
+5. Kerapian penulisan (0-5 poin)
+
+Total skor maksimal: 100 poin.
+PENTING: Nilai proses pengerjaan, bukan hanya jawaban akhir.`,
+  ipa: `RUBRIK PENILAIAN — URAIAN IPA (SAINS)
+1. Pemahaman konsep ilmiah (0-30 poin)
+2. Ketepatan prosedur/metode ilmiah (0-25 poin)
+3. Penggunaan istilah ilmiah yang tepat (0-15 poin)
+4. Analisis data atau pengamatan (0-20 poin)
+5. Kesimpulan yang logis (0-10 poin)
+
+Total skor maksimal: 100 poin.`,
+  informatika: `RUBRIK PENILAIAN — URAIAN INFORMATIKA
+1. Pemahaman masalah & tujuan program/algoritma (0-15 poin)
+2. Ketepatan logika/algoritma (0-30 poin)
+3. Sintaks kode atau notasi yang benar (0-25 poin)
+4. Efisiensi & kejelasan solusi (0-20 poin)
+5. Dokumentasi/penjelasan singkat (0-10 poin)
+
+Total skor maksimal: 100 poin.`,
+  bahasa: `RUBRIK PENILAIAN — URAIAN BAHASA ASING
+1. Ketepatan tata bahasa (grammar) (0-30 poin)
+2. Penggunaan kosakata yang sesuai konteks (0-25 poin)
+3. Kejelasan makna & koherensi (0-25 poin)
+4. Kelancaran & struktur kalimat (0-20 poin)
+
+Total skor maksimal: 100 poin.`,
+  hitung: `RUBRIK PENILAIAN — URAIAN HITUNGAN SINGKAT
+1. Ketepatan jawaban akhir (0-60 poin)
+2. Ketepatan cara singkat/langkah (0-25 poin)
+3. Ketepatan satuan/notasi (0-10 poin)
+4. Kerapian penulisan (0-5 poin)
+
+Total skor maksimal: 100 poin.`,
+  gabunganUmum: `RUBRIK PENILAIAN — GABUNGAN (PILIHAN GANDA + URAIAN UMUM)
+
+BAGIAN A — PILIHAN GANDA:
+1. Jawaban benar: nilai penuh sesuai bobot.
+2. Jawaban salah atau kosong: 0 poin.
+3. Tidak perlu feedback panjang, cukup singkat.
+
+BAGIAN B — URAIAN:
+1. Kedalaman analisis dan pemahaman konsep (0-40 poin)
+2. Penggunaan bukti, data, atau contoh pendukung (0-30 poin)
+3. Koherensi dan struktur argumen (0-20 poin)
+4. Penggunaan bahasa Indonesia yang baik dan benar (0-10 poin)
+
+Total skor maksimal: 100 poin (disesuaikan dengan bobot tiap soal).`,
+  gabunganSains: `RUBRIK PENILAIAN — GABUNGAN SAINS (PILIHAN GANDA + URAIAN IPA/MATEMATIKA)
+
+BAGIAN A — PILIHAN GANDA:
+1. Jawaban benar: nilai penuh sesuai bobot.
+2. Jawaban salah atau kosong: 0 poin.
+3. Tidak perlu feedback panjang, cukup singkat.
+
+BAGIAN B — URAIAN SAINS/MATEMATIKA:
+1. Pemahaman konsep & identifikasi informasi (0-15 poin)
+2. Ketepatan rumus/konsep ilmiah (0-30 poin)
+3. Langkah pengerjaan sistematis dan logis (0-35 poin)
+4. Ketepatan hasil akhir dan satuan (0-15 poin)
+5. Kerapian penulisan (0-5 poin)
+
+PENTING: Nilai proses pengerjaan, bukan hanya jawaban akhir.
+Total skor maksimal: 100 poin (disesuaikan dengan bobot tiap soal).`,
+  gabunganBahasa: `RUBRIK PENILAIAN — GABUNGAN BAHASA (PILIHAN GANDA + URAIAN BAHASA)
+
+BAGIAN A — PILIHAN GANDA:
+1. Jawaban benar: nilai penuh sesuai bobot.
+2. Jawaban salah atau kosong: 0 poin.
+3. Tidak perlu feedback panjang, cukup singkat.
+
+BAGIAN B — URAIAN BAHASA:
+1. Ketepatan isi & pemahaman teks (0-30 poin)
+2. Struktur & koherensi tulisan (0-25 poin)
+3. Penggunaan kosakata & tata bahasa (0-25 poin)
+4. Kreativitas & gaya bahasa (0-20 poin)
+
+Total skor maksimal: 100 poin (disesuaikan dengan bobot tiap soal).`
+};
+
+const KETENTUAN_PRESET = {
+  pilgan: `1. Tugas bersifat individu, tidak boleh bekerja sama.
+2. Soal berisi Pilihan Ganda. Pilih satu jawaban yang paling tepat.
+3. Setelah mengumpulkan, nilai akan muncul otomatis.`,
+  uraian: `1. Tugas bersifat individu, tidak boleh bekerja sama.
+2. Soal berisi Uraian. Tulis jawaban dengan bahasa sendiri.
+3. Jawaban boleh diketik atau difoto (untuk soal hitungan/gambar).
+4. Setelah mengumpulkan, nilai akan muncul otomatis.`,
+  keduanya: `1. Tugas bersifat individu, tidak boleh bekerja sama.
+2. Tugas berisi Pilihan Ganda dan Uraian.
+3. Untuk Pilihan Ganda: pilih satu jawaban yang paling tepat.
+4. Untuk Uraian: tulis jawaban dengan bahasa sendiri (boleh diketik atau difoto).
+5. Setelah mengumpulkan, nilai akan muncul otomatis.`
+};
+
+let state;
+try { state = JSON.parse(localStorage.getItem('MUARA_v9') || '{}'); } catch (e) { state = {}; }
+if (!state.tugas) state.tugas = [];
+if (!state.hasil) state.hasil = [];
+if (!state.guruList || state.guruList.length === 0) state.guruList = JSON.parse(JSON.stringify(GURU_DEFAULT));
+if (!state.customPasswords) state.customPasswords = {};
+if (!state.admin) state.admin = { ...ADMIN_DEFAULT };
+
+let currentUser = { role: null, nama: '', kelas: '', email: '' };
+let currentTugas = null;
+let editingTugasId = null;
+let editorSoal = [];
+let jawabanSementara = {};
+let rubrikTabAktif = 'pilgan';
+let promptTabAktif = 'pilgan';
+let duplikatTugasId = null;
+let examTimerInterval = null;
+let examStartTime = null;
+
+function simpanLocal() {
+  try { localStorage.setItem('MUARA_v9', JSON.stringify(state)); } catch (e) { console.error(e); }
+}
+function simpanState() { simpanLocal(); }
+
+function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s) { return String(s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function formatWaktu(iso) {
+  if (!iso) return '';
+  try { return new Date(iso).toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+  catch (e) { return iso; }
+}
+
+function generateKodeUnik() {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let kode = ''; let attempts = 0;
+  do {
+    kode = '';
+    for (let i = 0; i < 6; i++) kode += chars[Math.floor(Math.random() * chars.length)];
+    attempts++;
+    if (attempts > 500) break;
+  } while (state.tugas.some(t => t.kode === kode));
+  return kode;
+}
+
+function togglePass(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPass = input.type === 'password';
+  input.type = isPass ? 'text' : 'password';
+  btn.innerHTML = `<svg class="ico"><use href="${isPass ? '#i-eye-off' : '#i-eye'}"/></svg>`;
+}
+
+function showLogin(role) {
+  document.getElementById('roleChoice').classList.toggle('hidden', role !== null);
+  document.getElementById('loginGuru').classList.toggle('hidden', role !== 'guru');
+  document.getElementById('loginLupa').classList.toggle('hidden', role !== 'lupaPassword');
+  document.getElementById('loginSiswa').classList.toggle('hidden', role !== 'siswa');
+  document.getElementById('loginAdmin').classList.toggle('hidden', role !== 'admin');
+  document.getElementById('guruError').textContent = '';
+  document.getElementById('siswaError').textContent = '';
+  document.getElementById('adminError').textContent = '';
+  document.getElementById('lupaStatus').textContent = '';
+  if (role === 'guru') document.getElementById('guruEmailLogin').focus();
+  if (role === 'siswa') document.getElementById('kodeInput').focus();
+  if (role === 'admin') document.getElementById('adminEmailLogin').focus();
+  if (role === 'lupaPassword') document.getElementById('lupaEmail').focus();
+}
+
+function loginGuru() {
+  const emailInput = document.getElementById('guruEmailLogin').value.trim().toLowerCase();
+  const pass = document.getElementById('guruPassLogin').value;
+  const err = document.getElementById('guruError');
+  err.textContent = '';
+  if (!emailInput) { err.textContent = 'Email belum diisi.'; return; }
+  if (!pass) { err.textContent = 'Password belum diisi.'; return; }
+  const guru = state.guruList.find(g => g.email.toLowerCase() === emailInput);
+  if (!guru) { err.textContent = 'Email tidak terdaftar sebagai guru.'; return; }
+  const expectedPass = state.customPasswords[encEmail(emailInput)] || guru.password;
+  if (pass.trim() !== expectedPass) { err.textContent = 'Password salah.'; return; }
+  currentUser = { role: 'guru', nama: guru.nama, email: guru.email };
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('guruPage').classList.remove('hidden');
+  document.getElementById('guruUserInfo').innerHTML = `<svg class="ico"><use href="#i-teacher"/></svg> <b>${escapeHtml(guru.nama)}</b> <small>(${escapeHtml(guru.email)})</small>`;
+  const infoBox = document.getElementById('guruInfoBox');
+  if (infoBox) infoBox.innerHTML = `<b>Nama:</b> ${escapeHtml(guru.nama)}<br><b>Email:</b> ${escapeHtml(guru.email)}<br><b>Password:</b> ${state.customPasswords[encEmail(emailInput)] ? '(sudah diganti)' : '(default)'}`;
+  try { renderTugasList(); muatFilterTugas(); } catch (e) { console.error(e); }
+}
+
+async function prosesLupaPassword() {
+  const email = document.getElementById('lupaEmail').value.trim().toLowerCase();
+  const st = document.getElementById('lupaStatus');
+  const btn = document.getElementById('btnLupa');
+  st.className = 'error-msg'; st.textContent = '';
+  if (!email) { st.textContent = 'Email belum diisi.'; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { st.textContent = 'Format email tidak valid.'; return; }
+  const guru = state.guruList.find(g => g.email.toLowerCase() === email);
+  if (!guru) { st.textContent = 'Email tidak terdaftar.'; return; }
+  const tempPass = generateTempPassword();
+  state.customPasswords[encEmail(email)] = tempPass;
+  simpanLocal();
+  await cloudSavePassword(email, tempPass);
+  btn.disabled = true;
+  st.className = 'ok-msg';
+  st.innerHTML = `Mengirim password baru ke <b>${escapeHtml(email)}</b>...`;
+  try {
+    const res = await fetch(FORMSUBMIT_ENDPOINT + encodeURIComponent(email), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        _subject: 'MUARA — Password Baru Akun Guru',
+        _template: 'table', _captcha: 'false',
+        Nama: guru.nama, Email: guru.email, PasswordBaru: tempPass,
+        Pesan: 'Password baru Anda untuk login ke sistem MUARA SMP Negeri 10 Samarinda.',
+        Waktu: new Date().toLocaleString('id-ID')
+      })
+    });
+    if (!res.ok) throw new Error('Gagal kirim');
+    st.className = 'ok-msg';
+    st.innerHTML = `Password baru berhasil dikirim ke <b>${escapeHtml(email)}</b>.<br><small style="color:#718096;">Cek inbox atau folder spam.</small>`;
+  } catch (e) {
+    st.className = 'error-msg';
+    st.innerHTML = `Pengiriman email gagal. Password darurat:<br><b style="font-family:monospace; background:#f0fff4; padding:6px 12px; border-radius:6px; display:inline-block; margin-top:8px; font-size:1rem; color:#38a169;">${tempPass}</b>`;
+  } finally { btn.disabled = false; }
+}
+
+function generateTempPassword() {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let p = 'TMP-';
+  for (let i = 0; i < 5; i++) p += chars[Math.floor(Math.random() * chars.length)];
+  return p;
+}
+
+function validasiKode() {
+  const kode = document.getElementById('kodeInput').value.trim().toUpperCase();
+  const err = document.getElementById('siswaError');
+  if (kode.length !== 6) { err.textContent = 'Kode harus 6 karakter.'; return; }
+  const tugas = state.tugas.find(t => t.kode === kode);
+  if (!tugas) { err.textContent = 'Kode tidak valid atau belum tersinkron. Tunggu sebentar & coba lagi.'; return; }
+  if (!tugas.aktif) { err.textContent = 'Tugas ini sudah ditutup.'; return; }
+  if (!tugas.apiKey) { err.textContent = 'Tugas belum memiliki API Key.'; return; }
+
+  const now = new Date();
+  if (tugas.waktuMulai && now < new Date(tugas.waktuMulai)) {
+    err.textContent = `Tugas baru bisa dikerjakan mulai ${formatWaktu(tugas.waktuMulai)}.`;
+    return;
+  }
+  if (tugas.waktuSelesai && now > new Date(tugas.waktuSelesai)) {
+    err.textContent = `Waktu pengerjaan sudah berakhir (${formatWaktu(tugas.waktuSelesai)}).`;
+    return;
+  }
+
+  err.textContent = '';
+  currentTugas = tugas;
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('previewPage').classList.remove('hidden');
+  document.getElementById('previewJudul').innerHTML = '<svg class="ico"><use href="#i-book"/></svg> ' + escapeHtml(tugas.judul || 'Tugas');
+  document.getElementById('previewInfo').innerHTML = `<svg class="ico"><use href="#i-info"/></svg><span><b>${escapeHtml(tugas.mapel || '-')}</b> | Kelas: <b>${escapeHtml(tugas.kelas || '-')}</b> | KKM: <b>${tugas.kkm}</b> | Jumlah soal: <b>${tugas.soal.length}</b></span>`;
+  const wrapWaktu = document.getElementById('previewWaktuInfo');
+  if (tugas.waktuMulai || tugas.waktuSelesai || (tugas.durasi && tugas.durasi > 0)) {
+    let wStr = '';
+    if (tugas.waktuMulai || tugas.waktuSelesai) {
+      wStr += `<b>Jendela Pengerjaan:</b> ${tugas.waktuMulai ? formatWaktu(tugas.waktuMulai) : 'sekarang'} s/d ${tugas.waktuSelesai ? formatWaktu(tugas.waktuSelesai) : 'selesai'}<br>`;
+    }
+    if (tugas.durasi && tugas.durasi > 0) {
+      wStr += `<b>Durasi Maksimal:</b> ${tugas.durasi} menit dari mulai mengerjakan`;
+    }
+    wrapWaktu.innerHTML = `<div class="info teal"><svg class="ico"><use href="#i-clock"/></svg><span>${wStr}</span></div>`;
+  } else { wrapWaktu.innerHTML = ''; }
+
+  const wrapLock = document.getElementById('previewLockdownInfo');
+  if (tugas.lockdownMode) {
+    wrapLock.innerHTML = `<div class="info red"><svg class="ico"><use href="#i-shield"/></svg><span><b>🔒 Ujian Terkunci (Lockdown Mode Aktif)</b><br>Setelah Anda mulai, layar akan terkunci penuh. Anda <b>tidak dapat pindah tab, minimize, atau keluar</b> sebelum menyelesaikan tugas. Keluar dari halaman ujian akan <b>mengumpulkan jawaban otomatis</b>.</span></div>`;
+  } else { wrapLock.innerHTML = ''; }
+
+  document.getElementById('previewKetentuan').textContent = tugas.ketentuan || '(Guru tidak menuliskan ketentuan khusus.)';
+  document.getElementById('siswaNama').focus();
+}
+
+function batalPreview() {
+  currentTugas = null;
+  document.getElementById('previewPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+  document.getElementById('kodeInput').value = '';
+  showLogin('siswa');
+}
+
+function loginAdmin() {
+  const email = document.getElementById('adminEmailLogin').value.trim().toLowerCase();
+  const pass = document.getElementById('adminPassLogin').value;
+  const err = document.getElementById('adminError');
+  err.textContent = '';
+  if (!email) { err.textContent = 'Email admin belum diisi.'; return; }
+  if (!pass) { err.textContent = 'Password admin belum diisi.'; return; }
+  if (email !== state.admin.email.toLowerCase()) { err.textContent = 'Email admin salah.'; return; }
+  if (pass !== state.admin.password) { err.textContent = 'Password admin salah.'; return; }
+  currentUser = { role: 'admin', nama: state.admin.nama, email: state.admin.email };
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('adminPage').classList.remove('hidden');
+  document.getElementById('adminUserInfo').innerHTML = `<svg class="ico"><use href="#i-admin"/></svg> <b>${escapeHtml(state.admin.nama)}</b>`;
+  const info = document.getElementById('adminInfoBox');
+  if (info) info.innerHTML = `<b>Nama:</b> ${escapeHtml(state.admin.nama)}<br><b>Email:</b> ${escapeHtml(state.admin.email)}<br><b>Total Guru:</b> ${state.guruList.length}`;
+  renderGuruTable();
+}
+
+function logoutAdmin() {
+  if (!confirm('Yakin keluar dari panel admin?')) return;
+  currentUser = { role: null, nama: '', email: '' };
+  document.getElementById('adminPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+  showLogin(null);
+  document.getElementById('adminEmailLogin').value = '';
+  document.getElementById('adminPassLogin').value = '';
+}
+
+function switchATab(tab) {
+  document.querySelectorAll('#adminPage .tab').forEach(t => { t.classList.remove('active'); if (t.dataset.atab === tab) t.classList.add('active'); });
+  document.querySelectorAll('.atab-content').forEach(t => t.classList.add('hidden'));
+  const target = document.getElementById('atab-' + tab); if (target) target.classList.remove('hidden');
+  if (tab === 'daftar') renderGuruTable();
+}
+
+function renderGuruTable() {
+  const tbody = document.getElementById('guruTableBody');
+  if (!tbody) return;
+  const totalBadge = document.getElementById('totalGuruBadge');
+  if (totalBadge) totalBadge.textContent = state.guruList.length + ' guru';
+  tbody.innerHTML = state.guruList.map((g, i) => {
+    const passAktif = state.customPasswords[encEmail(g.email)] || g.password;
+    const isCustom = !!state.customPasswords[encEmail(g.email)];
+    return `<tr><td>${i+1}</td><td><b>${escapeHtml(g.nama)}</b></td><td class="email-cell">${escapeHtml(g.email)}</td><td><span style="font-family:monospace; font-size:0.8rem; background:#f7fafc; padding:3px 8px; border-radius:4px;">${escapeHtml(passAktif)}</span>${isCustom ? '<span class="badge orange" style="margin-left:6px; font-size:0.65rem;">diubah</span>' : '<span class="badge gray" style="margin-left:6px; font-size:0.65rem;">default</span>'}</td><td><div class="actions"><button class="sm warning" onclick="quickReset('${escapeHtml(g.email)}')"><svg class="ico"><use href="#i-key"/></svg> Reset</button><button class="sm danger" onclick="hapusGuru('${escapeHtml(g.email)}')"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button></div></td></tr>`;
+  }).join('');
+}
+
+async function quickReset(email) {
+  const guru = state.guruList.find(g => g.email.toLowerCase() === email.toLowerCase());
+  if (!guru) return;
+  const newPass = prompt(`Reset password untuk ${guru.nama}\n\nMasukkan password baru (min 6 karakter):`, '');
+  if (newPass === null) return;
+  if (newPass.length < 6) return alert('Password minimal 6 karakter.');
+  state.customPasswords[encEmail(email)] = newPass;
+  simpanLocal(); renderGuruTable();
+  await cloudSavePassword(email, newPass);
+  alert(`Password ${guru.nama} berhasil direset menjadi: ${newPass}`);
+}
+
+async function hapusGuru(email) {
+  const guru = state.guruList.find(g => g.email.toLowerCase() === email.toLowerCase());
+  if (!guru) return;
+  if (!confirm(`Hapus guru "${guru.nama}" dari sistem?`)) return;
+  state.guruList = state.guruList.filter(g => g.email.toLowerCase() !== email.toLowerCase());
+  delete state.customPasswords[encEmail(email)];
+  simpanLocal(); renderGuruTable();
+  await cloudRemoveGuru(email);
+  await cloudRemovePassword(email);
+}
+
+async function tambahGuru() {
+  const nama = document.getElementById('newGuruNama').value.trim();
+  const email = document.getElementById('newGuruEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('newGuruPass').value;
+  const st = document.getElementById('tambahGuruStatus');
+  st.textContent = ''; st.className = 'error-msg';
+  if (!nama) { st.textContent = 'Nama belum diisi.'; return; }
+  if (!email) { st.textContent = 'Email belum diisi.'; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { st.textContent = 'Format email tidak valid.'; return; }
+  if (!pass || pass.length < 6) { st.textContent = 'Password minimal 6 karakter.'; return; }
+  if (state.guruList.some(g => g.email.toLowerCase() === email)) { st.textContent = 'Email sudah terdaftar.'; return; }
+  const guruBaru = { nama, email, password: pass };
+  state.guruList.push(guruBaru);
+  simpanLocal();
+  st.className = 'ok-msg';
+  st.textContent = `Guru "${nama}" berhasil ditambahkan.`;
+  document.getElementById('newGuruNama').value = '';
+  document.getElementById('newGuruEmail').value = '';
+  document.getElementById('newGuruPass').value = '';
+  renderGuruTable();
+  await cloudSaveGuru(guruBaru);
+}
+
+async function resetPasswordGuru() {
+  const email = document.getElementById('resetEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('resetPass').value;
+  const st = document.getElementById('resetStatus');
+  st.textContent = ''; st.className = 'error-msg';
+  if (!email) { st.textContent = 'Email belum diisi.'; return; }
+  if (!pass || pass.length < 6) { st.textContent = 'Password baru minimal 6 karakter.'; return; }
+  const guru = state.guruList.find(g => g.email.toLowerCase() === email);
+  if (!guru) { st.textContent = 'Email tidak terdaftar.'; return; }
+  state.customPasswords[encEmail(email)] = pass;
+  simpanLocal();
+  st.className = 'ok-msg';
+  st.textContent = `Password ${guru.nama} berhasil direset.`;
+  document.getElementById('resetEmail').value = '';
+  document.getElementById('resetPass').value = '';
+  renderGuruTable();
+  await cloudSavePassword(email, pass);
+}
+
+async function gantiPasswordAdmin() {
+  const old = document.getElementById('adminOldPass').value;
+  const p1 = document.getElementById('adminNewPass').value;
+  const p2 = document.getElementById('adminNewPass2').value;
+  if (old !== state.admin.password) return alert('Password lama salah!');
+  if (p1.length < 6) return alert('Password baru minimal 6 karakter.');
+  if (p1 !== p2) return alert('Password baru tidak sama!');
+  state.admin.password = p1;
+  simpanLocal();
+  await cloudSaveAdmin(state.admin);
+  document.getElementById('adminOldPass').value = '';
+  document.getElementById('adminNewPass').value = '';
+  document.getElementById('adminNewPass2').value = '';
+  alert('Password admin berhasil diganti!');
+}
+
+function exportGuruCSV() {
+  let csv = 'No,Nama,Email,Password Aktif,Status\n';
+  state.guruList.forEach((g, i) => {
+    const passAktif = state.customPasswords[encEmail(g.email)] || g.password;
+    const status = state.customPasswords[encEmail(g.email)] ? 'diubah' : 'default';
+    csv += `${i+1},"${g.nama}","${g.email}","${passAktif}","${status}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `daftar-guru-MUARA-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function logout() {
+  if (!confirm('Yakin keluar dari panel guru?')) return;
+  currentUser = { role: null, nama: '', kelas: '', email: '' };
+  currentTugas = null; editingTugasId = null; editorSoal = []; jawabanSementara = {};
+  hentikanTimerUjian();
+  document.getElementById('guruPage').classList.add('hidden');
+  document.getElementById('tugasPage').classList.add('hidden');
+  document.getElementById('previewPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+  showLogin(null);
+  ['guruEmailLogin','guruPassLogin','kodeInput'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+
+function mulaiKerjakan() {
+  const nama = document.getElementById('siswaNama').value.trim();
+  const kelas = document.getElementById('siswaKelas').value;
+  if (!nama) return alert('Isi nama lengkap Anda.');
+  if (!kelas) return alert('Pilih kelas Anda.');
+  const now = new Date();
+  if (currentTugas.waktuMulai && now < new Date(currentTugas.waktuMulai)) {
+    return alert(`Tugas baru bisa dikerjakan mulai ${formatWaktu(currentTugas.waktuMulai)}.`);
+  }
+  if (currentTugas.waktuSelesai && now > new Date(currentTugas.waktuSelesai)) {
+    return alert(`Waktu pengerjaan sudah berakhir (${formatWaktu(currentTugas.waktuSelesai)}).`);
+  }
+  currentUser = { role: 'siswa', nama, kelas };
+  jawabanSementara = {};
+  document.getElementById('previewPage').classList.add('hidden');
+  document.getElementById('tugasPage').classList.remove('hidden');
+  document.getElementById('tugasUserInfo').innerHTML = `<svg class="ico"><use href="#i-student"/></svg> <b>${escapeHtml(nama)}</b> <small>(${escapeHtml(kelas)}) - Kode: ${currentTugas.kode}</small>`;
+  document.getElementById('tugasJudul').innerHTML = '<svg class="ico"><use href="#i-book"/></svg> ' + escapeHtml(currentTugas.judul || 'Tugas');
+  document.getElementById('tugasKetentuanSingkat').innerHTML = `<svg class="ico"><use href="#i-info"/></svg><span>${escapeHtml(currentTugas.mapel || '-')} | Kelas: ${escapeHtml(currentTugas.kelas || '-')} | KKM: ${currentTugas.kkm}</span>`;
+  renderSoalSiswa();
+  mulaiTimerUjian();
+
+  const btnKeluar = document.getElementById('btnKeluarTugas');
+  if (currentTugas.lockdownMode) {
+    if (btnKeluar) {
+      btnKeluar.disabled = true;
+      btnKeluar.style.opacity = '0.4';
+      btnKeluar.style.cursor = 'not-allowed';
+      btnKeluar.title = 'Mode Ujian Terkunci aktif';
+    }
+    setTimeout(() => aktifkanLockdown(), 300);
+  } else {
+    if (btnKeluar) {
+      btnKeluar.disabled = false;
+      btnKeluar.style.opacity = '1';
+      btnKeluar.style.cursor = 'pointer';
+      btnKeluar.title = '';
+    }
+  }
+}
+
+function hentikanTimerUjian() {
+  if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
+  examStartTime = null;
+  const wrap = document.getElementById('examTimerWrap');
+  if (wrap) wrap.innerHTML = '';
+}
+
+function mulaiTimerUjian() {
+  hentikanTimerUjian();
+  examStartTime = Date.now();
+  const hasWaktuSelesai = !!currentTugas.waktuSelesai;
+  const hasDurasi = currentTugas.durasi && currentTugas.durasi > 0;
+  if (!hasWaktuSelesai && !hasDurasi) return;
+  tickTimerUjian();
+  examTimerInterval = setInterval(tickTimerUjian, 1000);
+}
+
+function tickTimerUjian() {
+  const wrap = document.getElementById('examTimerWrap');
+  if (!wrap) return;
+  const now = Date.now();
+  let endTime = null;
+  if (currentTugas.waktuSelesai) {
+    const ws = new Date(currentTugas.waktuSelesai).getTime();
+    if (endTime === null || ws < endTime) endTime = ws;
+  }
+  if (currentTugas.durasi > 0 && examStartTime) {
+    const durasiEnd = examStartTime + currentTugas.durasi * 60000;
+    if (endTime === null || durasiEnd < endTime) endTime = durasiEnd;
+  }
+  if (endTime === null) { wrap.innerHTML = ''; return; }
+  const sisa = endTime - now;
+  if (sisa <= 0) {
+    wrap.innerHTML = `<div class="timer-banner danger"><div><div class="label">Waktu Habis</div><div class="value">00:00</div></div><div style="font-size:0.85rem;">Mengumpulkan jawaban otomatis...</div></div>`;
+    if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
+    autoSubmitWaktuHabis();
+    return;
+  }
+  const mnt = Math.floor(sisa / 60000);
+  const dtk = Math.floor((sisa % 60000) / 1000);
+  let cls = 'timer-banner';
+  if (sisa <= 60000) cls += ' danger';
+  else if (sisa <= 300000) cls += ' warning';
+  wrap.innerHTML = `<div class="${cls}"><div><div class="label">Sisa Waktu Pengerjaan</div><div class="value">${String(mnt).padStart(2,'0')}:${String(dtk).padStart(2,'0')}</div></div><div style="font-size:0.78rem; opacity:0.9;">${currentTugas.waktuSelesai ? 'Batas: ' + formatWaktu(currentTugas.waktuSelesai) : ''}${currentTugas.durasi > 0 ? (currentTugas.waktuSelesai ? ' • ' : '') + 'Durasi: ' + currentTugas.durasi + ' menit' : ''}</div></div>`;
+}
+
+async function autoSubmitWaktuHabis() {
+  if (!currentTugas) return;
+  if (document.getElementById('btnKirim')?.disabled) return;
+  alert('Waktu pengerjaan telah habis. Jawaban Anda akan dikumpulkan otomatis.');
+  await kirimJawaban(true, 'waktu', 'waktu habis');
+}
+
+// ============================================================
+// BLOKIR PASTE / CLIPBOARD — VERSI ULTRA AGRESIF (SEMUA DEVICE)
+// ============================================================
+const _lastValueMap = new WeakMap();
+let _lastLegitInputTime = 0;
+let _inComposition = false;
+
+function isExamActive() {
+  return currentUser.role === 'siswa'
+      && !!currentTugas
+      && !document.getElementById('tugasPage').classList.contains('hidden');
+}
+function isAnswerInput(el) {
+  if (!el) return false;
+  if (el.tagName !== 'TEXTAREA' && el.tagName !== 'INPUT') return false;
+  return !!(el.closest && el.closest('#jawabanContainer'));
+}
+function _getBaseline(el) {
+  if (_lastValueMap.has(el)) return _lastValueMap.get(el);
+  const d = el.getAttribute && el.getAttribute('data-muara-baseline');
+  if (d !== null && d !== undefined) return d;
+  return '';
+}
+function _setBaseline(el, val) {
+  _lastValueMap.set(el, val);
+  try { el.setAttribute('data-muara-baseline', val); } catch(_) {}
+}
+function _revertInput(el, prevValue) {
+  try {
+    el.value = prevValue;
+    try {
+      el.dispatchEvent(new Event('input',  { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch(_) {}
+  } catch (_) {}
+}
+
+// LAPIS 1: paste di SELURUH halaman selama ujian aktif
+document.addEventListener('paste', (e) => {
+  if (!isExamActive()) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  return false;
+}, true);
+
+document.addEventListener('copy', (e) => {
+  if (!isExamActive()) return;
+  if (isAnswerInput(e.target)) {
+    e.preventDefault(); e.stopImmediatePropagation(); return false;
+  }
+}, true);
+
+document.addEventListener('cut', (e) => {
+  if (!isExamActive()) return;
+  if (isAnswerInput(e.target)) {
+    e.preventDefault(); e.stopImmediatePropagation(); return false;
+  }
+}, true);
+
+document.addEventListener('drop', (e) => {
+  if (!isExamActive()) return;
+  e.preventDefault(); e.stopImmediatePropagation(); return false;
+}, true);
+
+document.addEventListener('dragover', (e) => {
+  if (!isExamActive()) return;
+  if (isAnswerInput(e.target)) { e.preventDefault(); return false; }
+}, true);
+
+document.addEventListener('dragstart', (e) => {
+  if (!isExamActive()) return;
+  if (isAnswerInput(e.target)) { e.preventDefault(); return false; }
+}, true);
+
+// LAPIS 2: beforeinput
+document.addEventListener('beforeinput', (e) => {
+  if (!isExamActive()) return;
+  if (!isAnswerInput(e.target)) return;
+  const t = e.inputType || '';
+  if (t === 'insertFromPaste' ||
+      t === 'insertFromPasteAsQuotation' ||
+      t === 'insertFromDrop' ||
+      t === 'insertFromYank') {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    return false;
+  }
+  if (t.startsWith('insert') || t.startsWith('delete')) {
+    _lastLegitInputTime = Date.now();
+  }
+}, true);
+
+// LAPIS 3: composition (IME mobile sah)
+document.addEventListener('compositionstart', (e) => {
+  if (!isExamActive() || !isAnswerInput(e.target)) return;
+  _inComposition = true;
+  _lastLegitInputTime = Date.now();
+}, true);
+document.addEventListener('compositionupdate', (e) => {
+  if (!isExamActive() || !isAnswerInput(e.target)) return;
+  _lastLegitInputTime = Date.now();
+}, true);
+document.addEventListener('compositionend', (e) => {
+  if (!isExamActive() || !isAnswerInput(e.target)) return;
+  _inComposition = false;
+  _lastLegitInputTime = Date.now();
+  _setBaseline(e.target, e.target.value || '');
+}, true);
+
+// LAPIS 4: keydown shortcut
+document.addEventListener('keydown', (e) => {
+  if (!isExamActive()) return;
+  const key = (e.key || '').toLowerCase();
+  const ctrl = e.ctrlKey || e.metaKey;
+  if ((ctrl && key === 'v') ||
+      (e.shiftKey && key === 'insert') ||
+      (ctrl && key === 'insert')) {
+    e.preventDefault(); e.stopImmediatePropagation(); return false;
+  }
+  if (isAnswerInput(e.target)) {
+    _lastLegitInputTime = Date.now();
+    _setBaseline(e.target, e.target.value || '');
+    if (ctrl && (key === 'c' || key === 'x')) {
+      e.preventDefault(); e.stopImmediatePropagation(); return false;
+    }
+  }
+}, true);
+
+// LAPIS 5: contextmenu (klik kanan + long-press)
+document.addEventListener('contextmenu', (e) => {
+  if (!isExamActive()) return;
+  if (isAnswerInput(e.target)) {
+    e.preventDefault(); e.stopImmediatePropagation(); return false;
+  }
+}, true);
+
+// LAPIS 6: focusin baseline + input fallback
+document.addEventListener('focusin', (e) => {
+  if (!isExamActive() || !isAnswerInput(e.target)) return;
+  _setBaseline(e.target, e.target.value || '');
+}, true);
+
+document.addEventListener('input', (e) => {
+  if (!isExamActive() || !isAnswerInput(e.target)) return;
+  const el = e.target;
+  const prev = _getBaseline(el);
+  const cur = el.value || '';
+  const now = Date.now();
+
+  if (_inComposition || (now - _lastLegitInputTime) < 300) {
+    _setBaseline(el, cur);
+    return;
+  }
+  const delta = cur.length - prev.length;
+  if (cur !== prev) {
+    if (delta < 0 && Math.abs(delta) <= 3) {
+      _setBaseline(el, cur);
+      return;
+    }
+    _revertInput(el, prev);
+    return;
+  }
+  _setBaseline(el, cur);
+}, true);
+
+window.__muaraWatchInput = function(event, el) {
+  if (!isExamActive()) return;
+  const prev = _getBaseline(el);
+  const cur = el.value || '';
+  const now = Date.now();
+  if (_inComposition || (now - _lastLegitInputTime) < 300) {
+    _setBaseline(el, cur);
+    return;
+  }
+  if (cur !== prev) {
+    const delta = cur.length - prev.length;
+    if (delta < 0 && Math.abs(delta) <= 3) {
+      _setBaseline(el, cur);
+      return;
+    }
+    el.value = prev;
+    return;
+  }
+  _setBaseline(el, cur);
+};
+
+// ============================================================
+// LOCKDOWN MODE — VERSI MAKSIMAL v2 (SEMUA DEVICE)
+// ============================================================
+const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isAndroidDevice = /Android/i.test(navigator.userAgent);
+const isIPadOS = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+let lockdownState = {
+  active: false,
+  violations: 0,
+  hiddenTimer: null,
+  blurTimer: null,
+  fullscreenRetryTimer: null,
+  fullscreenRetries: 0,
+  autoSubmitTriggered: false,
+  originalOpen: null,
+  wakeLock: null,
+  historyArmed: false
+};
+
+function requestFullscreenLockdown() {
+  if (isIOSDevice && !isIPadOS) return;
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (!req) return;
+  try {
+    const p = req.call(el);
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  } catch (e) {}
+}
+function exitFullscreenIfAny() {
+  const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+  if (!exit) return;
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+  if (isFs) { try { exit.call(document); } catch (e) {} }
+}
+function isFullscreenNow() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+}
+async function requestWakeLockLockdown() {
+  if (!('wakeLock' in navigator)) return;
+  try {
+    lockdownState.wakeLock = await navigator.wakeLock.request('screen');
+    lockdownState.wakeLock.addEventListener('release', () => { lockdownState.wakeLock = null; });
+  } catch (e) {}
+}
+async function releaseWakeLockLockdown() {
+  try {
+    if (lockdownState.wakeLock) {
+      await lockdownState.wakeLock.release();
+      lockdownState.wakeLock = null;
+    }
+  } catch (e) {}
+}
+async function lockOrientationLockdown() {
+  try {
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock('portrait');
+    }
+  } catch (e) {}
+}
+async function unlockOrientationLockdown() {
+  try {
+    if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+  } catch (e) {}
+}
+
+function tampilLockdownBadge() {
+  let el = document.getElementById('lockdownBadge');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'lockdownBadge';
+    el.className = 'lockdown-badge';
+    el.innerHTML = '🔒 Mode Ujian Terkunci';
+    document.body.appendChild(el);
+  } else {
+    el.classList.remove('hidden');
+  }
+}
+function sembunyiLockdownBadge() {
+  const el = document.getElementById('lockdownBadge');
+  if (el) el.classList.add('hidden');
+}
+function tampilLockdownWarnOverlay(alasan) {
+  let el = document.getElementById('lockdownWarnOverlay');
+  if (el) return;
+  el = document.createElement('div');
+  el.id = 'lockdownWarnOverlay';
+  el.innerHTML = `
+    <div class="big">⚠️ UJIAN TERKUNCI</div>
+    <div class="sub">
+      Anda terdeteksi <b>${alasan}</b>.<br>
+      Jawaban Anda akan dikumpulkan otomatis dalam:
+    </div>
+    <div class="count" id="lockdownWarnCount">5</div>
+    <div class="sub">Segera kembali ke halaman ujian. Jika tidak, jawaban akan dikumpulkan otomatis.</div>
+  `;
+  document.body.appendChild(el);
+  let n = 5;
+  const intv = setInterval(() => {
+    n--;
+    const c = document.getElementById('lockdownWarnCount');
+    if (c) c.textContent = n;
+    if (n <= 0) clearInterval(intv);
+  }, 1000);
+}
+function sembunyiLockdownWarnOverlay() {
+  const el = document.getElementById('lockdownWarnOverlay');
+  if (el) el.remove();
+}
+
+function handleVisibilityLockdown() {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  const hidden = document.hidden || document.visibilityState === 'hidden';
+  if (hidden) {
+    if (lockdownState.hiddenTimer) clearTimeout(lockdownState.hiddenTimer);
+    lockdownState.hiddenTimer = setTimeout(() => {
+      const stillHidden = document.hidden || document.visibilityState === 'hidden';
+      if (lockdownState.active && stillHidden && !lockdownState.autoSubmitTriggered) {
+        lockdownState.violations++;
+        autoSubmitLockdown('pindah tab / minimize');
+      }
+    }, 1200);
+  } else {
+    if (lockdownState.hiddenTimer) { clearTimeout(lockdownState.hiddenTimer); lockdownState.hiddenTimer = null; }
+    sembunyiLockdownWarnOverlay();
+  }
+}
+
+function handleWindowBlurLockdown() {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  if (lockdownState.blurTimer) clearTimeout(lockdownState.blurTimer);
+  lockdownState.blurTimer = setTimeout(() => {
+    if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+    if (!document.hasFocus()) {
+      lockdownState.violations++;
+      autoSubmitLockdown('keluar dari jendela ujian');
+    }
+  }, 1200);
+}
+function handleWindowFocusLockdown() {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  if (lockdownState.blurTimer) { clearTimeout(lockdownState.blurTimer); lockdownState.blurTimer = null; }
+  sembunyiLockdownWarnOverlay();
+}
+
+function handlePageHideLockdown() {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  lockdownState.violations++;
+  autoSubmitLockdown('meninggalkan halaman ujian');
+}
+function handlePageFreezeLockdown() {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  lockdownState.violations++;
+  autoSubmitLockdown('halaman dibekukan sistem');
+}
+
+function handleFullscreenChangeLockdown() {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  if (isFullscreenNow()) {
+    lockdownState.fullscreenRetries = 0;
+    if (lockdownState.fullscreenRetryTimer) { clearTimeout(lockdownState.fullscreenRetryTimer); lockdownState.fullscreenRetryTimer = null; }
+    sembunyiLockdownWarnOverlay();
+    return;
+  }
+  let attempts = 0;
+  const tryReenter = () => {
+    if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+    if (isFullscreenNow()) { lockdownState.fullscreenRetries = 0; return; }
+    attempts++;
+    if (attempts <= 3) {
+      requestFullscreenLockdown();
+      setTimeout(tryReenter, 400);
+    } else {
+      if (lockdownState.fullscreenRetryTimer) clearTimeout(lockdownState.fullscreenRetryTimer);
+      lockdownState.fullscreenRetryTimer = setTimeout(() => {
+        if (lockdownState.active && !isFullscreenNow() && !lockdownState.autoSubmitTriggered) {
+          lockdownState.violations++;
+          autoSubmitLockdown('keluar dari mode fullscreen');
+        }
+      }, 1800);
+    }
+  };
+  setTimeout(tryReenter, 200);
+}
+
+function handleKeydownLockdown(e) {
+  if (!lockdownState.active) return;
+  const k = (e.key || '').toLowerCase();
+  const ctrl = e.ctrlKey || e.metaKey;
+  if (ctrl && ['t','n','w','r','p','s','o','u'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  if (ctrl && e.shiftKey && ['t','n','w','r','i','j','c'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  if (k === 'f5' || k === 'f11' || k === 'f12') { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+}
+
+function blockContextMenuLockdown(e) {
+  if (!lockdownState.active) return;
+  e.preventDefault();
+  return false;
+}
+
+function handleBeforeUnloadLockdown(e) {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  e.preventDefault();
+  e.returnValue = '';
+  return '';
+}
+
+function armHistoryTrapLockdown() {
+  if (lockdownState.historyArmed) return;
+  try {
+    history.pushState({ lockdown: Date.now() }, '', location.href);
+    lockdownState.historyArmed = true;
+  } catch (e) {}
+}
+function handlePopstateLockdown() {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  try { history.pushState({ lockdown: Date.now() }, '', location.href); } catch (e) {}
+  lockdownState.violations++;
+  autoSubmitLockdown('menekan tombol kembali');
+}
+
+function aktifkanLockdown() {
+  if (lockdownState.active) return;
+  lockdownState.active = true;
+  lockdownState.violations = 0;
+  lockdownState.autoSubmitTriggered = false;
+  lockdownState.fullscreenRetries = 0;
+
+  document.body.classList.add('lockdown-active');
+  tampilLockdownBadge();
+
+  requestFullscreenLockdown();
+  requestWakeLockLockdown();
+  lockOrientationLockdown();
+  armHistoryTrapLockdown();
+
+  document.addEventListener('visibilitychange', handleVisibilityLockdown, true);
+  document.addEventListener('keydown', handleKeydownLockdown, true);
+  document.addEventListener('contextmenu', blockContextMenuLockdown, true);
+  document.addEventListener('fullscreenchange', handleFullscreenChangeLockdown, true);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChangeLockdown, true);
+  document.addEventListener('mozfullscreenchange', handleFullscreenChangeLockdown, true);
+  document.addEventListener('MSFullscreenChange', handleFullscreenChangeLockdown, true);
+  window.addEventListener('beforeunload', handleBeforeUnloadLockdown, true);
+  window.addEventListener('blur', handleWindowBlurLockdown, true);
+  window.addEventListener('focus', handleWindowFocusLockdown, true);
+  window.addEventListener('pagehide', handlePageHideLockdown, true);
+  document.addEventListener('freeze', handlePageFreezeLockdown, true);
+  window.addEventListener('popstate', handlePopstateLockdown, true);
+
+  try {
+    lockdownState.originalOpen = window.open;
+    window.open = function() { return null; };
+  } catch (e) {}
+
+  try { document.documentElement.style.overscrollBehavior = 'none'; } catch (e) {}
+}
+
+function nonaktifkanLockdown() {
+  if (!lockdownState.active) return;
+  lockdownState.active = false;
+  if (lockdownState.hiddenTimer) { clearTimeout(lockdownState.hiddenTimer); lockdownState.hiddenTimer = null; }
+  if (lockdownState.blurTimer) { clearTimeout(lockdownState.blurTimer); lockdownState.blurTimer = null; }
+  if (lockdownState.fullscreenRetryTimer) { clearTimeout(lockdownState.fullscreenRetryTimer); lockdownState.fullscreenRetryTimer = null; }
+
+  document.body.classList.remove('lockdown-active');
+  document.removeEventListener('visibilitychange', handleVisibilityLockdown, true);
+  document.removeEventListener('keydown', handleKeydownLockdown, true);
+  document.removeEventListener('contextmenu', blockContextMenuLockdown, true);
+  document.removeEventListener('fullscreenchange', handleFullscreenChangeLockdown, true);
+  document.removeEventListener('webkitfullscreenchange', handleFullscreenChangeLockdown, true);
+  document.removeEventListener('mozfullscreenchange', handleFullscreenChangeLockdown, true);
+  document.removeEventListener('MSFullscreenChange', handleFullscreenChangeLockdown, true);
+  window.removeEventListener('beforeunload', handleBeforeUnloadLockdown, true);
+  window.removeEventListener('blur', handleWindowBlurLockdown, true);
+  window.removeEventListener('focus', handleWindowFocusLockdown, true);
+  window.removeEventListener('pagehide', handlePageHideLockdown, true);
+  document.removeEventListener('freeze', handlePageFreezeLockdown, true);
+  window.removeEventListener('popstate', handlePopstateLockdown, true);
+
+  if (lockdownState.originalOpen) { try { window.open = lockdownState.originalOpen; } catch (e) {} lockdownState.originalOpen = null; }
+
+  releaseWakeLockLockdown();
+  unlockOrientationLockdown();
+  exitFullscreenIfAny();
+  sembunyiLockdownBadge();
+  sembunyiLockdownWarnOverlay();
+
+  try { document.documentElement.style.overscrollBehavior = ''; } catch (e) {}
+  lockdownState.historyArmed = false;
+}
+
+async function autoSubmitLockdown(alasan) {
+  if (lockdownState.autoSubmitTriggered) return;
+  lockdownState.autoSubmitTriggered = true;
+  tampilLockdownWarnOverlay(alasan || '');
+  try {
+    await kirimJawaban(true, 'lockdown', alasan || '');
+  } catch (e) { console.error('autoSubmitLockdown error:', e); }
+  setTimeout(() => {
+    nonaktifkanLockdown();
+  }, 800);
+}
+
+function renderSoalSiswa() {
+  const c = document.getElementById('jawabanContainer');
+  c.innerHTML = '';
+  const allowFoto = currentTugas.aktifkanFoto !== false;
+  currentTugas.soal.forEach((s, i) => {
+    const jawab = jawabanSementara[i] || { mode: 'teks', teks: '', fotoData: '', mimeType: '', pilgan: '' };
+    if (!allowFoto && jawab.mode === 'foto') jawab.mode = 'teks';
+    jawabanSementara[i] = jawab;
+
+    if (s.jenis === 'pilgan') {
+      const opsi = s.opsi || [];
+      const huruf = ['A', 'B', 'C', 'D', 'E'];
+      c.innerHTML += `
+        <div class="question-box" style="border-left-color:#6a1b9a;">
+          <b>Soal #${i+1}</b> <span class="badge purple">Pilihan Ganda</span> <span class="badge">Bobot ${s.bobot}</span>
+          <p style="margin:8px 0; white-space:pre-wrap;">${escapeHtml(s.pertanyaan) || '(Soal kosong)'}</p>
+          <div class="opts-grid">
+            ${opsi.map((o, j) => `
+              <label class="kunci-pilih" style="display:flex; padding:10px; border-radius:8px; cursor:pointer; ${jawab.pilgan === huruf[j] ? 'background:#e8f5e9; border-color:#38a169;' : ''}" onclick="pilihJawabanPilgan(${i}, '${huruf[j]}')">
+                <input type="radio" name="pilgan-${i}" value="${huruf[j]}" ${jawab.pilgan === huruf[j] ? 'checked' : ''} onchange="pilihJawabanPilgan(${i}, '${huruf[j]}')">
+                <span style="font-weight:700; color:#6a1b9a; margin-right:6px;">${huruf[j]}.</span>
+                <span>${escapeHtml(o)}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>`;
+    } else {
+      const showTeks = jawab.mode === 'teks';
+      const showFoto = allowFoto && jawab.mode === 'foto';
+      let tabsHtml = `<div class="answer-tab ${showTeks ? 'active' : ''}" onclick="gantiMode(${i}, 'teks')"><svg class="ico"><use href="#i-edit"/></svg> Ketik Jawaban</div>`;
+      if (allowFoto) {
+        tabsHtml += `<div class="answer-tab ${showFoto ? 'active' : ''}" onclick="gantiMode(${i}, 'foto')"><svg class="ico"><use href="#i-camera"/></svg> Foto / Upload Gambar</div>`;
+      }
+      let fotoHtml = '';
+      if (allowFoto) {
+        fotoHtml = `
+          <div id="modeFoto-${i}" class="${showFoto ? '' : 'hidden'}">
+            <div class="photo-note">
+              <svg class="ico"><use href="#i-warn"/></svg>
+              <div><b>Catatan kualitas foto:</b><br>1. Pencahayaan cukup.<br>2. Foto tegak lurus, tidak blur.<br>3. Seluruh jawaban terlihat.<br>4. Tulisan jelas & kontras.<br>5. Format JPG/PNG, maks 5 MB.</div>
+            </div>
+            <div class="photo-zone" onclick="document.getElementById('foto-${i}').click()">
+              <svg class="ico ico-lg"><use href="#i-camera"/></svg>
+              <div class="main">Klik untuk pilih foto jawaban</div>
+              <div class="hint">atau ambil langsung dari kamera (HP)</div>
+            </div>
+            <input type="file" id="foto-${i}" class="file-input-hidden" accept="image/*" capture="environment" onchange="prosesFoto(${i}, event)">
+            <div id="preview-${i}">${jawab.fotoData ? `<img src="${jawab.fotoData}" class="photo-preview" alt="Preview">` : ''}</div>
+          </div>`;
+      }
+      c.innerHTML += `
+        <div class="question-box">
+          <b>Soal #${i+1}</b> <span class="badge">Uraian</span> <span class="badge">Bobot ${s.bobot}</span>
+          <p style="margin:8px 0; white-space:pre-wrap;">${escapeHtml(s.pertanyaan) || '(Soal kosong)'}</p>
+          <div class="answer-tabs">${tabsHtml}</div>
+          <div id="modeTeks-${i}" class="${showTeks ? '' : 'hidden'}">
+            <textarea id="jw-${i}"
+              placeholder="Tulis jawaban Anda di sini..."
+              onchange="simpanTeks(${i}, this.value)"
+              onpaste="event.preventDefault(); event.stopImmediatePropagation(); return false;"
+              ondrop="event.preventDefault(); event.stopImmediatePropagation(); return false;"
+              ondragover="event.preventDefault(); return false;"
+              oncopy="event.preventDefault(); return false;"
+              oncut="event.preventDefault(); return false;"
+              onbeforeinput="if(event.inputType && (event.inputType==='insertFromPaste'||event.inputType==='insertFromPasteAsQuotation'||event.inputType==='insertFromDrop'||event.inputType==='insertFromYank')){event.preventDefault(); event.stopImmediatePropagation(); return false;}"
+              oncontextmenu="event.preventDefault(); return false;"
+              oninput="window.__muaraWatchInput(event, this)"
+              autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false"
+              data-muara-baseline="${escapeAttr(jawab.teks)}">${escapeHtml(jawab.teks)}</textarea>
+          </div>
+          ${fotoHtml}
+        </div>`;
+    }
+  });
+}
+
+function pilihJawabanPilgan(i, val) { jawabanSementara[i].pilgan = val; renderSoalSiswa(); }
+
+function gantiMode(i, mode) {
+  const allowFoto = currentTugas.aktifkanFoto !== false;
+  if (mode === 'foto' && !allowFoto) return;
+  jawabanSementara[i].mode = mode;
+  const elTeks = document.getElementById('modeTeks-' + i);
+  const elFoto = document.getElementById('modeFoto-' + i);
+  if (elTeks) elTeks.classList.toggle('hidden', mode !== 'teks');
+  if (elFoto) elFoto.classList.toggle('hidden', mode !== 'foto');
+  const qBox = elTeks.closest('.question-box');
+  const tabs = qBox.querySelectorAll('.answer-tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  if (mode === 'teks' && tabs[0]) tabs[0].classList.add('active');
+  if (mode === 'foto' && tabs[1]) tabs[1].classList.add('active');
+}
+
+function simpanTeks(i, val) { jawabanSementara[i].teks = val; }
+
+function prosesFoto(i, event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) return alert('Ukuran foto terlalu besar (maks 5 MB).');
+  if (!file.type.startsWith('image/')) return alert('File harus berupa gambar.');
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    jawabanSementara[i].fotoData = e.target.result;
+    jawabanSementara[i].mimeType = file.type;
+    const prev = document.getElementById('preview-' + i);
+    if (prev) prev.innerHTML = `<img src="${e.target.result}" class="photo-preview" alt="Preview">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function buildSoalSnapshot() {
+  return currentTugas.soal.map(s => ({
+    jenis: s.jenis,
+    pertanyaan: s.pertanyaan || '',
+    opsi: s.jenis === 'pilgan' ? (s.opsi || []) : null,
+    kunci: s.kunci || null,
+    bobot: s.bobot || 0
+  }));
+}
+function buildJawabanSnapshot() {
+  return currentTugas.soal.map((s, i) => {
+    const j = jawabanSementara[i] || {};
+    if (s.jenis === 'pilgan') {
+      return { jenis: 'pilgan', pilgan: j.pilgan || '' };
+    }
+    if (j.mode === 'foto' && j.fotoData) {
+      return { jenis: 'uraian', mode: 'foto', fotoData: j.fotoData, mimeType: j.mimeType || 'image/jpeg' };
+    }
+    return { jenis: 'uraian', mode: 'teks', teks: j.teks || '' };
+  });
+}
+
+async function kirimJawaban(paksa, trigger, alasan) {
+  for (let i = 0; i < currentTugas.soal.length; i++) {
+    const j = jawabanSementara[i];
+    const soal = currentTugas.soal[i];
+    if (!j) {
+      if (paksa) { jawabanSementara[i] = { mode: 'teks', teks: '(tidak dijawab)', fotoData: '', mimeType: '', pilgan: '' }; continue; }
+      return alert(`Soal #${i+1} belum dijawab.`);
+    }
+    if (soal.jenis === 'pilgan') {
+      if (!j.pilgan) { if (paksa) continue; return alert(`Soal #${i+1} (pilihan ganda) belum dipilih jawabannya.`); }
+    } else {
+      if (j.mode === 'teks' && !j.teks.trim()) { if (paksa) { j.teks = '(tidak dijawab)'; continue; } return alert(`Soal #${i+1} belum diisi.`); }
+      if (j.mode === 'foto' && !j.fotoData) { if (paksa) { jawabanSementara[i] = { mode: 'teks', teks: '(tidak dijawab)', fotoData: '', mimeType: '', pilgan: '' }; continue; } return alert(`Soal #${i+1} belum ada foto.`); }
+    }
+  }
+  if (!paksa && !confirm('Kumpulkan jawaban sekarang?')) return;
+  hentikanTimerUjian();
+  const btn = document.getElementById('btnKirim');
+  btn.disabled = true;
+
+  const soalSnapshot = buildSoalSnapshot();
+  const jawabanSiswaSnapshot = buildJawabanSnapshot();
+
+  document.getElementById('hasilSiswa').innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span><span class="msg">Silakan tunggu 1-5 menit, jawaban anda sedang dikoreksi</span><span class="sub">Mohon jangan menutup atau me-refresh halaman ini.</span></div></div>';
+  try {
+    const hasil = await koreksiAI(currentUser.nama, currentUser.kelas, jawabanSementara);
+    if (hasil.perluUploadUlang && hasil.perluUploadUlang.length > 0) {
+      const daftar = hasil.perluUploadUlang.map(x => `Soal #${x.nomor} (${x.alasan})`).join('<br>');
+      document.getElementById('hasilSiswa').innerHTML = `<div class="card info warning"><svg class="ico"><use href="#i-warn"/></svg><div><b>Foto jawaban kurang jelas.</b><br>AI tidak dapat membaca dengan baik pada:<br>${daftar}<br><br><b>Silakan:</b><br>1. Upload ulang foto lebih baik, atau<br>2. Laporkan ke guru Anda.<br><br><button class="warning sm" onclick="cobaLagi()">Coba Lagi</button></div></div>`;
+      btn.disabled = false;
+      return;
+    }
+    const record = {
+      tugasId: currentTugas.id,
+      tugasKode: currentTugas.kode,
+      tugasJudul: currentTugas.judul,
+      tugasMapel: currentTugas.mapel,
+      tugasKelas: currentTugas.kelas,
+      tugasKkm: currentTugas.kkm,
+      guruEmail: currentTugas.guruEmail,
+      nama: currentUser.nama,
+      kelas: currentUser.kelas,
+      waktu: new Date().toISOString(),
+      trigger: trigger || 'manual',
+      alasanSubmit: alasan || '',
+      ...hasil,
+      soalSnapshot: soalSnapshot,
+      jawabanSiswa: jawabanSiswaSnapshot
+    };
+    tampilkanHasilSiswa(record);
+    state.hasil.push(record);
+    simpanLocal();
+    const pushKey = await cloudAddHasil(record);
+    if (pushKey) { record._fbKey = pushKey; simpanLocal(); }
+    document.getElementById('jawabanContainer').innerHTML = '';
+    document.getElementById('examTimerWrap').innerHTML = '';
+    btn.classList.add('hidden');
+
+    nonaktifkanLockdown();
+    const btnKeluar = document.getElementById('btnKeluarTugas');
+    if (btnKeluar) {
+      btnKeluar.disabled = false;
+      btnKeluar.style.opacity = '1';
+      btnKeluar.style.cursor = 'pointer';
+    }
+  } catch (e) {
+    document.getElementById('hasilSiswa').innerHTML = `<div class="card info red"><svg class="ico"><use href="#i-warn"/></svg><div><b>Terjadi kesalahan:</b><br>${escapeHtml(e.message)}</div></div>`;
+    btn.disabled = false;
+  }
+}
+
+function cobaLagi() {
+  document.getElementById('hasilSiswa').innerHTML = '';
+  document.getElementById('btnKirim').disabled = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function koreksiAI(nama, kelas, jawaban) {
+  const parts = [];
+  let promptText = `Anda guru ${currentTugas.mapel || 'umum'} yang adil menilai tugas siswa.
+
+RUBRIK PENILAIAN:
+${currentTugas.rubrik}
+
+TUGAS: ${currentTugas.judul}
+KELAS: ${currentTugas.kelas || '-'}
+NAMA SISWA: ${nama} (${kelas})
+
+INSTRUKSI KHUSUS:
+1. Setiap soal punya bobot. Nilai maksimal = bobot soal.
+2. Untuk soal jenis "PILIHAN GANDA":
+   - Bandingkan huruf jawaban siswa dengan kunci. Jika SAMA dapat nilai penuh. Jika BEDA 0.
+   - Tidak perlu feedback panjang, cukup singkat.
+3. Untuk soal jenis "URAIAN":
+   - Nilai sesuai RUBRIK di atas.
+   - Jika jawaban berupa FOTO dan TIDAK JELAS/BLUR/TERPOTONG, masukkan nomor soal ke "perluUploadUlang".
+4. Skor total 0-100 (disesuaikan dengan bobot).
+5. Kesimpulan umum.
+
+Balas HANYA JSON valid:
+{"perluUploadUlang":[{"nomor":1,"alasan":"..."}],"skorPerSoal":[{"nomor":1,"skor":0,"maks":100,"feedback":"..."}],"skorTotal":0,"kesimpulan":"..."}
+
+Jika semua dapat dinilai, "perluUploadUlang": [].
+
+Berikut jawaban siswa:
+`;
+  parts.push({ text: promptText });
+  for (let i = 0; i < currentTugas.soal.length; i++) {
+    const s = currentTugas.soal[i];
+    const j = jawaban[i];
+    if (s.jenis === 'pilgan') {
+      const huruf = ['A', 'B', 'C', 'D', 'E'];
+      const opsiList = (s.opsi || []).map((o, idx) => `  ${huruf[idx]}. ${o}`).join('\n');
+      const kunciIdx = huruf.indexOf(s.kunci);
+      const kunciTeks = kunciIdx >= 0 ? s.opsi[kunciIdx] : '-';
+      parts.push({ text: `\n\n--- SOAL ${i+1} (Bobot ${s.bobot}) [JENIS: PILIHAN GANDA] ---\nPERTANYAAN: ${s.pertanyaan}\nOPSI:\n${opsiList}\nKUNCI JAWABAN: ${s.kunci}. ${kunciTeks}\nJAWABAN SISWA: ${j.pilgan || '(tidak dijawab)'}\n` });
+    } else {
+      parts.push({ text: `\n\n--- SOAL ${i+1} (Bobot ${s.bobot}) [JENIS: URAIAN] ---\nPERTANYAAN: ${s.pertanyaan}\nKUNCI: ${s.kunci || '(tidak ada)'}\nTIPE: ${j.mode === 'foto' ? 'FOTO' : 'TEKS'}\n` });
+      if (j.mode === 'teks') parts.push({ text: `JAWABAN (TEKS):\n${j.teks}` });
+      else if (j.mode === 'foto' && j.fotoData) {
+        parts.push({ text: `JAWABAN (FOTO):` });
+        const base64 = j.fotoData.split(',')[1];
+        parts.push({ inline_data: { mime_type: j.mimeType || 'image/jpeg', data: base64 } });
+      }
+    }
+  }
+  const MODEL = 'gemini-3.6-flash';
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${currentTugas.apiKey}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts }], generationConfig: { temperature: 0.3, responseMimeType: 'application/json' } })
+  });
+  if (!res.ok) throw new Error(`Gemini API error (${res.status}).`);
+  const data = await res.json();
+  let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  text = text.replace(/```json|```/g, '').trim();
+  try { const parsed = JSON.parse(text); if (!parsed.perluUploadUlang) parsed.perluUploadUlang = []; return parsed; }
+  catch (e) { throw new Error('Format AI tidak valid. Coba lagi.'); }
+}
+
+function tampilkanHasilSiswa(hasil) {
+  const lulus = hasil.skorTotal >= (hasil.tugasKkm || currentTugas.kkm || 75);
+  const warna = lulus ? '#38a169' : '#e53e3e';
+  const status = lulus ? 'LULUS' : 'BELUM LULUS';
+  let html = `<div class="card" id="hasilCard"><h2><svg class="ico"><use href="#i-check"/></svg> Hasil Penilaian Anda</h2><div class="score-big" style="color:${warna};">${hasil.skorTotal} / 100</div><p style="text-align:center; color:${warna}; font-weight:700; margin-top:8px;">${status} (KKM: ${hasil.tugasKkm || currentTugas.kkm})</p><h3><svg class="ico"><use href="#i-doc"/></svg> Rincian Per Soal</h3>`;
+  (hasil.skorPerSoal || []).forEach(s => { html += `<div class="result-box"><b>Soal #${s.nomor}</b> — Skor: <b>${s.skor}/${s.maks}</b><div class="feedback">${escapeHtml(s.feedback)}</div></div>`; });
+  html += `<h3><svg class="ico"><use href="#i-info"/></svg> Kesimpulan Guru</h3><div class="feedback">${escapeHtml(hasil.kesimpulan)}</div><div class="info green" style="margin-top:16px;"><svg class="ico"><use href="#i-check"/></svg><span>Nilai Anda sudah otomatis terkirim ke guru.</span></div>
+    <h3 style="margin-top:20px;"><svg class="ico"><use href="#i-download"/></svg> Unduh Hasil Penilaian</h3>
+    <p style="font-size:0.85rem; color:#718096; margin-bottom:6px;">Pilih format unduhan (soal & jawaban Anda akan disertakan):</p>
+    <div class="unduh-row">
+      <button class="pdf" onclick="unduhHasilPDF()"><svg class="ico"><use href="#i-file-pdf"/></svg> Unduh PDF</button>
+      <button class="img" onclick="unduhHasilGambar()"><svg class="ico"><use href="#i-image"/></svg> Unduh Gambar (PNG)</button>
+    </div>
+    </div>`;
+  document.getElementById('hasilSiswa').innerHTML = html;
+  window.scrollTo({ top: document.getElementById('hasilSiswa').offsetTop, behavior: 'smooth' });
+}
+
+function buildHasilRenderHTML(hasil) {
+  const kkm = hasil.tugasKkm || currentTugas?.kkm || 75;
+  const lulus = hasil.skorTotal >= kkm;
+  const warna = lulus ? '#38a169' : '#e53e3e';
+  const status = lulus ? 'LULUS' : 'BELUM LULUS';
+  const tgl = new Date(hasil.waktu).toLocaleString('id-ID', {
+    day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+
+  const huruf = ['A', 'B', 'C', 'D', 'E'];
+
+  let html = `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;background:#fff;padding:30px;width:720px;color:#222;">
+      <div style="text-align:center;border-bottom:3px solid #0d47a1;padding-bottom:12px;margin-bottom:18px;">
+        <div style="font-size:1.6rem;font-weight:800;color:#0d47a1;letter-spacing:1px;">MUARA</div>
+        <div style="font-size:0.88rem;font-weight:700;color:#0d47a1;margin-top:2px;">SMP Negeri 10 Samarinda</div>
+        <div style="font-size:0.78rem;color:#00695c;font-style:italic;margin-top:2px;">Mesin Ujian &amp; Analisis Respons Alternatif</div>
+        <div style="font-size:0.95rem;font-weight:700;margin-top:8px;">LAPORAN HASIL PENILAIAN TUGAS</div>
+      </div>
+
+      <table style="width:100%;font-size:0.88rem;border-collapse:collapse;margin-bottom:14px;">
+        <tr><td style="padding:3px 0;width:140px;"><b>Nama Siswa</b></td><td>: ${escapeHtml(hasil.nama)}</td></tr>
+        <tr><td style="padding:3px 0;"><b>Kelas</b></td><td>: ${escapeHtml(hasil.kelas)}</td></tr>
+        <tr><td style="padding:3px 0;"><b>Mata Pelajaran</b></td><td>: ${escapeHtml(hasil.tugasMapel || '-')}</td></tr>
+        <tr><td style="padding:3px 0;"><b>Judul Tugas</b></td><td>: ${escapeHtml(hasil.tugasJudul || '-')}</td></tr>
+        <tr><td style="padding:3px 0;"><b>Kode Tugas</b></td><td>: ${escapeHtml(hasil.tugasKode || '-')}</td></tr>
+        <tr><td style="padding:3px 0;"><b>Waktu Kumpul</b></td><td>: ${tgl}</td></tr>
+        <tr><td style="padding:3px 0;"><b>KKM</b></td><td>: ${kkm}</td></tr>
+      </table>
+
+      <div style="text-align:center;padding:16px;border:3px solid ${warna};border-radius:10px;background:${lulus?'#f0fff4':'#fff5f5'};margin-bottom:18px;">
+        <div style="font-size:2.4rem;font-weight:800;color:${warna};line-height:1.1;">${hasil.skorTotal} / 100</div>
+        <div style="font-size:1rem;font-weight:700;color:${warna};margin-top:4px;">${status}</div>
+      </div>
+
+      <h3 style="font-size:1rem;color:#0d47a1;border-bottom:2px solid #0d47a1;padding-bottom:4px;margin-bottom:10px;">Rincian Per Soal (Soal, Jawaban, &amp; Penilaian)</h3>`;
+
+  const soalList = hasil.soalSnapshot || [];
+  const jawabanList = hasil.jawabanSiswa || [];
+
+  (hasil.skorPerSoal || []).forEach(s => {
+    const idx = (s.nomor || 1) - 1;
+    const soal = soalList[idx] || {};
+    const jaw = jawabanList[idx] || {};
+
+    html += `
+      <div style="border:1px solid #cbd5e0;border-radius:8px;margin-bottom:12px;overflow:hidden;">
+        <div style="background:#e3f2fd;padding:8px 12px;font-weight:700;color:#0d47a1;display:flex;justify-content:space-between;align-items:center;">
+          <span>Soal #${s.nomor} ${soal.jenis === 'pilgan' ? '<span style="background:#6a1b9a;color:#fff;font-size:0.65rem;padding:2px 8px;border-radius:10px;margin-left:6px;">PILIHAN GANDA</span>' : '<span style="background:#0d47a1;color:#fff;font-size:0.65rem;padding:2px 8px;border-radius:10px;margin-left:6px;">URAIAN</span>'}</span>
+          <span style="color:${warna};font-size:1rem;">${s.skor} / ${s.maks}</span>
+        </div>
+        <div style="padding:12px;">`;
+
+    if (soal.pertanyaan) {
+      html += `<div style="margin-bottom:10px;">
+        <div style="font-size:0.75rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Pertanyaan:</div>
+        <div style="font-size:0.88rem;line-height:1.5;color:#222;">${escapeHtml(soal.pertanyaan).replace(/\n/g, '<br>')}</div>
+      </div>`;
+    }
+
+    if (soal.jenis === 'pilgan' && soal.opsi && soal.opsi.length > 0) {
+      html += `<div style="margin-bottom:10px;">
+        <div style="font-size:0.75rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Pilihan:</div>
+        <div style="font-size:0.85rem;line-height:1.6;">`;
+      soal.opsi.forEach((o, j) => {
+        const isKunci = soal.kunci === huruf[j];
+        const isDipilih = jaw.pilgan === huruf[j];
+        let bg = 'transparent';
+        let weight = 'normal';
+        let mark = '';
+        if (isKunci) { bg = '#e8f5e9'; weight = 'bold'; mark = ' ✓'; }
+        if (isDipilih && !isKunci) { bg = '#fff5f5'; weight = 'bold'; mark = ' ✗ (dipilih)'; }
+        if (isDipilih && isKunci) mark = ' ✓ (dipilih - benar)';
+        html += `<div style="padding:3px 8px;border-radius:4px;background:${bg};font-weight:${weight};margin-bottom:2px;">${huruf[j]}. ${escapeHtml(o)}${mark}</div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    if (soal.jenis === 'pilgan' && soal.kunci) {
+      html += `<div style="margin-bottom:10px;font-size:0.85rem;">
+        <span style="color:#718096;">Kunci Jawaban:</span> <b style="color:#38a169;">${escapeHtml(soal.kunci)}</b>
+      </div>`;
+    } else if (soal.jenis === 'uraian' && soal.kunci) {
+      html += `<div style="margin-bottom:10px;">
+        <div style="font-size:0.75rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Kunci / Poin Penting:</div>
+        <div style="font-size:0.82rem;line-height:1.5;color:#4a5568;background:#f7fafc;padding:8px;border-radius:4px;border-left:3px solid #38a169;">${escapeHtml(soal.kunci).replace(/\n/g, '<br>')}</div>
+      </div>`;
+    }
+
+    html += `<div style="margin-bottom:10px;">
+      <div style="font-size:0.75rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Jawaban Anda:</div>`;
+
+    if (soal.jenis === 'pilgan') {
+      const ans = jaw.pilgan || '(tidak dijawab)';
+      const benar = jaw.pilgan && jaw.pilgan === soal.kunci;
+      html += `<div style="font-size:0.88rem;padding:6px 10px;border-radius:4px;background:${benar?'#f0fff4':'#fff5f5'};color:${benar?'#22543d':'#742a2a'};font-weight:600;">${escapeHtml(ans)} ${benar?'✓':''}</div>`;
+    } else {
+      if (jaw.mode === 'foto' && jaw.fotoData) {
+        html += `<div style="border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;display:inline-block;max-width:100%;">
+          <img src="${jaw.fotoData}" style="max-width:100%;max-height:320px;display:block;" />
+        </div>`;
+      } else if (jaw.teks) {
+        html += `<div style="font-size:0.86rem;line-height:1.55;white-space:pre-wrap;background:#f7fafc;padding:10px;border-radius:6px;border-left:3px solid #0d47a1;">${escapeHtml(jaw.teks).replace(/\n/g, '<br>')}</div>`;
+      } else {
+        html += `<div style="font-size:0.85rem;color:#a0aec0;font-style:italic;">(tidak dijawab)</div>`;
+      }
+    }
+    html += `</div>`;
+
+    if (s.feedback) {
+      html += `<div style="margin-top:8px;">
+        <div style="font-size:0.75rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Feedback:</div>
+        <div style="font-size:0.85rem;line-height:1.5;padding:10px;background:#fffaf0;border-left:3px solid #dd6b20;border-radius:4px;">${escapeHtml(s.feedback).replace(/\n/g, '<br>')}</div>
+      </div>`;
+    }
+
+    html += `</div></div>`;
+  });
+
+  html += `
+      <h3 style="font-size:1rem;color:#0d47a1;border-bottom:2px solid #0d47a1;padding-bottom:4px;margin:18px 0 10px;">Kesimpulan</h3>
+      <div style="background:#fffaf0;border-left:4px solid #dd6b20;padding:12px;border-radius:6px;font-size:0.88rem;line-height:1.6;">
+        ${escapeHtml(hasil.kesimpulan || '-').replace(/\n/g, '<br>')}
+      </div>
+
+      <div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #cbd5e0;font-size:0.75rem;color:#718096;">
+        Dokumen ini dihasilkan otomatis oleh sistem MUARA — SMP Negeri 10 Samarinda.<br>
+        ${new Date().toLocaleString('id-ID')}
+      </div>
+    </div>`;
+  return html;
+}
+
+function getHasilSiswa() {
+  const hasilList = state.hasil.filter(h => h.nama === currentUser.nama && h.kelas === currentUser.kelas && h.tugasId === currentTugas.id);
+  if (hasilList.length === 0) { alert('Data hasil tidak ditemukan.'); return null; }
+  return hasilList[hasilList.length - 1];
+}
+
+function showUnduhLoading(pesan) {
+  document.getElementById('hasilSiswa').insertAdjacentHTML('afterbegin',
+    `<div id="unduhLoading" class="card info green" style="text-align:center;"><svg class="ico"><use href="#i-info"/></svg><span>${pesan}</span></div>`);
+}
+function hideUnduhLoading() { const el = document.getElementById('unduhLoading'); if (el) el.remove(); }
+
+async function unduhHasilPDF() {
+  const hasil = getHasilSiswa();
+  if (!hasil) return;
+  if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') { alert('Pustaka PDF belum termuat.'); return; }
+  showUnduhLoading('Menyiapkan PDF... Mohon tunggu, soal & jawaban Anda sedang disusun.');
+  try {
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '0'; wrapper.style.background = '#fff';
+    wrapper.innerHTML = buildHasilRenderHTML(hasil);
+    document.body.appendChild(wrapper);
+    const target = wrapper.firstElementChild;
+    const canvas = await html2canvas(target, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+    document.body.removeChild(wrapper);
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgWidth = pdfWidth;
+    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    let heightLeft = imgHeight; let position = 0;
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pdfHeight;
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+    }
+    pdf.save(`Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.pdf`);
+  } catch (e) { console.error(e); alert('Gagal membuat PDF: ' + e.message); }
+  finally { hideUnduhLoading(); }
+}
+
+async function unduhHasilGambar() {
+  const hasil = getHasilSiswa();
+  if (!hasil) return;
+  if (typeof html2canvas === 'undefined') { alert('Pustaka gambar belum termuat.'); return; }
+  showUnduhLoading('Menyiapkan gambar... Mohon tunggu, soal & jawaban Anda sedang disusun.');
+  try {
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '0'; wrapper.style.background = '#fff';
+    wrapper.innerHTML = buildHasilRenderHTML(hasil);
+    document.body.appendChild(wrapper);
+    const target = wrapper.firstElementChild;
+    const canvas = await html2canvas(target, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+    document.body.removeChild(wrapper);
+    const link = document.createElement('a');
+    link.download = `Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (e) { console.error(e); alert('Gagal membuat gambar: ' + e.message); }
+  finally { hideUnduhLoading(); }
+}
+
+function switchGTab(tab) {
+  document.querySelectorAll('#guruPage .tab').forEach(t => { t.classList.remove('active'); if (t.dataset.gtab === tab) t.classList.add('active'); });
+  document.querySelectorAll('.gtab-content').forEach(t => t.classList.add('hidden'));
+  const target = document.getElementById('gtab-' + tab); if (target) target.classList.remove('hidden');
+  if (tab === 'hasil') { muatFilterTugas(); muatHasil(); }
+}
+
+function renderTugasList() {
+  const c = document.getElementById('tugasList'); if (!c) return;
+  if (state.tugas.length === 0) { c.innerHTML = '<div class="info warning"><svg class="ico"><use href="#i-warn"/></svg><span>Belum ada tugas. Klik "Input Soal" untuk memulai.</span></div>'; return; }
+  c.innerHTML = state.tugas.slice().reverse().map(e => {
+    const jmlHasil = state.hasil.filter(h => h.tugasId === e.id).length;
+    const jmlPilgan = e.soal.filter(s => s.jenis === 'pilgan').length;
+    const jmlUraian = e.soal.filter(s => s.jenis !== 'pilgan').length;
+    const pembuat = e.guruNama ? ` | Dibuat oleh: ${escapeHtml(e.guruNama)}` : '';
+    const kelasInfo = e.kelas ? ` | Kelas: ${escapeHtml(e.kelas)}` : '';
+    const jenisInfo = ` | ${jmlPilgan} pilgan + ${jmlUraian} uraian`;
+    let waktuInfo = '';
+    if (e.waktuMulai || e.waktuSelesai) waktuInfo = ` | ⏰ ${e.waktuMulai ? formatWaktu(e.waktuMulai) : 'sekarang'} s/d ${e.waktuSelesai ? formatWaktu(e.waktuSelesai) : 'selesai'}`;
+    if (e.durasi > 0) waktuInfo += ` | ⏱ ${e.durasi} menit`;
+    const fotoInfo = e.aktifkanFoto === false ? ' | 🚫 Foto off' : ' | 📷 Foto on';
+    const lockInfo = e.lockdownMode ? ' | <b style="color:#c62828;">🔒 LOCKDOWN</b>' : '';
+    return `<div class="exam-item"><h3><svg class="ico"><use href="#i-exam"/></svg> ${escapeHtml(e.judul) || '(Tanpa judul)'} <span class="badge ${e.aktif ? 'green' : 'gray'}">${e.aktif ? 'AKTIF' : 'DITUTUP'}</span></h3><div class="meta">${escapeHtml(e.mapel || '-')}${kelasInfo} | KKM: ${e.kkm}${jenisInfo} | ${jmlHasil} siswa${pembuat}<br>${waktuInfo}${fotoInfo}${lockInfo}</div><div style="font-size:0.82rem; color:#718096; margin-bottom:6px;">Kode Tugas:</div><div class="code-badge">${e.kode}</div><div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"><button class="sm secondary" onclick="salinKode('${e.kode}')"><svg class="ico"><use href="#i-copy"/></svg> Salin Kode</button><button class="sm purple" onclick="bukaDuplikat('${e.id}')"><svg class="ico"><use href="#i-copy"/></svg> Duplikat</button><button class="sm secondary" onclick="bukaEditorTugas('${e.id}')"><svg class="ico"><use href="#i-edit"/></svg> Edit</button><button class="sm ${e.aktif ? 'warning' : 'success'}" onclick="toggleAktif('${e.id}')"><svg class="ico"><use href="${e.aktif ? '#i-pause' : '#i-play'}"/></svg> ${e.aktif ? 'Tutup' : 'Buka'}</button><button class="sm danger" onclick="hapusTugas('${e.id}')"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button></div></div>`;
+  }).join('');
+}
+
+function salinKode(code) { navigator.clipboard.writeText(code).then(() => alert('Kode ' + code + ' tersalin!')).catch(() => prompt('Salin manual:', code)); }
+async function toggleAktif(id) {
+  const e = state.tugas.find(x => x.id === id); if (!e) return;
+  e.aktif = !e.aktif; simpanLocal(); renderTugasList();
+  await cloudSaveTugas(e);
+}
+async function hapusTugas(id) {
+  if (!confirm('Hapus tugas ini?')) return;
+  state.tugas = state.tugas.filter(x => x.id !== id); simpanLocal(); renderTugasList();
+  await cloudRemoveTugas(id);
+}
+
+function bukaDuplikat(id) {
+  const e = state.tugas.find(x => x.id === id);
+  if (!e) return;
+  duplikatTugasId = id;
+  document.getElementById('duplikatInfo').innerHTML = `<div class="info"><svg class="ico"><use href="#i-info"/></svg><span><b>Asal:</b> ${escapeHtml(e.judul)} <br><b>Kode:</b> ${e.kode} | <b>Kelas:</b> ${escapeHtml(e.kelas || '-')} | <b>Soal:</b> ${e.soal.length}${e.lockdownMode ? ' | <b style="color:#c62828;">🔒 Lockdown</b>' : ''}</span></div>`;
+  document.getElementById('duplikatJudul').value = (e.judul || 'Tugas') + ' (Copy)';
+  document.getElementById('duplikatKelas').value = '';
+  document.getElementById('duplikatWaktuMulai').value = e.waktuMulai || '';
+  document.getElementById('duplikatWaktuSelesai').value = e.waktuSelesai || '';
+  document.getElementById('duplikatBukaSekarang').checked = true;
+  document.getElementById('duplikatModal').classList.remove('hidden');
+}
+
+function tutupDuplikat() { duplikatTugasId = null; document.getElementById('duplikatModal').classList.add('hidden'); }
+
+async function konfirmasiDuplikat() {
+  const e = state.tugas.find(x => x.id === duplikatTugasId);
+  if (!e) return;
+  const kelasBaru = document.getElementById('duplikatKelas').value;
+  const judulBaru = document.getElementById('duplikatJudul').value.trim();
+  const waktuMulaiBaru = document.getElementById('duplikatWaktuMulai').value || '';
+  const waktuSelesaiBaru = document.getElementById('duplikatWaktuSelesai').value || '';
+  const bukaSekarang = document.getElementById('duplikatBukaSekarang').checked;
+  if (!kelasBaru) return alert('Pilih kelas tujuan dulu.');
+  if (!judulBaru) return alert('Isi judul tugas baru.');
+  if (waktuMulaiBaru && waktuSelesaiBaru && new Date(waktuMulaiBaru) >= new Date(waktuSelesaiBaru)) return alert('Waktu mulai harus lebih awal dari waktu selesai.');
+  const baru = JSON.parse(JSON.stringify(e));
+  baru.id = 'tg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+  baru.kode = generateKodeUnik();
+  baru.kelas = kelasBaru;
+  baru.judul = judulBaru;
+  baru.waktuMulai = waktuMulaiBaru;
+  baru.waktuSelesai = waktuSelesaiBaru;
+  baru.aktif = bukaSekarang;
+  baru.createdAt = new Date().toISOString();
+  state.tugas.push(baru);
+  simpanLocal();
+  renderTugasList();
+  tutupDuplikat();
+  await cloudSaveTugas(baru);
+  alert(`Tugas berhasil diduplikat!\n\nKelas Baru: ${kelasBaru}\nKode Tugas Baru: ${baru.kode}\nStatus: ${bukaSekarang ? 'AKTIF' : 'DITUTUP (draf)'}\n\nBagikan kode baru ini ke siswa kelas ${kelasBaru}.`);
+}
+
+function mulaiInputSoal() {
+  document.getElementById('tugasListView').classList.add('hidden');
+  document.getElementById('tugasChoiceView').classList.remove('hidden');
+  document.getElementById('tugasTempelView').classList.add('hidden');
+  document.getElementById('tugasEditorView').classList.add('hidden');
+}
+
+function tutupPilihanBuat() {
+  document.getElementById('tugasListView').classList.remove('hidden');
+  document.getElementById('tugasChoiceView').classList.add('hidden');
+  document.getElementById('tugasTempelView').classList.add('hidden');
+  document.getElementById('tugasEditorView').classList.add('hidden');
+}
+
+function pilihModeBuat(mode) {
+  if (mode === 'manual') {
+    editingTugasId = null;
+    document.getElementById('tugasChoiceView').classList.add('hidden');
+    document.getElementById('tugasEditorView').classList.remove('hidden');
+    document.getElementById('editorTitle').innerHTML = `<svg class="ico"><use href="#i-edit"/></svg> Input Soal (Manual)`;
+    ['exMapel','exJudul','exKelas','exApiKey','exJenisTugas','exKetentuan','exRubrik','exWaktuMulai','exWaktuSelesai'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('exDurasi').value = 0;
+    document.getElementById('exKkm').value = 75;
+    document.getElementById('exAktifkanFoto').checked = true;
+    document.getElementById('exLockdownMode').checked = false;
+    editorSoal = [{ jenis: 'uraian', pertanyaan: '', kunci: '', bobot: 100 }];
+    renderEditorSoal();
+    switchRubrikTab('pilgan');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (mode === 'tempel') {
+    document.getElementById('tugasChoiceView').classList.add('hidden');
+    document.getElementById('tugasTempelView').classList.remove('hidden');
+    document.getElementById('tempelJenis').value = '';
+    document.getElementById('tempelInputPilgan').value = '';
+    document.getElementById('tempelInputUraian').value = '';
+    document.getElementById('tempelInputKeduanya').value = '';
+    document.getElementById('tempelStatus').innerHTML = '';
+    ubahTempelJenis();
+    switchPromptTab('pilgan');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function switchPromptTab(tab) {
+  promptTabAktif = tab;
+  document.querySelectorAll('.prompt-tab').forEach(t => { t.classList.toggle('active', t.dataset.prompt === tab); });
+  document.getElementById('promptContent').textContent = PROMPT_AI[tab] || '';
+}
+
+function copyPromptSaatIni() {
+  const teks = PROMPT_AI[promptTabAktif] || '';
+  navigator.clipboard.writeText(teks).then(() => {
+    alert('✅ Prompt berhasil disalin!\n\nTempel di Google Gemini, ganti bagian [TEMPEL DRAF SOAL DI SINI] dengan draf soal Anda.');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = teks;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('✅ Prompt berhasil disalin!');
+  });
+}
+
+function toggleLangkahPraktis() { document.getElementById('langkahPraktis').classList.toggle('hidden'); }
+
+function ubahTempelJenis() {
+  const jenis = document.getElementById('tempelJenis').value;
+  const boxPilgan = document.getElementById('tempelBoxPilgan');
+  const boxUraian = document.getElementById('tempelBoxUraian');
+  const boxKeduanya = document.getElementById('tempelBoxKeduanya');
+  const info = document.getElementById('tempelInfo');
+  boxPilgan.classList.add('hidden'); boxUraian.classList.add('hidden'); boxKeduanya.classList.add('hidden');
+  info.classList.add('hidden'); info.innerHTML = '';
+  if (jenis === 'pilgan') {
+    boxPilgan.classList.remove('hidden'); info.classList.remove('hidden');
+    info.innerHTML = `<b>Sistem Deteksi Otomatis — Pilihan Ganda:</b>
+<pre>1. Apa ibu kota Indonesia?
+A. Bandung
+B. Jakarta
+C. Surabaya
+D. Medan
+Kunci Jawaban: B</pre>
+Format didukung: <code>1.</code> <code>1)</code> <code>(1)</code> <code>Soal 1</code>, opsi <code>A.</code> <code>a)</code> <code>(A)</code> <code>A-</code>, dan label <code>Kunci Jawaban:</code> <code>Jawaban:</code> <code>Kunci:</code> <code>Answer:</code> — semua dideteksi otomatis.`;
+  } else if (jenis === 'uraian') {
+    boxUraian.classList.remove('hidden'); info.classList.remove('hidden');
+    info.innerHTML = `<b>Sistem Deteksi Otomatis — Uraian:</b>
+<pre>1. Jelaskan pengertian gotong royong!
+Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama...</pre>
+Format didukung: <code>1.</code> <code>1)</code> <code>(1)</code> <code>Soal 1</code>, dan label <code>Jawaban Ideal:</code> <code>Jawaban:</code> <code>Kunci:</code> <code>Pembahasan:</code> — semua dideteksi otomatis.`;
+  } else if (jenis === 'keduanya') {
+    boxKeduanya.classList.remove('hidden'); info.classList.remove('hidden');
+    info.innerHTML = `<b>Mode Keduanya (1 Kotak):</b> Paste soal <b>Pilihan Ganda</b> dan <b>Uraian</b> dalam satu kotak. Sistem otomatis mendeteksi jenis tiap soal.`;
+  }
+}
+
+function prosesTempelSoal() {
+  const jenis = document.getElementById('tempelJenis').value;
+  const status = document.getElementById('tempelStatus');
+  status.innerHTML = '';
+  if (!jenis) { status.innerHTML = '<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><span>Pilih jenis soal dulu.</span></div>'; return; }
+  let teksPilgan = '', teksUraian = '', teksKeduanya = '';
+  if (jenis === 'pilgan') teksPilgan = document.getElementById('tempelInputPilgan').value;
+  else if (jenis === 'uraian') teksUraian = document.getElementById('tempelInputUraian').value;
+  else if (jenis === 'keduanya') teksKeduanya = document.getElementById('tempelInputKeduanya').value;
+
+  if (jenis === 'pilgan' && (!teksPilgan || !teksPilgan.trim())) { status.innerHTML = '<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><span>Kotak teks soal Pilihan Ganda masih kosong.</span></div>'; return; }
+  if (jenis === 'uraian' && (!teksUraian || !teksUraian.trim())) { status.innerHTML = '<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><span>Kotak teks soal Uraian masih kosong.</span></div>'; return; }
+  if (jenis === 'keduanya' && (!teksKeduanya || !teksKeduanya.trim())) { status.innerHTML = '<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><span>Kotak teks soal gabungan masih kosong.</span></div>'; return; }
+
+  try {
+    let semuaSoal = [];
+    if (jenis === 'pilgan') semuaSoal = parseTeksSoal(teksPilgan.trim(), 'pilgan').soal;
+    else if (jenis === 'uraian') semuaSoal = parseTeksSoal(teksUraian.trim(), 'uraian').soal;
+    else if (jenis === 'keduanya') semuaSoal = parseTeksSoal(teksKeduanya.trim(), 'keduanya').soal;
+
+    if (!semuaSoal || semuaSoal.length === 0) {
+      status.innerHTML = '<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><div><b>Tidak menemukan soal.</b><br>Pastikan format nomor soal seperti "1." atau "1)" di awal baris.</div></div>';
+      return;
+    }
+
+    const jmlPilgan = semuaSoal.filter(s => s.jenis === 'pilgan').length;
+    const jmlUraian = semuaSoal.filter(s => s.jenis === 'uraian').length;
+
+    const totalBobot = semuaSoal.reduce((sum, s) => sum + (s.bobot || 0), 0);
+    if (totalBobot === 0 || Math.abs(totalBobot - 100) > 0.01) {
+      const bobotPerSoal = Math.round(100 / semuaSoal.length);
+      let sisa = 100 - (bobotPerSoal * semuaSoal.length);
+      semuaSoal.forEach((s, i) => { s.bobot = bobotPerSoal + (i === 0 ? sisa : 0); });
+    }
+
+    editingTugasId = null;
+    document.getElementById('tugasTempelView').classList.add('hidden');
+    document.getElementById('tugasEditorView').classList.remove('hidden');
+    document.getElementById('editorTitle').innerHTML = `<svg class="ico"><use href="#i-clipboard"/></svg> Input Soal (dari Tempel)`;
+    ['exMapel','exJudul','exKelas','exApiKey','exRubrik','exWaktuMulai','exWaktuSelesai'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('exDurasi').value = 0;
+    document.getElementById('exKkm').value = 75;
+    document.getElementById('exJenisTugas').value = jenis;
+    document.getElementById('exKetentuan').value = KETENTUAN_PRESET[jenis] || '';
+    document.getElementById('exAktifkanFoto').checked = true;
+    document.getElementById('exLockdownMode').checked = false;
+    editorSoal = semuaSoal;
+    renderEditorSoal();
+
+    if (jenis === 'pilgan') { switchRubrikTab('pilgan'); document.getElementById('exRubrik').value = RUBRIK_PRESET.pilgan; }
+    else if (jenis === 'uraian') switchRubrikTab('uraian');
+    else switchRubrikTab('gabungan');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    alert(`Berhasil memproses!\n\n- ${jmlPilgan} soal Pilihan Ganda\n- ${jmlUraian} soal Uraian\n\nSilakan periksa & lengkapi (mapel, judul, kelas, API key, kunci jawaban).`);
+  } catch (e) {
+    status.innerHTML = `<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><div><b>Gagal memproses:</b><br>${escapeHtml(e.message)}</div></div>`;
+  }
+}
+
+function parseTeksSoal(teks, jenisMode) {
+  let t = String(teks).replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  const lines = t.split('\n');
+  const soalBlocks = [];
+  let current = null;
+  const startSoalRegex = /^\s*(?:\(\s*\d+\s*\)|(?:Soal|soal|SOAL)\s+\d+\s*[.:)]?|\d+\s*[.)]\s*)/;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (startSoalRegex.test(line) && line.trim().length > 2) {
+      if (current) soalBlocks.push(current);
+      const isiBersih = line.replace(startSoalRegex, '').trim();
+      current = { isiLines: [isiBersih] };
+    } else { if (current) current.isiLines.push(line); }
+  }
+  if (current) soalBlocks.push(current);
+  if (soalBlocks.length === 0) soalBlocks.push({ isiLines: t.split('\n') });
+
+  const hasil = [];
+  for (const block of soalBlocks) {
+    const blockText = block.isiLines.join('\n').trim();
+    if (!blockText) continue;
+    if (jenisMode === 'pilgan') {
+      const p = cobaParsePilgan(blockText);
+      if (p) hasil.push(p);
+      else {
+        const u = cobaParseUraian(blockText);
+        if (u) { u.jenis = 'pilgan'; u.opsi = ['Opsi A', 'Opsi B', 'Opsi C', 'Opsi D']; u.kunci = 'A'; hasil.push(u); }
+      }
+    } else if (jenisMode === 'uraian') {
+      const u = cobaParseUraian(blockText);
+      if (u) { u.jenis = 'uraian'; delete u.opsi; hasil.push(u); }
+    } else {
+      const pilgan = cobaParsePilgan(blockText);
+      if (pilgan) hasil.push(pilgan);
+      else { const uraian = cobaParseUraian(blockText); if (uraian) hasil.push(uraian); }
+    }
+  }
+  if (hasil.length > 0) {
+    const totalBobot = hasil.reduce((sum, s) => sum + (s.bobot || 0), 0);
+    if (totalBobot === 0 || Math.abs(totalBobot - 100) > 0.01) {
+      const bobotPerSoal = Math.round(100 / hasil.length);
+      let sisa = 100 - (bobotPerSoal * hasil.length);
+      hasil.forEach((s, i) => { s.bobot = bobotPerSoal + (i === 0 ? sisa : 0); });
+    }
+  }
+  return { soal: hasil };
+}
+
+function cobaParsePilgan(blockText) {
+  const lines = blockText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length < 3) return null;
+  const opsiRegex = /^\s*[\(\[]?\s*([A-Ea-e])\s*[.):\-]\s*(.+)$/;
+  const opsiMap = {}; const opsiIndex = [];
+  let pertanyaanLines = []; let kunciIdx = null;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const kunciMatch = line.match(/^\s*(?:Kunci\s+Jawaban|Jawaban|Kunci|Answer|JAWABAN|KUNCI|Pembahasan)\s*[:.=]?\s*([A-Ea-e])\b/i);
+    if (kunciMatch) { kunciIdx = kunciMatch[1].toUpperCase(); continue; }
+    const kunciMatch2 = line.match(/\b(?:Kunci\s+Jawaban|Jawaban|Kunci|Answer|Pembahasan)\s*[:.=]\s*([A-Ea-e])\b/i);
+    if (kunciMatch2) { kunciIdx = kunciMatch2[1].toUpperCase(); continue; }
+    const opsiMatch = line.match(opsiRegex);
+    if (opsiMatch) {
+      const huruf = opsiMatch[1].toUpperCase(); const isi = opsiMatch[2].trim();
+      if (!opsiMap[huruf]) { opsiMap[huruf] = isi; opsiIndex.push(huruf); }
+    } else { if (opsiIndex.length === 0) pertanyaanLines.push(line); }
+  }
+  if (opsiIndex.length < 2) return null;
+  const opsi = [];
+  ['A','B','C','D','E'].forEach(h => { if (opsiMap[h]) opsi.push(opsiMap[h]); });
+  const pertanyaan = pertanyaanLines.join(' ').trim();
+  if (!pertanyaan || pertanyaan.length < 3) return null;
+  let kunci = kunciIdx || 'A';
+  const idxKunci = ['A','B','C','D','E'].indexOf(kunci);
+  if (idxKunci >= opsi.length) kunci = 'A';
+  return { jenis: 'pilgan', pertanyaan, opsi, kunci, bobot: 100 };
+}
+
+function cobaParseUraian(blockText) {
+  const lines = blockText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length === 0) return null;
+  const labelRegex = /(?:Jawaban\s+Ideal|Kunci\s+Jawaban|Jawaban|Kunci|Answer|Pembahasan)\s*[:.\-=]/i;
+  let kunciIdx = -1, inlinePos = -1, inlineLen = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(labelRegex);
+    if (m) { kunciIdx = i; inlinePos = m.index; inlineLen = m[0].length; break; }
+  }
+  let pertanyaan = '', kunci = '';
+  if (kunciIdx >= 0) {
+    const beforeLabel = lines[kunciIdx].slice(0, inlinePos).trim();
+    const afterLabel = lines[kunciIdx].slice(inlinePos + inlineLen).trim();
+    const pertanyaanLines = lines.slice(0, kunciIdx);
+    if (beforeLabel) pertanyaanLines.push(beforeLabel);
+    pertanyaan = pertanyaanLines.join(' ').trim();
+    const kunciLines = [];
+    if (afterLabel) kunciLines.push(afterLabel);
+    kunciLines.push(...lines.slice(kunciIdx + 1));
+    kunci = kunciLines.join('\n').trim();
+  } else { pertanyaan = lines.join(' ').trim(); }
+  if (!pertanyaan || pertanyaan.length < 3) return null;
+  if (!kunci && pertanyaan.length > 800) return null;
+  return { jenis: 'uraian', pertanyaan, kunci, bobot: 100 };
+}
+
+function switchRubrikTab(tab) {
+  rubrikTabAktif = tab;
+  document.getElementById('rubrikTabPilgan').classList.toggle('active', tab === 'pilgan');
+  document.getElementById('rubrikTabUraian').classList.toggle('active', tab === 'uraian');
+  document.getElementById('rubrikTabGabungan').classList.toggle('active', tab === 'gabungan');
+  document.getElementById('rubrikContentPilgan').classList.toggle('hidden', tab !== 'pilgan');
+  document.getElementById('rubrikContentUraian').classList.toggle('hidden', tab !== 'uraian');
+  document.getElementById('rubrikContentGabungan').classList.toggle('hidden', tab !== 'gabungan');
+}
+
+function pakaiRubrik(jenis) {
+  const rub = RUBRIK_PRESET[jenis]; if (!rub) return;
+  document.getElementById('exRubrik').value = rub;
+}
+
+function ubahJenisTugas() {
+  const jenis = document.getElementById('exJenisTugas').value;
+  if (jenis && KETENTUAN_PRESET[jenis]) document.getElementById('exKetentuan').value = KETENTUAN_PRESET[jenis];
+}
+
+function isiTemplateKetentuan() {
+  const jenis = document.getElementById('exJenisTugas').value;
+  if (jenis && KETENTUAN_PRESET[jenis]) document.getElementById('exKetentuan').value = KETENTUAN_PRESET[jenis];
+  else document.getElementById('exKetentuan').value = KETENTUAN_PRESET.keduanya;
+}
+
+function bukaEditorTugas(id) {
+  editingTugasId = id;
+  const e = id ? state.tugas.find(x => x.id === id) : null;
+  document.getElementById('tugasListView').classList.add('hidden');
+  document.getElementById('tugasChoiceView').classList.add('hidden');
+  document.getElementById('tugasTempelView').classList.add('hidden');
+  document.getElementById('tugasEditorView').classList.remove('hidden');
+  document.getElementById('editorTitle').innerHTML = `<svg class="ico"><use href="#i-edit"/></svg> ${e ? 'Edit Soal' : 'Input Soal'}`;
+  document.getElementById('exMapel').value = e?.mapel || '';
+  document.getElementById('exJudul').value = e?.judul || '';
+  document.getElementById('exKelas').value = e?.kelas || '';
+  document.getElementById('exDurasi').value = e?.durasi || 0;
+  document.getElementById('exKkm').value = e?.kkm || 75;
+  document.getElementById('exApiKey').value = e?.apiKey || '';
+  document.getElementById('exJenisTugas').value = e?.jenisTugas || '';
+  document.getElementById('exKetentuan').value = e?.ketentuan || '';
+  document.getElementById('exRubrik').value = e?.rubrik || '';
+  document.getElementById('exWaktuMulai').value = e?.waktuMulai || '';
+  document.getElementById('exWaktuSelesai').value = e?.waktuSelesai || '';
+  document.getElementById('exAktifkanFoto').checked = e?.aktifkanFoto !== false;
+  document.getElementById('exLockdownMode').checked = e?.lockdownMode === true;
+  editorSoal = e ? JSON.parse(JSON.stringify(e.soal)) : [{ jenis: 'uraian', pertanyaan: '', kunci: '', bobot: 100 }];
+  editorSoal.forEach(s => {
+    if (!s.jenis) s.jenis = (s.opsi && s.opsi.length > 0) ? 'pilgan' : 'uraian';
+    if (s.jenis === 'esai' || s.jenis === 'isianGanda') s.jenis = 'uraian';
+  });
+  renderEditorSoal();
+  if (e?.jenisTugas === 'pilgan') switchRubrikTab('pilgan');
+  else if (e?.jenisTugas === 'uraian') switchRubrikTab('uraian');
+  else if (e?.jenisTugas === 'keduanya') switchRubrikTab('gabungan');
+  else switchRubrikTab('pilgan');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function tutupEditorTugas() {
+  editingTugasId = null;
+  document.getElementById('tugasEditorView').classList.add('hidden');
+  document.getElementById('tugasListView').classList.remove('hidden');
+  renderTugasList();
+}
+
+function renderEditorSoal() {
+  const c = document.getElementById('soalEditorContainer');
+  c.innerHTML = '';
+  const huruf = ['A', 'B', 'C', 'D', 'E'];
+  editorSoal.forEach((s, i) => {
+    const jenis = s.jenis || 'uraian';
+    const badge = jenis === 'pilgan' ? '<span class="badge purple">Pilihan Ganda</span>' : '<span class="badge">Uraian</span>';
+    let konten = '';
+    if (jenis === 'pilgan') {
+      const opsi = s.opsi || ['', '', '', ''];
+      while (opsi.length < 4) opsi.push('');
+      konten = `
+        <label>Pertanyaan</label>
+        <textarea onchange="updateEditorSoal(${i},'pertanyaan',this.value)" placeholder="Tulis pertanyaan pilihan ganda...">${escapeHtml(s.pertanyaan)}</textarea>
+        <label>Opsi Jawaban</label>
+        <div class="opts-grid">
+          ${opsi.map((o, j) => `
+            <div class="opt-row">
+              <span class="opt-label">${huruf[j]}.</span>
+              <input type="text" value="${escapeAttr(o)}" placeholder="Opsi ${huruf[j]}" onchange="updateOpsi(${i}, ${j}, this.value)">
+              ${opsi.length > 2 ? `<button class="danger sm" onclick="hapusOpsi(${i}, ${j})" type="button"><svg class="ico"><use href="#i-trash"/></svg></button>` : ''}
+            </div>
+          `).join('')}
+        </div>
+        <button class="secondary sm" onclick="tambahOpsi(${i})" type="button"><svg class="ico"><use href="#i-plus"/></svg> Tambah Opsi</button>
+        <label style="margin-top:12px;">Kunci Jawaban (pilih satu)</label>
+        <div class="kunci-pilih">
+          ${opsi.map((_, j) => `
+            <label class="${s.kunci === huruf[j] ? 'selected' : ''}" onclick="setKunciPilgan(${i}, '${huruf[j]}')">
+              <input type="radio" name="kunci-${i}" value="${huruf[j]}" ${s.kunci === huruf[j] ? 'checked' : ''}> ${huruf[j]}
+            </label>
+          `).join('')}
+        </div>
+        <label style="margin-top:12px;">Bobot Nilai</label>
+        <input type="number" value="${s.bobot || 100}" min="1" max="100" onchange="updateEditorSoal(${i},'bobot',parseInt(this.value))">
+      `;
+    } else {
+      konten = `
+        <label>Pertanyaan</label>
+        <textarea onchange="updateEditorSoal(${i},'pertanyaan',this.value)" placeholder="Tulis pertanyaan uraian...">${escapeHtml(s.pertanyaan)}</textarea>
+        <label>Kunci Jawaban / Poin Penting (dibaca AI)</label>
+        <textarea onchange="updateEditorSoal(${i},'kunci',this.value)" placeholder="Poin-poin jawaban ideal...">${escapeHtml(s.kunci)}</textarea>
+        <label>Bobot Nilai</label>
+        <input type="number" value="${s.bobot || 100}" min="1" max="100" onchange="updateEditorSoal(${i},'bobot',parseInt(this.value))">
+      `;
+    }
+    c.innerHTML += `
+      <div class="question-box" style="${jenis === 'pilgan' ? 'border-left-color:#6a1b9a;' : ''}">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div>Soal #${i+1} ${badge}</div>
+          <button class="danger sm" onclick="hapusSoalEditor(${i})" type="button"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button>
+        </div>
+        ${konten}
+      </div>`;
+  });
+}
+
+function tambahSoalPilgan() { editorSoal.push({ jenis: 'pilgan', pertanyaan: '', opsi: ['', '', '', ''], kunci: 'A', bobot: 100 }); renderEditorSoal(); }
+function tambahSoalUraian() { editorSoal.push({ jenis: 'uraian', pertanyaan: '', kunci: '', bobot: 100 }); renderEditorSoal(); }
+function hapusSoalEditor(i) { if (editorSoal.length <= 1) return alert('Minimal 1 soal.'); if (!confirm('Hapus soal ini?')) return; editorSoal.splice(i, 1); renderEditorSoal(); }
+function updateEditorSoal(i, field, val) { editorSoal[i][field] = val; }
+function tambahOpsi(i) { if (!editorSoal[i].opsi) editorSoal[i].opsi = ['', '', '', '']; if (editorSoal[i].opsi.length >= 5) return alert('Maksimal 5 opsi (A-E).'); editorSoal[i].opsi.push(''); renderEditorSoal(); }
+function hapusOpsi(i, j) { if (!editorSoal[i].opsi) return; if (editorSoal[i].opsi.length <= 2) return alert('Minimal 2 opsi.'); editorSoal[i].opsi.splice(j, 1); renderEditorSoal(); }
+function updateOpsi(i, j, val) { if (!editorSoal[i].opsi) editorSoal[i].opsi = []; editorSoal[i].opsi[j] = val; }
+function setKunciPilgan(i, huruf) { editorSoal[i].kunci = huruf; renderEditorSoal(); }
+
+async function simpanTugas() {
+  const mapel = document.getElementById('exMapel').value;
+  const judul = document.getElementById('exJudul').value.trim();
+  const kelas = document.getElementById('exKelas').value;
+  const durasi = parseInt(document.getElementById('exDurasi').value) || 0;
+  const kkm = parseInt(document.getElementById('exKkm').value) || 75;
+  const apiKey = document.getElementById('exApiKey').value.trim();
+  const jenisTugas = document.getElementById('exJenisTugas').value;
+  const ketentuan = document.getElementById('exKetentuan').value.trim();
+  const rubrik = document.getElementById('exRubrik').value.trim();
+  const waktuMulai = document.getElementById('exWaktuMulai').value || '';
+  const waktuSelesai = document.getElementById('exWaktuSelesai').value || '';
+  const aktifkanFoto = document.getElementById('exAktifkanFoto').checked;
+  const lockdownMode = document.getElementById('exLockdownMode').checked;
+
+  if (!mapel) return alert('Pilih mata pelajaran.');
+  if (!judul) return alert('Isi judul tugas.');
+  if (!kelas) return alert('Pilih kelas sasaran.');
+  if (!apiKey) return alert('Isi API Key untuk tugas ini.');
+  if (!jenisTugas) return alert('Pilih jenis tugas.');
+  if (!rubrik) return alert('Pilih atau tulis rubrik penilaian.');
+  if (waktuMulai && waktuSelesai && new Date(waktuMulai) >= new Date(waktuSelesai)) return alert('Waktu mulai harus lebih awal dari waktu selesai.');
+
+  const adaPilgan = editorSoal.some(s => s.jenis === 'pilgan');
+  const adaUraian = editorSoal.some(s => s.jenis !== 'pilgan');
+  if (jenisTugas === 'pilgan' && !adaPilgan) return alert('Jenis tugas "Pilihan Ganda" tetapi tidak ada soal pilihan ganda.');
+  if (jenisTugas === 'uraian' && !adaUraian) return alert('Jenis tugas "Uraian" tetapi tidak ada soal uraian.');
+  if (jenisTugas === 'keduanya' && (!adaPilgan || !adaUraian)) return alert('Jenis tugas "Keduanya" tetapi tidak ada salah satu jenis soal.');
+
+  for (let i = 0; i < editorSoal.length; i++) {
+    const s = editorSoal[i];
+    if (!s.pertanyaan || !s.pertanyaan.trim()) return alert(`Soal #${i+1} belum diisi pertanyaannya.`);
+    if (s.jenis === 'pilgan') {
+      const opsi = (s.opsi || []).filter(o => o && o.trim());
+      if (opsi.length < 2) return alert(`Soal #${i+1} (pilihan ganda) minimal punya 2 opsi.`);
+      if (!s.kunci) return alert(`Soal #${i+1} (pilihan ganda) belum ditentukan kuncinya.`);
+      const idxKunci = ['A','B','C','D','E'].indexOf(s.kunci);
+      if (idxKunci >= opsi.length) return alert(`Soal #${i+1} kunci jawaban (${s.kunci}) tidak ada di opsi.`);
+    } else {
+      if (!s.kunci || !s.kunci.trim()) {
+        if (!confirm(`Soal #${i+1} tidak memiliki kunci jawaban. Tetap simpan?`)) return;
+      }
+    }
+  }
+
+  if (editingTugasId) {
+    const e = state.tugas.find(x => x.id === editingTugasId);
+    Object.assign(e, { mapel, judul, kelas, durasi, kkm, apiKey, jenisTugas, ketentuan, rubrik, soal: editorSoal, waktuMulai, waktuSelesai, aktifkanFoto, lockdownMode });
+    simpanLocal();
+    await cloudSaveTugas(e);
+    alert('Tugas diperbarui!');
+  } else {
+    const newTugas = {
+      id: 'tg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      kode: generateKodeUnik(),
+      mapel, judul, kelas, durasi, kkm, apiKey, jenisTugas, ketentuan, rubrik,
+      soal: editorSoal, aktif: true, waktuMulai, waktuSelesai, aktifkanFoto, lockdownMode,
+      guruNama: currentUser.nama, guruEmail: currentUser.email,
+      createdAt: new Date().toISOString()
+    };
+    state.tugas.push(newTugas);
+    simpanLocal();
+    await cloudSaveTugas(newTugas);
+    alert(`Tugas berhasil dibuat!\n\nKODE TUGAS: ${newTugas.kode}\n${lockdownMode ? '\n🔒 Lockdown Mode AKTIF\n' : ''}\nBagikan kode ini ke siswa Anda.`);
+  }
+  tutupEditorTugas();
+}
+
+function muatFilterTugas() {
+  const sel = document.getElementById('filterTugas'); if (!sel) return;
+  const current = sel.value;
+  const tugasSaya = state.tugas.filter(e => e.guruEmail === currentUser.email);
+  sel.innerHTML = '<option value="">-- Semua Tugas Saya --</option>' + tugasSaya.map(e => `<option value="${e.id}">${escapeHtml(e.judul)} [${e.kode}] - ${escapeHtml(e.kelas || '-')}</option>`).join('');
+  sel.value = current;
+}
+
+function muatHasil() {
+  const filterId = document.getElementById('filterTugas').value;
+  let list = state.hasil.filter(h => h.guruEmail === currentUser.email);
+  if (filterId) list = list.filter(h => h.tugasId === filterId);
+  const c = document.getElementById('hasilContainer');
+  if (list.length === 0) { c.innerHTML = '<div class="info"><svg class="ico"><use href="#i-info"/></svg><span>Belum ada siswa yang mengumpulkan jawaban.</span></div>'; return; }
+  c.innerHTML = list.slice().reverse().map(h => {
+    const kkm = (state.tugas.find(e => e.id === h.tugasId)?.kkm) || 75;
+    const lulus = h.skorTotal >= kkm; const warna = lulus ? '#38a169' : '#e53e3e';
+    const tgl = new Date(h.waktu).toLocaleString('id-ID');
+    const trig = h.trigger === 'lockdown' ? ' <span class="badge red" style="font-size:0.65rem;">AUTO (Lockdown)</span>' : (h.trigger === 'waktu' ? ' <span class="badge orange" style="font-size:0.65rem;">AUTO (Waktu)</span>' : '');
+    return `<div class="result-item" style="border-left-color:${warna};"><div class="name">${escapeHtml(h.nama)} <small style="color:#718096;">(${escapeHtml(h.kelas || '-')})</small><span class="score" style="color:${warna};">${h.skorTotal}/100</span></div><div style="font-size:0.8rem; color:#718096; margin-top:4px;">${escapeHtml(h.tugasJudul || '-')} - ${h.tugasKode} - ${tgl}${trig}${h.alasanSubmit ? ' <i>('+escapeHtml(h.alasanSubmit)+')</i>' : ''}</div><details style="margin-top:8px;"><summary style="cursor:pointer; color:#0d47a1; font-size:0.85rem;">Lihat detail</summary><div style="margin-top:8px;">${(h.skorPerSoal || []).map(s => `<div style="font-size:0.82rem; margin-bottom:6px;"><b>Soal ${s.nomor}:</b> ${s.skor}/${s.maks} - ${escapeHtml(s.feedback)}</div>`).join('')}<div style="font-size:0.85rem; margin-top:8px; padding-top:8px; border-top:1px solid #e2e8f0;"><b>Kesimpulan:</b> ${escapeHtml(h.kesimpulan)}</div></div></details></div>`;
+  }).join('');
+}
+
+function exportCSV() {
+  const filterId = document.getElementById('filterTugas').value;
+  let list = state.hasil.filter(h => h.guruEmail === currentUser.email);
+  if (filterId) list = list.filter(h => h.tugasId === filterId);
+  if (list.length === 0) return alert('Belum ada data.');
+  let csv = 'Nama,Kelas,Tugas,Kode Tugas,Waktu,Skor Total,Status,Metode Submit\n';
+  list.forEach(h => {
+    const kkm = state.tugas.find(e => e.id === h.tugasId)?.kkm || 75;
+    const lulus = h.skorTotal >= kkm ? 'LULUS' : 'BELUM LULUS';
+    const trig = h.trigger === 'lockdown' ? 'AUTO (Lockdown)' : (h.trigger === 'waktu' ? 'AUTO (Waktu)' : 'Manual');
+    csv += `"${h.nama}","${h.kelas || '-'}","${h.tugasJudul || '-'}","${h.tugasKode}","${new Date(h.waktu).toLocaleString('id-ID')}",${h.skorTotal},${lulus},${trig}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `nilai_${Date.now()}.csv`; a.click(); URL.revokeObjectURL(url);
+}
+
+async function hapusSemuaHasil() {
+  if (!confirm('Hapus SEMUA hasil penilaian Anda?')) return;
+  state.hasil = state.hasil.filter(h => h.guruEmail !== currentUser.email);
+  simpanLocal(); muatHasil();
+  await cloudRemoveHasilGuru(currentUser.email);
+}
+
+async function gantiPassword() {
+  const oldPass = document.getElementById('oldPass').value;
+  const p1 = document.getElementById('newPass').value;
+  const p2 = document.getElementById('newPass2').value;
+  const guru = state.guruList.find(g => g.email.toLowerCase() === currentUser.email.toLowerCase());
+  const expectedOld = state.customPasswords[encEmail(currentUser.email)] || guru.password;
+  if (oldPass !== expectedOld) return alert('Password lama salah!');
+  if (p1.length < 6) return alert('Password baru minimal 6 karakter.');
+  if (p1 !== p2) return alert('Password baru tidak sama!');
+  state.customPasswords[encEmail(currentUser.email)] = p1;
+  simpanLocal();
+  await cloudSavePassword(currentUser.email, p1);
+  document.getElementById('oldPass').value = ''; document.getElementById('newPass').value = ''; document.getElementById('newPass2').value = '';
+  alert('Password berhasil diganti!');
+}
+
+function konfirmasiKeluarTugas() {
+  if (lockdownState.active) {
+    alert('Mode ujian terkunci aktif. Anda harus menyelesaikan tugas terlebih dahulu.');
+    return;
+  }
+  if (!confirm('Yakin keluar? Jawaban yang belum dikumpulkan akan hilang.')) return;
+  hentikanTimerUjian();
+  nonaktifkanLockdown();
+  currentTugas = null;
+  currentUser = { role: null, nama: '', kelas: '', email: '' };
+  jawabanSementara = {};
+  document.getElementById('tugasPage').classList.add('hidden');
+  document.getElementById('previewPage').classList.add('hidden');
+  document.getElementById('guruPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+  const hasilSiswa = document.getElementById('hasilSiswa'); if (hasilSiswa) hasilSiswa.innerHTML = '';
+  const kInput = document.getElementById('kodeInput'); if (kInput) kInput.value = '';
+  const sNama = document.getElementById('siswaNama'); const sKelas = document.getElementById('siswaKelas');
+  if (sNama) sNama.value = ''; if (sKelas) sKelas.value = '';
+  showLogin(null);
+}
+
+(async function boot() {
+  showLogin(null);
+  switchPromptTab('pilgan');
+  const ok = initFirebase();
+  if (ok) {
+    await initialCloudLoad();
+    setupFirebaseListeners();
+    setCloudStatus('online', '☁️ Cloud tersinkron');
+  } else {
+    console.warn('MUARA berjalan dalam mode LOCAL (tanpa Firebase).');
+  }
+  console.log('MUARA v12 (paste-lock ultra + lockdown-max) siap. Mode:', firebaseReady ? 'CLOUD' : 'LOCAL', '| Total guru:', state.guruList.length);
+})();
+</script>
+</body>
+</html>
