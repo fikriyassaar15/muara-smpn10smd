@@ -122,8 +122,6 @@
   .photo-preview { max-width: 100%; max-height: 260px; border-radius: 8px; margin-top: 10px; border: 2px solid #e2e8f0; }
   .photo-note { background: #fffaf0; border-left: 4px solid #dd6b20; padding: 10px 12px; border-radius: 6px; margin-top: 10px; font-size: 0.78rem; color: #7b341e; line-height: 1.5; display: flex; gap: 8px; align-items: flex-start; }
   .photo-note .ico { margin-top: 2px; flex-shrink: 0; }
-  .anti-paste-note { background: #fff5f5; border-left: 3px solid #e53e3e; padding: 8px 10px; border-radius: 6px; margin-top: 6px; font-size: 0.75rem; color: #742a2a; line-height: 1.5; display: flex; gap: 6px; align-items: flex-start; }
-  .anti-paste-note .ico { margin-top: 2px; flex-shrink: 0; }
   .file-input-hidden { display: none; }
   .admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
   .admin-table th { background: #e3f2fd; color: #0d47a1; padding: 10px; text-align: left; border-bottom: 2px solid #0d47a1; font-size: 0.82rem; }
@@ -230,9 +228,9 @@
   <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></symbol>
   <symbol id="i-file-pdf" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6"/><path d="M9 14h1.5a1.5 1.5 0 0 1 0 3H9v-3ZM9 17v3M14 14v6M14 14h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2"/></symbol>
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
-  <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
 </svg>
 
+<!-- CLOUD STATUS INDICATOR -->
 <div id="cloudStatus" class="cloud-status loading"><span class="dot"></span><span id="cloudStatusText">Menghubungkan...</span></div>
 
 <!-- ==================== LOGIN ==================== -->
@@ -606,6 +604,14 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
               <div class="sub">Jika dimatikan, siswa hanya bisa mengetik jawaban uraian (tidak bisa upload foto).</div>
             </div>
           </label>
+
+          <label class="toggle-line" style="margin-top:10px;">
+            <input type="checkbox" id="exLockdownMode">
+            <div>
+              <div class="txt"><svg class="ico" style="vertical-align:-0.15em;"><use href="#i-lock"/></svg> Aktifkan Lockdown Mode</div>
+              <div class="sub">Siswa tidak dapat menempel (paste) atau menyalin jawaban dari sumber luar. Jawaban hanya dapat diketik manual.</div>
+            </div>
+          </label>
         </div>
 
         <div class="card">
@@ -845,7 +851,7 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
 
 <script>
 // ============================================================
-// FIREBASE CONFIG
+// FIREBASE CONFIG — SUDAH DIISI UNTUK SMPN 10 SAMARINDA
 // ============================================================
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDfGGkiVl1JPdY1BHWQ31NdmrsjL10ZdWw",
@@ -1070,54 +1076,6 @@ async function initialCloudLoad() {
   }
 }
 
-// ============================================================
-// ANTI-PASTE UNTUK JAWABAN URAIAN
-// ============================================================
-function blokirPaste(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  alert('⚠️ Fitur TEMPEL (paste) dinonaktifkan pada kolom jawaban.\n\nJawaban harus DIKETIK SENDIRI untuk mencegah plagiarisme/menyalin.');
-  return false;
-}
-function blokirCopyCut(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  return false;
-}
-function blokirDrop(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  return false;
-}
-function blokirShortcut(e) {
-  const k = e.key ? e.key.toLowerCase() : '';
-  const ctrl = e.ctrlKey || e.metaKey;
-  // Ctrl+V / Cmd+V
-  if (ctrl && k === 'v') { e.preventDefault(); alert('⚠️ Ctrl+V dinonaktifkan. Jawaban harus diketik sendiri.'); return false; }
-  // Ctrl+Shift+V
-  if (ctrl && e.shiftKey && k === 'v') { e.preventDefault(); return false; }
-  // Ctrl+Insert
-  if (ctrl && k === 'insert') { e.preventDefault(); return false; }
-  // Shift+Insert
-  if (e.shiftKey && k === 'insert') { e.preventDefault(); return false; }
-  // Ctrl+C / Ctrl+X
-  if (ctrl && (k === 'c' || k === 'x')) { e.preventDefault(); return false; }
-  return true;
-}
-function pasangAntiPaste() {
-  document.querySelectorAll('textarea.no-paste').forEach(ta => {
-    if (ta.dataset.antiPaste === '1') return;
-    ta.dataset.antiPaste = '1';
-    ta.addEventListener('paste', blokirPaste);
-    ta.addEventListener('copy', blokirCopyCut);
-    ta.addEventListener('cut', blokirCopyCut);
-    ta.addEventListener('drop', blokirDrop);
-    ta.addEventListener('dragover', blokirDrop);
-    ta.addEventListener('contextmenu', blokirCopyCut);
-    ta.addEventListener('keydown', blokirShortcut);
-  });
-}
-
 const PROMPT_AI = {
   pilgan: `Saya adalah guru. Ubah draf soal PILIHAN GANDA berikut agar otomatis sesuai dengan format sistem ujian online:
 
@@ -1295,6 +1253,56 @@ function formatWaktu(iso) {
   if (!iso) return '';
   try { return new Date(iso).toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
   catch (e) { return iso; }
+}
+
+// ============================================================
+// LOCKDOWN MODE — Blokir paste/cut/drag-drop, tanpa notifikasi
+// ============================================================
+function blockLockdownKeys(e) {
+  const k = (e.key || '').toLowerCase();
+  // Blokir Ctrl+V / Cmd+V (paste), Ctrl+X / Cmd+X (cut), Ctrl+Insert / Cmd+Insert (copy di Linux/Win)
+  if ((e.ctrlKey || e.metaKey) && (k === 'v' || k === 'x' || k === 'insert')) {
+    e.preventDefault(); return false;
+  }
+  // Blokir Shift+Insert (paste alternatif)
+  if (e.shiftKey && k === 'insert') {
+    e.preventDefault(); return false;
+  }
+  return true;
+}
+
+function setupLockdownContainer() {
+  const container = document.getElementById('jawabanContainer');
+  if (!container || container._lockdownApplied) return;
+  container._lockdownApplied = true;
+
+  const blockFn = (e) => {
+    // Cek apakah lockdown aktif untuk tugas yang sedang dikerjakan
+    if (currentTugas && currentTugas.lockdownMode === true) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  };
+  // Blokir paste, cut, drop, drag — semua event di-capture (useCapture: true)
+  ['paste', 'cut', 'drop', 'dragover'].forEach(evt => {
+    container.addEventListener(evt, blockFn, true);
+  });
+
+  // Blokir keyboard shortcut paste/cut
+  container.addEventListener('keydown', (e) => {
+    if (!currentTugas || currentTugas.lockdownMode !== true) return;
+    blockLockdownKeys(e);
+  }, true);
+
+  // Blokir input event yang tidak wajar (fallback untuk browser tertentu)
+  container.addEventListener('beforeinput', (e) => {
+    if (!currentTugas || currentTugas.lockdownMode !== true) return;
+    if (e.inputType === 'insertFromPaste' || e.inputType === 'insertFromDrop' || e.inputType === 'insertFromYank') {
+      e.preventDefault();
+      return false;
+    }
+  }, true);
 }
 
 function generateKodeUnik() {
@@ -1680,6 +1688,8 @@ function renderSoalSiswa() {
   const c = document.getElementById('jawabanContainer');
   c.innerHTML = '';
   const allowFoto = currentTugas.aktifkanFoto !== false;
+  const lockdown = currentTugas.lockdownMode === true;
+
   currentTugas.soal.forEach((s, i) => {
     const jawab = jawabanSementara[i] || { mode: 'teks', teks: '', fotoData: '', mimeType: '', pilgan: '' };
     if (!allowFoto && jawab.mode === 'foto') jawab.mode = 'teks';
@@ -1726,24 +1736,22 @@ function renderSoalSiswa() {
             <div id="preview-${i}">${jawab.fotoData ? `<img src="${jawab.fotoData}" class="photo-preview" alt="Preview">` : ''}</div>
           </div>`;
       }
+      // Lockdown attributes untuk textarea (hanya bila lockdown ON)
+      const lockAttrs = lockdown
+        ? 'onpaste="return false;" oncut="return false;" ondrop="return false;" ondragover="return false;" onkeydown="return blockLockdownKeys(event);"'
+        : '';
       c.innerHTML += `
         <div class="question-box">
           <b>Soal #${i+1}</b> <span class="badge">Uraian</span> <span class="badge">Bobot ${s.bobot}</span>
           <p style="margin:8px 0; white-space:pre-wrap;">${escapeHtml(s.pertanyaan) || '(Soal kosong)'}</p>
           <div class="answer-tabs">${tabsHtml}</div>
           <div id="modeTeks-${i}" class="${showTeks ? '' : 'hidden'}">
-            <textarea id="jw-${i}" class="no-paste" placeholder="Ketik jawaban Anda di sini (tempel/paste dinonaktifkan)..." onchange="simpanTeks(${i}, this.value)" oninput="simpanTeks(${i}, this.value)" onpaste="return blokirPaste(event)" oncopy="return blokirCopyCut(event)" oncut="return blokirCopyCut(event)" ondrop="return blokirDrop(event)" ondragover="return false" oncontextmenu="return blokirCopyCut(event)" autocomplete="off" spellcheck="false">${escapeHtml(jawab.teks)}</textarea>
-            <div class="anti-paste-note">
-              <svg class="ico"><use href="#i-ban"/></svg>
-              <span><b>Mode ketik aktif:</b> Fitur <b>tempel (paste)</b>, <b>salin (copy)</b>, dan <b>drag &amp; drop</b> dinonaktifkan pada kolom ini. Jawaban harus <b>diketik sendiri</b>.</span>
-            </div>
+            <textarea id="jw-${i}" placeholder="Tulis jawaban Anda di sini..." ${lockAttrs} onchange="simpanTeks(${i}, this.value)">${escapeHtml(jawab.teks)}</textarea>
           </div>
           ${fotoHtml}
         </div>`;
     }
   });
-  // Pasang listener tambahan (lapis kedua, jika inline terlewat)
-  pasangAntiPaste();
 }
 
 function pilihJawabanPilgan(i, val) { jawabanSementara[i].pilgan = val; renderSoalSiswa(); }
@@ -1803,16 +1811,6 @@ function buildJawabanSnapshot() {
 }
 
 async function kirimJawaban(paksa) {
-  // Sinkronkan nilai textarea yang mungkin belum ter-save (oninput sudah handle)
-  currentTugas.soal.forEach((s, i) => {
-    if (s.jenis !== 'pilgan') {
-      const el = document.getElementById('jw-' + i);
-      if (el && jawabanSementara[i] && jawabanSementara[i].mode === 'teks') {
-        jawabanSementara[i].teks = el.value;
-      }
-    }
-  });
-
   for (let i = 0; i < currentTugas.soal.length; i++) {
     const j = jawabanSementara[i];
     const soal = currentTugas.soal[i];
@@ -1942,10 +1940,11 @@ Berikut jawaban siswa:
 }
 
 function tampilkanHasilSiswa(hasil) {
-  const lulus = hasil.skorTotal >= (hasil.tugasKkm || currentTugas.kkm || 75);
+  const kkm = hasil.tugasKkm || currentTugas?.kkm || 75;
+  const lulus = hasil.skorTotal >= kkm;
   const warna = lulus ? '#38a169' : '#e53e3e';
   const status = lulus ? 'LULUS' : 'BELUM LULUS';
-  let html = `<div class="card" id="hasilCard"><h2><svg class="ico"><use href="#i-check"/></svg> Hasil Penilaian Anda</h2><div class="score-big" style="color:${warna};">${hasil.skorTotal} / 100</div><p style="text-align:center; color:${warna}; font-weight:700; margin-top:8px;">${status} (KKM: ${hasil.tugasKkm || currentTugas.kkm})</p><h3><svg class="ico"><use href="#i-doc"/></svg> Rincian Per Soal</h3>`;
+  let html = `<div class="card" id="hasilCard"><h2><svg class="ico"><use href="#i-check"/></svg> Hasil Penilaian Anda</h2><div class="score-big" style="color:${warna};">${hasil.skorTotal} / 100</div><p style="text-align:center; color:${warna}; font-weight:700; margin-top:8px;">${status} (KKM: ${kkm})</p><h3><svg class="ico"><use href="#i-doc"/></svg> Rincian Per Soal</h3>`;
   (hasil.skorPerSoal || []).forEach(s => { html += `<div class="result-box"><b>Soal #${s.nomor}</b> — Skor: <b>${s.skor}/${s.maks}</b><div class="feedback">${escapeHtml(s.feedback)}</div></div>`; });
   html += `<h3><svg class="ico"><use href="#i-info"/></svg> Kesimpulan Guru</h3><div class="feedback">${escapeHtml(hasil.kesimpulan)}</div><div class="info green" style="margin-top:16px;"><svg class="ico"><use href="#i-check"/></svg><span>Nilai Anda sudah otomatis terkirim ke guru.</span></div>
     <h3 style="margin-top:20px;"><svg class="ico"><use href="#i-download"/></svg> Unduh Hasil Penilaian</h3>
@@ -1968,6 +1967,7 @@ function buildHasilRenderHTML(hasil) {
     day: '2-digit', month: 'long', year: 'numeric',
     hour: '2-digit', minute: '2-digit'
   });
+
   const huruf = ['A', 'B', 'C', 'D', 'E'];
 
   let html = `
@@ -1978,6 +1978,7 @@ function buildHasilRenderHTML(hasil) {
         <div style="font-size:0.78rem;color:#00695c;font-style:italic;margin-top:2px;">Mesin Ujian &amp; Analisis Respons Alternatif</div>
         <div style="font-size:0.95rem;font-weight:700;margin-top:8px;">LAPORAN HASIL PENILAIAN TUGAS</div>
       </div>
+
       <table style="width:100%;font-size:0.88rem;border-collapse:collapse;margin-bottom:14px;">
         <tr><td style="padding:3px 0;width:140px;"><b>Nama Siswa</b></td><td>: ${escapeHtml(hasil.nama)}</td></tr>
         <tr><td style="padding:3px 0;"><b>Kelas</b></td><td>: ${escapeHtml(hasil.kelas)}</td></tr>
@@ -1987,10 +1988,12 @@ function buildHasilRenderHTML(hasil) {
         <tr><td style="padding:3px 0;"><b>Waktu Kumpul</b></td><td>: ${tgl}</td></tr>
         <tr><td style="padding:3px 0;"><b>KKM</b></td><td>: ${kkm}</td></tr>
       </table>
+
       <div style="text-align:center;padding:16px;border:3px solid ${warna};border-radius:10px;background:${lulus?'#f0fff4':'#fff5f5'};margin-bottom:18px;">
         <div style="font-size:2.4rem;font-weight:800;color:${warna};line-height:1.1;">${hasil.skorTotal} / 100</div>
         <div style="font-size:1rem;font-weight:700;color:${warna};margin-top:4px;">${status}</div>
       </div>
+
       <h3 style="font-size:1rem;color:#0d47a1;border-bottom:2px solid #0d47a1;padding-bottom:4px;margin-bottom:10px;">Rincian Per Soal (Soal, Jawaban, &amp; Penilaian)</h3>`;
 
   const soalList = hasil.soalSnapshot || [];
@@ -2080,6 +2083,7 @@ function buildHasilRenderHTML(hasil) {
       <div style="background:#fffaf0;border-left:4px solid #dd6b20;padding:12px;border-radius:6px;font-size:0.88rem;line-height:1.6;">
         ${escapeHtml(hasil.kesimpulan || '-').replace(/\n/g, '<br>')}
       </div>
+
       <div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #cbd5e0;font-size:0.75rem;color:#718096;">
         Dokumen ini dihasilkan otomatis oleh sistem MUARA — SMP Negeri 10 Samarinda.<br>
         ${new Date().toLocaleString('id-ID')}
@@ -2177,7 +2181,8 @@ function renderTugasList() {
     if (e.waktuMulai || e.waktuSelesai) waktuInfo = ` | ⏰ ${e.waktuMulai ? formatWaktu(e.waktuMulai) : 'sekarang'} s/d ${e.waktuSelesai ? formatWaktu(e.waktuSelesai) : 'selesai'}`;
     if (e.durasi > 0) waktuInfo += ` | ⏱ ${e.durasi} menit`;
     const fotoInfo = e.aktifkanFoto === false ? ' | 🚫 Foto off' : ' | 📷 Foto on';
-    return `<div class="exam-item"><h3><svg class="ico"><use href="#i-exam"/></svg> ${escapeHtml(e.judul) || '(Tanpa judul)'} <span class="badge ${e.aktif ? 'green' : 'gray'}">${e.aktif ? 'AKTIF' : 'DITUTUP'}</span></h3><div class="meta">${escapeHtml(e.mapel || '-')}${kelasInfo} | KKM: ${e.kkm}${jenisInfo} | ${jmlHasil} siswa${pembuat}<br>${waktuInfo}${fotoInfo}</div><div style="font-size:0.82rem; color:#718096; margin-bottom:6px;">Kode Tugas:</div><div class="code-badge">${e.kode}</div><div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"><button class="sm secondary" onclick="salinKode('${e.kode}')"><svg class="ico"><use href="#i-copy"/></svg> Salin Kode</button><button class="sm purple" onclick="bukaDuplikat('${e.id}')"><svg class="ico"><use href="#i-copy"/></svg> Duplikat</button><button class="sm secondary" onclick="bukaEditorTugas('${e.id}')"><svg class="ico"><use href="#i-edit"/></svg> Edit</button><button class="sm ${e.aktif ? 'warning' : 'success'}" onclick="toggleAktif('${e.id}')"><svg class="ico"><use href="${e.aktif ? '#i-pause' : '#i-play'}"/></svg> ${e.aktif ? 'Tutup' : 'Buka'}</button><button class="sm danger" onclick="hapusTugas('${e.id}')"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button></div></div>`;
+    const lockInfo = e.lockdownMode === true ? ' | 🔒 Lockdown on' : '';
+    return `<div class="exam-item"><h3><svg class="ico"><use href="#i-exam"/></svg> ${escapeHtml(e.judul) || '(Tanpa judul)'} <span class="badge ${e.aktif ? 'green' : 'gray'}">${e.aktif ? 'AKTIF' : 'DITUTUP'}</span></h3><div class="meta">${escapeHtml(e.mapel || '-')}${kelasInfo} | KKM: ${e.kkm}${jenisInfo} | ${jmlHasil} siswa${pembuat}<br>${waktuInfo}${fotoInfo}${lockInfo}</div><div style="font-size:0.82rem; color:#718096; margin-bottom:6px;">Kode Tugas:</div><div class="code-badge">${e.kode}</div><div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"><button class="sm secondary" onclick="salinKode('${e.kode}')"><svg class="ico"><use href="#i-copy"/></svg> Salin Kode</button><button class="sm purple" onclick="bukaDuplikat('${e.id}')"><svg class="ico"><use href="#i-copy"/></svg> Duplikat</button><button class="sm secondary" onclick="bukaEditorTugas('${e.id}')"><svg class="ico"><use href="#i-edit"/></svg> Edit</button><button class="sm ${e.aktif ? 'warning' : 'success'}" onclick="toggleAktif('${e.id}')"><svg class="ico"><use href="${e.aktif ? '#i-pause' : '#i-play'}"/></svg> ${e.aktif ? 'Tutup' : 'Buka'}</button><button class="sm danger" onclick="hapusTugas('${e.id}')"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button></div></div>`;
   }).join('');
 }
 
@@ -2260,6 +2265,7 @@ function pilihModeBuat(mode) {
     document.getElementById('exDurasi').value = 0;
     document.getElementById('exKkm').value = 75;
     document.getElementById('exAktifkanFoto').checked = true;
+    document.getElementById('exLockdownMode').checked = false;
     editorSoal = [{ jenis: 'uraian', pertanyaan: '', kunci: '', bobot: 100 }];
     renderEditorSoal();
     switchRubrikTab('pilgan');
@@ -2376,6 +2382,7 @@ function prosesTempelSoal() {
     document.getElementById('exJenisTugas').value = jenis;
     document.getElementById('exKetentuan').value = KETENTUAN_PRESET[jenis] || '';
     document.getElementById('exAktifkanFoto').checked = true;
+    document.getElementById('exLockdownMode').checked = false;
     editorSoal = semuaSoal;
     renderEditorSoal();
 
@@ -2539,6 +2546,7 @@ function bukaEditorTugas(id) {
   document.getElementById('exWaktuMulai').value = e?.waktuMulai || '';
   document.getElementById('exWaktuSelesai').value = e?.waktuSelesai || '';
   document.getElementById('exAktifkanFoto').checked = e?.aktifkanFoto !== false;
+  document.getElementById('exLockdownMode').checked = e?.lockdownMode === true;
   editorSoal = e ? JSON.parse(JSON.stringify(e.soal)) : [{ jenis: 'uraian', pertanyaan: '', kunci: '', bobot: 100 }];
   editorSoal.forEach(s => {
     if (!s.jenis) s.jenis = (s.opsi && s.opsi.length > 0) ? 'pilgan' : 'uraian';
@@ -2638,6 +2646,7 @@ async function simpanTugas() {
   const waktuMulai = document.getElementById('exWaktuMulai').value || '';
   const waktuSelesai = document.getElementById('exWaktuSelesai').value || '';
   const aktifkanFoto = document.getElementById('exAktifkanFoto').checked;
+  const lockdownMode = document.getElementById('exLockdownMode').checked;
 
   if (!mapel) return alert('Pilih mata pelajaran.');
   if (!judul) return alert('Isi judul tugas.');
@@ -2671,7 +2680,7 @@ async function simpanTugas() {
 
   if (editingTugasId) {
     const e = state.tugas.find(x => x.id === editingTugasId);
-    Object.assign(e, { mapel, judul, kelas, durasi, kkm, apiKey, jenisTugas, ketentuan, rubrik, soal: editorSoal, waktuMulai, waktuSelesai, aktifkanFoto });
+    Object.assign(e, { mapel, judul, kelas, durasi, kkm, apiKey, jenisTugas, ketentuan, rubrik, soal: editorSoal, waktuMulai, waktuSelesai, aktifkanFoto, lockdownMode });
     simpanLocal();
     await cloudSaveTugas(e);
     alert('Tugas diperbarui!');
@@ -2680,7 +2689,7 @@ async function simpanTugas() {
       id: 'tg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
       kode: generateKodeUnik(),
       mapel, judul, kelas, durasi, kkm, apiKey, jenisTugas, ketentuan, rubrik,
-      soal: editorSoal, aktif: true, waktuMulai, waktuSelesai, aktifkanFoto,
+      soal: editorSoal, aktif: true, waktuMulai, waktuSelesai, aktifkanFoto, lockdownMode,
       guruNama: currentUser.nama, guruEmail: currentUser.email,
       createdAt: new Date().toISOString()
     };
@@ -2780,6 +2789,8 @@ function konfirmasiKeluarTugas() {
   } else {
     console.warn('MUARA berjalan dalam mode LOCAL (tanpa Firebase).');
   }
+  // Aktifkan listener lockdown pada container jawaban
+  setupLockdownContainer();
   console.log('MUARA v10 siap. Mode:', firebaseReady ? 'CLOUD' : 'LOCAL', '| Total guru:', state.guruList.length);
 })();
 </script>
