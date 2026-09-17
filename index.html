@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUARA - Mesin Ujian & Analisis Respons Alternatif</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #0d47a1 0%, #00695c 100%); min-height: 100vh; padding: 20px; color: #333; }
+  .container { max-width: 960px; margin: 0 auto; }
+  .ico { display: inline-block; width: 1em; height: 1em; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .ico-lg { width: 1.8em; height: 1.8em; }
+  .card { background: #fff; border-radius: 16px; padding: 26px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); margin-bottom: 18px; }
+  h1 { color: #fff; text-align: center; margin-bottom: 20px; font-size: 1.6rem; display:flex; align-items:center; justify-content:center; gap:10px; }
+  h2 { color: #0d47a1; margin-bottom: 14px; font-size: 1.2rem; display:flex; align-items:center; gap:8px; }
+  h3 { color: #00695c; margin: 14px 0 8px; font-size: 1rem; display:flex; align-items:center; gap:6px; }
+  label { display: block; margin: 10px 0 6px; font-weight: 600; color: #4a5568; font-size: 0.9rem; }
+  input, textarea, select { width: 100%; padding: 11px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; font-family: inherit; background: #fff; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: #0d47a1; }
+  textarea { resize: vertical; min-height: 80px; }
+  select { cursor: pointer; }
+  button { background: linear-gradient(135deg, #0d47a1, #00695c); color: #fff; border: none; padding: 11px 18px; border-radius: 8px; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
+  button:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(13,71,161,0.4); }
+  button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  button.secondary { background: #718096; }
+  button.danger { background: #e53e3e; }
+  button.success { background: #38a169; }
+  button.warning { background: #dd6b20; }
+  button.purple { background: #6a1b9a; }
+  button.pdf { background: linear-gradient(135deg, #c62828, #e53935); }
+  button.img { background: linear-gradient(135deg, #2e7d32, #43a047); }
+  button.full { width: 100%; padding: 14px; font-size: 1rem; }
+  button.sm { padding: 6px 12px; font-size: 0.8rem; margin: 0; }
+  .hidden { display: none !important; }
+  .login-container { max-width: 520px; margin: 30px auto; background: #fff; border-radius: 20px; padding: 34px 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.3); }
+  .login-logos { display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 14px; }
+  .login-logos .logo-sekolah { max-height: 54px; max-width: 100px; width: auto; height: auto; object-fit: contain; }
+  .login-logos .logo-sistem { max-height: 72px; max-width: 120px; width: auto; height: auto; object-fit: contain; }
+  .login-container h1 { color: #0d47a1; font-size: 1.4rem; margin-bottom: 2px; text-align: center; }
+  .login-container .sekolah-name { text-align: center; color: #0d47a1; font-size: 0.92rem; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.2px; }
+  .login-container .tagline { text-align: center; color: #00695c; font-size: 0.74rem; font-weight: 600; margin-bottom: 22px; letter-spacing: 0.3px; }
+  .role-btn { display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 14px; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; width: 100%; text-align: left; font-size: 1rem; }
+  .role-btn:hover { border-color: #0d47a1; background: #e3f2fd; transform: translateY(-2px); }
+  .role-btn .title { font-weight: 700; color: #0d47a1; }
+  .role-btn .desc { font-size: 0.8rem; color: #718096; }
+  .back-link { text-align: center; margin-top: 14px; font-size: 0.86rem; color: #0d47a1; cursor: pointer; text-decoration: underline; }
+  .back-link.muted { color: #718096; }
+  .pass-wrap { position: relative; }
+  .pass-wrap input { padding-right: 44px; }
+  .pass-toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 6px; margin: 0; cursor: pointer; color: #718096; display: flex; align-items: center; }
+  .pass-toggle:hover { color: #0d47a1; transform: translateY(-50%) !important; box-shadow: none !important; }
+  .app-header { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.95); border-radius: 12px; padding: 12px 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 10px; }
+  .app-header .brand { display: flex; align-items: center; gap: 10px; }
+  .app-header .brand img { max-height: 36px; }
+  .app-header .brand .txt { display: flex; flex-direction: column; line-height: 1.15; }
+  .app-header .brand .txt b { font-weight: 700; color: #0d47a1; font-size: 1rem; }
+  .app-header .brand .txt small { color: #718096; font-size: 0.72rem; }
+  .app-header .user { font-weight: 600; color: #0d47a1; display:flex; align-items:center; gap:8px; }
+  .app-header .user small { color: #718096; font-weight: 400; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tab { flex: 1; min-width: 100px; padding: 11px; text-align: center; cursor: pointer; background: rgba(255,255,255,0.25); color: #fff; border-radius: 10px; font-weight: 600; transition: all 0.2s; font-size: 0.86rem; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .tab.active { background: #fff; color: #0d47a1; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .question-box { background: #f7fafc; border-left: 4px solid #0d47a1; padding: 16px; border-radius: 8px; margin-bottom: 14px; }
+  .result-box { background: #f0fff4; border-left: 4px solid #38a169; padding: 14px; border-radius: 8px; margin-top: 12px; }
+  .score-big { font-size: 2.6rem; font-weight: 700; color: #38a169; text-align: center; }
+  .feedback { background: #fff; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; }
+  .result-item { background: #f7fafc; padding: 14px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #0d47a1; }
+  .result-item .name { font-weight: 700; color: #0d47a1; }
+  .result-item .score { float: right; color: #38a169; font-weight: 700; }
+  .loading { text-align: center; padding: 20px; color: #0d47a1; font-weight: 600; }
+  .loading .msg { display: block; margin-top: 10px; font-size: 0.95rem; }
+  .loading .sub { display: block; font-size: 0.82rem; color: #00695c; font-weight: 400; margin-top: 6px; }
+  .spinner { display: inline-block; width: 22px; height: 22px; border: 3px solid #e2e8f0; border-top-color: #0d47a1; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .info { background: #e3f2fd; padding: 12px; border-radius: 8px; font-size: 0.85rem; color: #0d47a1; margin-bottom: 12px; line-height: 1.5; display:flex; gap:8px; align-items:flex-start; }
+  .info > .ico { margin-top: 3px; }
+  .info.green { background: #f0fff4; color: #22543d; }
+  .info.warning { background: #fffaf0; color: #7b341e; }
+  .info.red { background: #fff5f5; color: #742a2a; }
+  .info.teal { background: #e0f2f1; color: #00695c; }
+  .info.purple { background: #f3e5f5; color: #4a148c; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .row > * { flex: 1; min-width: 130px; }
+  .badge { display: inline-block; background: #0d47a1; color: #fff; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+  .badge.green { background: #38a169; }
+  .badge.gray { background: #a0aec0; }
+  .badge.red { background: #e53e3e; }
+  .badge.orange { background: #dd6b20; }
+  .badge.teal { background: #00695c; }
+  .badge.purple { background: #6a1b9a; }
+  .error-msg { color: #e53e3e; font-size: 0.88rem; text-align: center; margin-top: 10px; font-weight: 600; }
+  .ok-msg { color: #38a169; font-size: 0.88rem; text-align: center; margin-top: 10px; font-weight: 600; }
+  .exam-item { background: #fff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+  .exam-item h3 { margin: 0 0 8px; color: #0d47a1; }
+  .exam-item .meta { font-size: 0.82rem; color: #718096; margin-bottom: 10px; }
+  .exam-item .code-badge { display: inline-block; background: #f7fafc; border: 2px dashed #0d47a1; color: #0d47a1; font-family: monospace; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 1.05rem; letter-spacing: 3px; margin: 6px 0; }
+  .ketentuan-box { background: #fffaf0; border-left: 4px solid #dd6b20; padding: 14px; border-radius: 8px; margin: 12px 0; font-size: 0.9rem; line-height: 1.7; white-space: pre-wrap; }
+  .guru-info { background: #e3f2fd; border-left: 4px solid #0d47a1; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; color: #0d47a1; margin-bottom: 10px; line-height: 1.7; }
+  .choice-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  .choice-card { flex: 1; min-width: 220px; padding: 20px; background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 14px; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .choice-card:hover { border-color: #0d47a1; background: #e3f2fd; transform: translateY(-3px); }
+  .choice-card .ico-lg { color: #0d47a1; margin-bottom: 8px; }
+  .choice-card .title { font-weight: 700; color: #0d47a1; font-size: 1rem; margin-bottom: 4px; }
+  .choice-card .desc { font-size: 0.82rem; color: #718096; line-height: 1.5; }
+  .rubrik-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 8px; }
+  .rubrik-card { padding: 14px 16px; background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+  .rubrik-card:hover { border-color: #0d47a1; background: #e3f2fd; transform: translateY(-2px); }
+  .rubrik-card .title { font-weight: 700; color: #0d47a1; font-size: 0.9rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .rubrik-card .desc { font-size: 0.75rem; color: #718096; line-height: 1.4; }
+  .answer-tabs { display: flex; gap: 6px; margin: 12px 0 8px; flex-wrap: wrap; }
+  .answer-tab { padding: 7px 14px; background: #e2e8f0; color: #4a5568; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+  .answer-tab.active { background: #0d47a1; color: #fff; }
+  .photo-zone { background: #f7fafc; border: 2px dashed #0d47a1; border-radius: 10px; padding: 18px; text-align: center; margin-top: 8px; cursor: pointer; transition: all 0.2s; }
+  .photo-zone:hover { background: #e3f2fd; }
+  .photo-zone .ico-lg { color: #0d47a1; margin-bottom: 6px; }
+  .photo-zone .main { font-weight: 600; color: #0d47a1; font-size: 0.92rem; }
+  .photo-zone .hint { font-size: 0.78rem; color: #718096; margin-top: 4px; }
+  .photo-preview { max-width: 100%; max-height: 260px; border-radius: 8px; margin-top: 10px; border: 2px solid #e2e8f0; }
+  .photo-note { background: #fffaf0; border-left: 4px solid #dd6b20; padding: 10px 12px; border-radius: 6px; margin-top: 10px; font-size: 0.78rem; color: #7b341e; line-height: 1.5; display: flex; gap: 8px; align-items: flex-start; }
+  .photo-note .ico { margin-top: 2px; flex-shrink: 0; }
+  .file-input-hidden { display: none; }
+  .admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+  .admin-table th { background: #e3f2fd; color: #0d47a1; padding: 10px; text-align: left; border-bottom: 2px solid #0d47a1; font-size: 0.82rem; }
+  .admin-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  .admin-table tr:hover { background: #f7fafc; }
+  .admin-table .email-cell { font-family: monospace; font-size: 0.78rem; word-break: break-all; }
+  .admin-table .actions { display: flex; gap: 4px; flex-wrap: wrap; }
+  .opts-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 8px; }
+  .opt-row { display: flex; gap: 8px; align-items: center; }
+  .opt-label { font-weight: 700; color: #6a1b9a; min-width: 30px; text-align: center; font-size: 1rem; }
+  .opt-row input { flex: 1; }
+  .kunci-pilih { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .kunci-pilih label { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.82rem; margin: 0; }
+  .kunci-pilih input[type="radio"] { width: auto; margin: 0; }
+  .kunci-pilih label.selected { background: #e8f5e9; border-color: #38a169; color: #22543d; }
+  .paste-help { background: #fffaf0; border-left: 4px solid #dd6b20; padding: 12px; border-radius: 8px; margin-bottom: 14px; font-size: 0.85rem; line-height: 1.7; }
+  .paste-help code { background: #fff; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 0.82rem; color: #00695c; }
+  .paste-help pre { background: #fff; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.78rem; color: #333; margin: 8px 0; overflow-x: auto; white-space: pre; border: 1px solid #e2e8f0; }
+  .paste-input { font-family: 'Consolas', 'Monaco', monospace; font-size: 0.88rem; line-height: 1.6; }
+  .prompt-panel { background: linear-gradient(135deg, #f3e5f5 0%, #e1f5fe 100%); border: 2px solid #6a1b9a; border-radius: 12px; padding: 18px; margin-bottom: 18px; }
+  .prompt-panel h3 { color: #6a1b9a; margin-bottom: 8px; font-size: 1.05rem; }
+  .prompt-tab { padding: 8px 14px; background: #fff; color: #6a1b9a; border: 2px solid #e1bee7; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px; margin: 0 6px 6px 0; }
+  .prompt-tab.active { background: #6a1b9a; color: #fff; border-color: #6a1b9a; }
+  .prompt-box { background: #fff; border: 1px solid #e1bee7; border-radius: 8px; padding: 14px; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.8rem; line-height: 1.6; white-space: pre-wrap; color: #333; margin-top: 10px; max-height: 320px; overflow-y: auto; }
+  .prompt-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .step-list { counter-reset: step; list-style: none; margin: 10px 0; }
+  .step-list li { counter-increment: step; padding: 8px 0 8px 40px; position: relative; font-size: 0.86rem; line-height: 1.5; }
+  .step-list li::before { content: counter(step); position: absolute; left: 0; top: 6px; width: 28px; height: 28px; background: #6a1b9a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
+  .unduh-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .unduh-row button { flex: 1; min-width: 180px; }
+  @media (max-width: 600px) {
+    .tabs { flex-direction: column; }
+    .score-big { font-size: 2rem; }
+    .app-header { flex-direction: column; align-items: stretch; }
+    .app-header .user { justify-content: center; }
+    .login-logos .logo-sekolah { max-height: 44px; max-width: 80px; }
+    .login-logos .logo-sistem { max-height: 60px; max-width: 100px; }
+    .admin-table { font-size: 0.75rem; }
+    .admin-table th, .admin-table td { padding: 6px; }
+    .choice-card { min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
+  <symbol id="i-teacher" viewBox="0 0 24 24"><path d="M4 5h16v10H4z"/><path d="M8 19h8"/><path d="M12 15v4"/></symbol>
+  <symbol id="i-student" viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M5 21c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/><path d="M4 8 12 4l8 4"/></symbol>
+  <symbol id="i-admin" viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V5Z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-8-10-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9 3 3-3 3 3 3-4 4-3-3"/></symbol>
+  <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4Z"/><path d="M13 5v14"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3Z"/><path d="M18 7h2v13H7"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></symbol>
+  <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v10"/><path d="M6.5 6.5a8 8 0 1 0 11 0"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 4 4 5-6"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8Z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3 2 21h20Z"/><path d="M12 10v5"/><circle cx="12" cy="18" r="0.5" fill="currentColor"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r="0.5" fill="currentColor"/></symbol>
+  <symbol id="i-exam" viewBox="0 0 24 24"><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 7h6M9 11h6M9 15h4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V5Z"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6"/></symbol>
+  <symbol id="i-hand" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></symbol>
+  <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 21c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M15 21c0-2.5 1.5-4 4-4s3.5 1.5 3.5 4"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v5h-5"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6"/><path d="M10 3v6L4 20a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2L14 9V3"/><path d="M6 15h12"/></symbol>
+  <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M2 4h7a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2Z"/><path d="M22 4h-7a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h8Z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><circle cx="3.5" cy="6" r="0.5" fill="currentColor"/><circle cx="3.5" cy="12" r="0.5" fill="currentColor"/><circle cx="3.5" cy="18" r="0.5" fill="currentColor"/></symbol>
+  <symbol id="i-check-square" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="m8 12 3 3 6-6"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="6" y="4" width="14" height="18" rx="2"/><path d="M9 4V2h6v2"/><path d="M10 12h6M10 16h4"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></symbol>
+  <symbol id="i-file-pdf" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6"/><path d="M9 14h1.5a1.5 1.5 0 0 1 0 3H9v-3ZM9 17v3M14 14v6M14 14h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2"/></symbol>
+</svg>
+
+<!-- ==================== LOGIN ==================== -->
+<div id="loginPage">
+  <div class="login-container">
+    <div class="login-logos">
+      <img src="https://iili.io/nBiviCX.th.png" alt="Logo Sekolah" class="logo-sekolah">
+      <img src="https://iili.io/noOE5EN.md.png" alt="Logo MUARA" class="logo-sistem">
+    </div>
+    <h1>MUARA</h1>
+    <div class="sekolah-name">SMP Negeri 10 Samarinda</div>
+    <div class="tagline">Mesin Ujian & Analisis Respons Alternatif</div>
+
+    <div id="roleChoice">
+      <button class="role-btn" onclick="showLogin('guru')">
+        <svg class="ico ico-lg" style="color:#0d47a1"><use href="#i-teacher"/></svg>
+        <div><div class="title">Masuk sebagai Guru</div><div class="desc">Login dengan email & password terdaftar</div></div>
+      </button>
+      <button class="role-btn" onclick="showLogin('siswa')">
+        <svg class="ico ico-lg" style="color:#00695c"><use href="#i-student"/></svg>
+        <div><div class="title">Masuk sebagai Siswa</div><div class="desc">Masukkan kode tugas dari guru</div></div>
+      </button>
+      <button class="role-btn" onclick="showLogin('admin')">
+        <svg class="ico ico-lg" style="color:#dd6b20"><use href="#i-admin"/></svg>
+        <div><div class="title">Masuk sebagai Admin</div><div class="desc">Kelola akun guru</div></div>
+      </button>
+    </div>
+
+    <div id="loginGuru" class="hidden">
+      <h2 style="justify-content:center"><svg class="ico"><use href="#i-teacher"/></svg> Login Guru</h2>
+      <label>Email</label>
+      <input type="email" id="guruEmailLogin" placeholder="nama@email.com" autocomplete="off">
+      <label>Password</label>
+      <div class="pass-wrap">
+        <input type="password" id="guruPassLogin" placeholder="Password guru" onkeydown="if(event.key==='Enter')loginGuru()">
+        <button class="pass-toggle" onclick="togglePass('guruPassLogin', this)" type="button"><svg class="ico"><use href="#i-eye"/></svg></button>
+      </div>
+      <button class="full" onclick="loginGuru()"><svg class="ico"><use href="#i-lock"/></svg> Masuk</button>
+      <div id="guruError" class="error-msg"></div>
+      <div class="back-link" onclick="showLogin(null)">Kembali</div>
+      <div class="back-link muted" onclick="showLogin('lupaPassword')">Lupa password?</div>
+    </div>
+
+    <div id="loginLupa" class="hidden">
+      <h2 style="justify-content:center"><svg class="ico"><use href="#i-key"/></svg> Lupa Password</h2>
+      <div class="info"><svg class="ico"><use href="#i-info"/></svg><span>Masukkan email Anda. Sistem akan <b>mengirim password baru ke email tersebut</b>.</span></div>
+      <label>Email Terdaftar</label>
+      <input type="email" id="lupaEmail" placeholder="nama@email.com" autocomplete="off">
+      <button class="full" onclick="prosesLupaPassword()" id="btnLupa"><svg class="ico"><use href="#i-send"/></svg> Kirim Password Baru ke Email</button>
+      <div id="lupaStatus" class="error-msg"></div>
+      <div class="back-link" onclick="showLogin('guru')">Kembali ke Login Guru</div>
+    </div>
+
+    <div id="loginSiswa" class="hidden">
+      <h2 style="justify-content:center"><svg class="ico"><use href="#i-student"/></svg> Masuk Tugas</h2>
+      <div class="info"><svg class="ico"><use href="#i-ticket"/></svg><span>Masukkan <b>kode tugas</b> yang diberikan guru Anda.</span></div>
+      <label>Kode Tugas</label>
+      <input type="text" id="kodeInput" placeholder="ABC123" style="text-transform:uppercase; font-family:monospace; font-size:1.3rem; letter-spacing:4px; text-align:center;" maxlength="6" onkeydown="if(event.key==='Enter')validasiKode()">
+      <button class="full" onclick="validasiKode()"><svg class="ico"><use href="#i-play"/></svg> Validasi Kode</button>
+      <div id="siswaError" class="error-msg"></div>
+      <div class="back-link" onclick="showLogin(null)">Kembali</div>
+    </div>
+
+    <div id="loginAdmin" class="hidden">
+      <h2 style="justify-content:center"><svg class="ico"><use href="#i-admin"/></svg> Login Admin</h2>
+      <label>Email Admin</label>
+      <input type="email" id="adminEmailLogin" placeholder="Email admin" autocomplete="off">
+      <label>Password</label>
+      <div class="pass-wrap">
+        <input type="password" id="adminPassLogin" placeholder="Password admin" onkeydown="if(event.key==='Enter')loginAdmin()">
+        <button class="pass-toggle" onclick="togglePass('adminPassLogin', this)" type="button"><svg class="ico"><use href="#i-eye"/></svg></button>
+      </div>
+      <button class="full" onclick="loginAdmin()"><svg class="ico"><use href="#i-lock"/></svg> Masuk Admin</button>
+      <div id="adminError" class="error-msg"></div>
+      <div class="back-link" onclick="showLogin(null)">Kembali</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PREVIEW TUGAS ==================== -->
+<div id="previewPage" class="hidden">
+  <div class="container">
+    <div class="card">
+      <h2 id="previewJudul"><svg class="ico"><use href="#i-book"/></svg> Judul Tugas</h2>
+      <div class="info" id="previewInfo"></div>
+      <h3><svg class="ico"><use href="#i-doc"/></svg> Ketentuan Tugas</h3>
+      <div class="ketentuan-box" id="previewKetentuan"></div>
+      <h3><svg class="ico"><use href="#i-edit"/></svg> Data Peserta</h3>
+      <label>Nama Lengkap</label>
+      <input type="text" id="siswaNama" placeholder="Nama lengkap Anda">
+      <label>Kelas</label>
+      <select id="siswaKelas">
+        <option value="">-- Pilih Kelas --</option>
+        <optgroup label="Kelas VII"><option>VII A</option><option>VII B</option><option>VII C</option><option>VII D</option><option>VII E</option><option>VII F</option><option>VII G</option><option>VII H</option><option>VII I</option><option>VII J</option></optgroup>
+        <optgroup label="Kelas VIII"><option>VIII A</option><option>VIII B</option><option>VIII C</option><option>VIII D</option><option>VIII E</option><option>VIII F</option><option>VIII G</option><option>VIII H</option><option>VIII I</option><option>VIII J</option></optgroup>
+        <optgroup label="Kelas IX"><option>IX A</option><option>IX B</option><option>IX C</option><option>IX D</option><option>IX E</option><option>IX F</option><option>IX G</option><option>IX H</option><option>IX I</option><option>IX J</option></optgroup>
+      </select>
+      <div class="row" style="margin-top:16px;">
+        <button class="success" onclick="mulaiKerjakan()"><svg class="ico"><use href="#i-play"/></svg> Mulai Mengerjakan</button>
+        <button class="secondary" onclick="batalPreview()"><svg class="ico"><use href="#i-close"/></svg> Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== HALAMAN TUGAS ==================== -->
+<div id="tugasPage" class="hidden">
+  <div class="container">
+    <div class="app-header">
+      <div class="brand">
+        <img src="https://iili.io/noOE5EN.md.png" alt="MUARA">
+        <div class="txt"><b>MUARA</b><small>SMP Negeri 10 Samarinda</small></div>
+      </div>
+      <div class="user" id="tugasUserInfo"></div>
+      <button class="danger sm" onclick="konfirmasiKeluarTugas()"><svg class="ico"><use href="#i-power"/></svg> Keluar</button>
+    </div>
+    <div class="card">
+      <h2 id="tugasJudul"></h2>
+      <div class="info warning" id="tugasKetentuanSingkat"></div>
+      <div id="jawabanContainer"></div>
+      <button class="full success" onclick="kirimJawaban()" id="btnKirim"><svg class="ico"><use href="#i-upload"/></svg> Kumpulkan & Nilai Otomatis</button>
+    </div>
+    <div id="hasilSiswa"></div>
+  </div>
+</div>
+
+<!-- ==================== PANEL GURU ==================== -->
+<div id="guruPage" class="hidden">
+  <div class="container">
+    <div class="app-header">
+      <div class="brand">
+        <img src="https://iili.io/noOE5EN.md.png" alt="MUARA">
+        <div class="txt"><b>MUARA</b><small>SMP Negeri 10 Samarinda</small></div>
+      </div>
+      <div class="user" id="guruUserInfo"></div>
+      <button class="danger sm" onclick="logout()"><svg class="ico"><use href="#i-power"/></svg> Keluar</button>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-gtab="tugas" onclick="switchGTab('tugas')"><svg class="ico"><use href="#i-exam"/></svg> Tugas</div>
+      <div class="tab" data-gtab="hasil" onclick="switchGTab('hasil')"><svg class="ico"><use href="#i-chart"/></svg> Hasil Siswa</div>
+      <div class="tab" data-gtab="pengaturan" onclick="switchGTab('pengaturan')"><svg class="ico"><use href="#i-gear"/></svg> Pengaturan</div>
+    </div>
+
+    <div id="gtab-tugas" class="gtab-content">
+      <div id="tugasListView">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <h2 style="margin:0"><svg class="ico"><use href="#i-exam"/></svg> Daftar Tugas</h2>
+            <button onclick="mulaiInputSoal()"><svg class="ico"><use href="#i-plus"/></svg> Input Soal</button>
+          </div>
+          <div id="tugasList" style="margin-top:16px;"></div>
+        </div>
+      </div>
+
+      <div id="tugasChoiceView" class="hidden">
+        <div class="card">
+          <h2><svg class="ico"><use href="#i-plus"/></svg> Input Soal</h2>
+          <p style="color:#4a5568; font-size:0.9rem; margin-bottom:8px;">Pilih cara input soal:</p>
+          <div class="choice-row">
+            <div class="choice-card" onclick="pilihModeBuat('tempel')">
+              <svg class="ico ico-lg" style="color:#38a169;"><use href="#i-clipboard"/></svg>
+              <div class="title">1. Tempel Soal (Tercepat)</div>
+              <div class="desc">Copy-paste teks soal dari mana saja. Sistem otomatis mendeteksi dan mengubahnya menjadi soal Pilihan Ganda & Uraian.</div>
+            </div>
+            <div class="choice-card" onclick="pilihModeBuat('manual')">
+              <svg class="ico ico-lg"><use href="#i-hand"/></svg>
+              <div class="title">2. Isi Manual</div>
+              <div class="desc">Ketik langsung soal Pilihan Ganda & Uraian, kunci jawaban, dan rubrik di sistem.</div>
+            </div>
+          </div>
+          <button class="secondary" style="margin-top:14px;" onclick="tutupPilihanBuat()"><svg class="ico"><use href="#i-close"/></svg> Batal</button>
+        </div>
+      </div>
+
+      <div id="tugasTempelView" class="hidden">
+        <div class="prompt-panel">
+          <h3><svg class="ico" style="color:#6a1b9a;"><use href="#i-sparkles"/></svg> Bantuan Prompt AI (Google Gemini)</h3>
+          <div class="info purple" style="background:#fff; color:#4a148c;">
+            <svg class="ico"><use href="#i-info"/></svg>
+            <span>Punya draf soal berantakan? Salin salah satu prompt di bawah ke <b>Google Gemini</b>. Gemini akan merapikan draf Anda sesuai format sistem MUARA, siap di-copy-paste ke kotak di bawah.</span>
+          </div>
+
+          <div style="margin-top:8px;">
+            <div class="prompt-tab active" data-prompt="pilgan" onclick="switchPromptTab('pilgan')">
+              <svg class="ico"><use href="#i-check-square"/></svg> Opsi 1 — Pilihan Ganda
+            </div>
+            <div class="prompt-tab" data-prompt="uraian" onclick="switchPromptTab('uraian')">
+              <svg class="ico"><use href="#i-edit"/></svg> Opsi 2 — Uraian
+            </div>
+            <div class="prompt-tab" data-prompt="gabungan" onclick="switchPromptTab('gabungan')">
+              <svg class="ico"><use href="#i-layers"/></svg> Opsi 3 — Gabungan
+            </div>
+          </div>
+
+          <div id="promptContent" class="prompt-box"></div>
+
+          <div class="prompt-actions">
+            <button class="purple sm" onclick="copyPromptSaatIni()"><svg class="ico"><use href="#i-copy"/></svg> Salin Prompt Ini</button>
+            <button class="secondary sm" onclick="toggleLangkahPraktis()"><svg class="ico"><use href="#i-info"/></svg> Lihat Langkah Praktis</button>
+          </div>
+
+          <div id="langkahPraktis" class="hidden" style="background:#fff; border-radius:8px; padding:14px; margin-top:12px;">
+            <b style="color:#6a1b9a;">Langkah Praktis Penggunaan:</b>
+            <ol class="step-list">
+              <li>Buka <b>gemini.google.com</b> menggunakan <b>Akun Belajar.id</b> (@guru.smp.belajar.id, dst.) untuk perlindungan data ekstra.</li>
+              <li>Salin salah satu opsi prompt di atas beserta draf soal Anda (ganti bagian <code>[TEMPEL DRAF SOAL DI SINI]</code> dengan soal Anda).</li>
+              <li>Tekan Enter / Kirim.</li>
+              <li>Klik tombol <b>Copy</b> di bawah balasan Gemini, lalu paste ke kotak input di bawah ini.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2><svg class="ico" style="color:#38a169;"><use href="#i-clipboard"/></svg> Tempel Soal</h2>
+          <div class="info green"><svg class="ico"><use href="#i-info"/></svg><span>Pilih <b>jenis soal</b>, lalu paste teks soal ke kotak yang muncul. Sistem otomatis mendeteksi dan mengurai.</span></div>
+
+          <label>Pilih Jenis Soal</label>
+          <select id="tempelJenis" onchange="ubahTempelJenis()">
+            <option value="">-- Pilih Jenis Soal --</option>
+            <option value="pilgan">Pilihan Ganda saja</option>
+            <option value="uraian">Uraian saja</option>
+            <option value="keduanya">Keduanya (Pilihan Ganda + Uraian)</option>
+          </select>
+
+          <div id="tempelInfo" class="paste-help hidden" style="margin-top:14px;"></div>
+
+          <div id="tempelBoxPilgan" class="hidden" style="margin-top:14px;">
+            <label>Teks Soal — Pilihan Ganda (paste di sini)</label>
+            <textarea id="tempelInputPilgan" class="paste-input" rows="14" placeholder="Paste soal pilihan ganda di sini...
+
+Contoh:
+1. Apa ibu kota Indonesia?
+A. Bandung
+B. Jakarta
+C. Surabaya
+D. Medan
+Kunci Jawaban: B"></textarea>
+          </div>
+
+          <div id="tempelBoxUraian" class="hidden" style="margin-top:14px;">
+            <label>Teks Soal — Uraian (paste di sini)</label>
+            <textarea id="tempelInputUraian" class="paste-input" rows="14" placeholder="Paste soal uraian di sini...
+
+Contoh:
+1. Jelaskan pengertian gotong royong!
+Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama..."></textarea>
+          </div>
+
+          <!-- ====== MODE KEDUANYA — SEKARANG 1 KOTAK SAJA ====== -->
+          <div id="tempelBoxKeduanya" class="hidden" style="margin-top:14px;">
+            <div style="background:#fffaf0; border-left:4px solid #dd6b20; padding:10px 12px; border-radius:6px; margin-bottom:14px; font-size:0.82rem; color:#7b341e; line-height:1.6;">
+              <b>Mode Keduanya (1 Kotak):</b> Paste soal <b>Pilihan Ganda</b> dan <b>Uraian</b> dalam satu kotak. Sistem otomatis mendeteksi jenis tiap soal — soal PG dikenali dari adanya opsi <code>A. B. C. D.</code>, soal Uraian dikenali dari label <code>Jawaban Ideal:</code> / <code>Kunci:</code> / <code>Pembahasan:</code>.
+            </div>
+            <label>Teks Soal — Gabungan (Pilihan Ganda + Uraian)</label>
+            <textarea id="tempelInputKeduanya" class="paste-input" rows="18" placeholder="Paste soal pilihan ganda & uraian di sini...
+
+Contoh:
+1. Apa ibu kota Indonesia?
+A. Bandung
+B. Jakarta
+C. Surabaya
+D. Medan
+Kunci Jawaban: B
+
+2. Jelaskan pengertian gotong royong!
+Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
+          </div>
+          <!-- ====== END MODE KEDUANYA ====== -->
+
+          <div class="row" style="margin-top:14px;">
+            <button class="success" onclick="prosesTempelSoal()"><svg class="ico"><use href="#i-play"/></svg> Proses & Ubah ke Bentuk Soal</button>
+            <button class="secondary" onclick="tutupPilihanBuat()"><svg class="ico"><use href="#i-close"/></svg> Batal</button>
+          </div>
+
+          <div id="tempelStatus" style="margin-top:12px;"></div>
+        </div>
+      </div>
+
+      <div id="tugasEditorView" class="hidden">
+        <div class="card">
+          <h2 id="editorTitle"><svg class="ico"><use href="#i-edit"/></svg> Input Soal</h2>
+          <div class="row">
+            <div>
+              <label>Mata Pelajaran</label>
+              <select id="exMapel">
+                <option value="">-- Pilih Mata Pelajaran --</option>
+                <option>Pendidikan Agama Islam</option><option>Pendidikan Agama Kristen</option><option>Pendidikan Agama Katolik</option>
+                <option>Pendidikan Agama Hindu</option><option>Pendidikan Agama Buddha</option><option>Pendidikan Agama Khonghucu</option>
+                <option>Pendidikan Kepercayaan terhadap Tuhan Yang Maha Esa (Penghayat)</option>
+                <option>Pendidikan Kewarganegaraan Pancasila</option><option>Bahasa Indonesia</option>
+                <option>Matematika</option><option>Ilmu Pengetahuan Alam (IPA)</option><option>Ilmu Pengetahuan Sosial (IPS)</option>
+                <option>Bahasa Inggris</option><option>Pendidikan Jasmani, Olahraga, dan Kesehatan (PJOK)</option>
+                <option>Informatika</option><option>Seni Musik</option><option>Seni Rupa</option><option>Seni Tari</option><option>Seni Teater</option>
+              </select>
+            </div>
+            <div><label>Judul Tugas</label><input type="text" id="exJudul" placeholder="Contoh: Ulangan Bab 3"></div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Kelas Sasaran</label>
+              <select id="exKelas">
+                <option value="">-- Pilih Kelas --</option>
+                <optgroup label="Kelas VII"><option>VII A</option><option>VII B</option><option>VII C</option><option>VII D</option><option>VII E</option><option>VII F</option><option>VII G</option><option>VII H</option><option>VII I</option><option>VII J</option></optgroup>
+                <optgroup label="Kelas VIII"><option>VIII A</option><option>VIII B</option><option>VIII C</option><option>VIII D</option><option>VIII E</option><option>VIII F</option><option>VIII G</option><option>VIII H</option><option>VIII I</option><option>VIII J</option></optgroup>
+                <optgroup label="Kelas IX"><option>IX A</option><option>IX B</option><option>IX C</option><option>IX D</option><option>IX E</option><option>IX F</option><option>IX G</option><option>IX H</option><option>IX I</option><option>IX J</option></optgroup>
+              </select>
+            </div>
+            <div><label>Durasi (menit) — isi 0 jika tidak ada batas</label><input type="number" id="exDurasi" value="0" min="0" max="300"></div>
+            <div><label>KKM</label><input type="number" id="exKkm" value="75" min="0" max="100"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2><svg class="ico"><use href="#i-key"/></svg> API Key (khusus tugas ini)</h2>
+          <div class="info warning"><svg class="ico"><use href="#i-warn"/></svg><span>API Key dipakai untuk mengoreksi tugas. Format 2026: <b>AQ.</b></span></div>
+          <label>API Key</label>
+          <div class="pass-wrap">
+            <input type="password" id="exApiKey" placeholder="AQ.Ab8RN...">
+            <button class="pass-toggle" onclick="togglePass('exApiKey', this)" type="button"><svg class="ico"><use href="#i-eye"/></svg></button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2><svg class="ico"><use href="#i-doc"/></svg> Ketentuan Tugas</h2>
+          <label>Jenis Tugas</label>
+          <select id="exJenisTugas" onchange="ubahJenisTugas()">
+            <option value="">-- Pilih Jenis Tugas --</option>
+            <option value="pilgan">Pilihan Ganda saja</option>
+            <option value="uraian">Uraian saja</option>
+            <option value="keduanya">Keduanya (Pilihan Ganda + Uraian)</option>
+          </select>
+          <small style="color:#718096; font-size:0.78rem; display:block; margin-top:4px;">Jenis ini menentukan template ketentuan yang muncul.</small>
+
+          <label style="margin-top:14px;">Teks Ketentuan (bisa diedit)</label>
+          <textarea id="exKetentuan" rows="6" placeholder="Pilih jenis tugas dulu, atau tulis ketentuan manual di sini..."></textarea>
+          <button class="secondary sm" onclick="isiTemplateKetentuan()"><svg class="ico"><use href="#i-refresh"/></svg> Isi Ulang Sesuai Jenis</button>
+        </div>
+
+        <div class="card">
+          <h2><svg class="ico"><use href="#i-shield"/></svg> Rubrik Penilaian</h2>
+          <div class="info"><svg class="ico"><use href="#i-info"/></svg><span>Pilih rubrik sesuai jenis soal. Rubrik ini dibaca AI saat mengoreksi.</span></div>
+
+          <div class="answer-tabs" style="margin-top:8px;">
+            <div class="answer-tab active" id="rubrikTabPilgan" onclick="switchRubrikTab('pilgan')">
+              <svg class="ico"><use href="#i-check-square"/></svg> Rubrik Pilihan Ganda
+            </div>
+            <div class="answer-tab" id="rubrikTabUraian" onclick="switchRubrikTab('uraian')">
+              <svg class="ico"><use href="#i-edit"/></svg> Rubrik Uraian
+            </div>
+            <div class="answer-tab" id="rubrikTabGabungan" onclick="switchRubrikTab('gabungan')">
+              <svg class="ico"><use href="#i-layers"/></svg> Rubrik Gabungan
+            </div>
+          </div>
+
+          <div id="rubrikContentPilgan">
+            <div class="rubrik-picker">
+              <div class="rubrik-card" onclick="pakaiRubrik('pilgan')">
+                <div class="title"><svg class="ico"><use href="#i-check-square"/></svg> Pilihan Ganda Standar</div>
+                <div class="desc">Jawaban benar = nilai penuh, salah = 0. Tanpa feedback panjang.</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="rubrikContentUraian" class="hidden">
+            <div class="rubrik-picker">
+              <div class="rubrik-card" onclick="pakaiRubrik('uraian')"><div class="title"><svg class="ico"><use href="#i-book-open"/></svg> Uraian Umum</div><div class="desc">Bahasa Indonesia, IPS, PPKn, Agama, Seni.</div></div>
+              <div class="rubrik-card" onclick="pakaiRubrik('matematika')"><div class="title"><svg class="ico"><use href="#i-flask"/></svg> Matematika</div><div class="desc">Proses, rumus, langkah, hasil akhir.</div></div>
+              <div class="rubrik-card" onclick="pakaiRubrik('ipa')"><div class="title"><svg class="ico"><use href="#i-flask"/></svg> IPA (Sains)</div><div class="desc">Konsep, prosedur ilmiah, kesimpulan.</div></div>
+              <div class="rubrik-card" onclick="pakaiRubrik('informatika')"><div class="title"><svg class="ico"><use href="#i-gear"/></svg> Informatika</div><div class="desc">Logika, algoritma, kode, solusi.</div></div>
+              <div class="rubrik-card" onclick="pakaiRubrik('bahasa')"><div class="title"><svg class="ico"><use href="#i-book-open"/></svg> Bahasa Asing</div><div class="desc">Tata bahasa, kosakata, makna.</div></div>
+              <div class="rubrik-card" onclick="pakaiRubrik('hitung')"><div class="title"><svg class="ico"><use href="#i-chart"/></svg> Hitungan Singkat</div><div class="desc">Jawaban akhir, cara singkat, satuan.</div></div>
+            </div>
+          </div>
+
+          <div id="rubrikContentGabungan" class="hidden">
+            <div class="rubrik-picker">
+              <div class="rubrik-card" onclick="pakaiRubrik('gabunganUmum')"><div class="title"><svg class="ico"><use href="#i-layers"/></svg> Gabungan Umum</div><div class="desc">Pilgan + Uraian umum. Cocok untuk ulangan campuran.</div></div>
+              <div class="rubrik-card" onclick="pakaiRubrik('gabunganSains')"><div class="title"><svg class="ico"><use href="#i-flask"/></svg> Gabungan Sains</div><div class="desc">Pilgan + Uraian IPA/Matematika.</div></div>
+              <div class="rubrik-card" onclick="pakaiRubrik('gabunganBahasa')"><div class="title"><svg class="ico"><use href="#i-book-open"/></svg> Gabungan Bahasa</div><div class="desc">Pilgan + Uraian Bahasa Indonesia/Inggris.</div></div>
+            </div>
+          </div>
+
+          <label style="margin-top:14px;">Rubrik Aktif (bisa diedit)</label>
+          <textarea id="exRubrik" rows="9" placeholder="Pilih salah satu rubrik di atas, atau tulis sendiri di sini..."></textarea>
+        </div>
+
+        <div class="card">
+          <h2><svg class="ico"><use href="#i-exam"/></svg> Daftar Soal</h2>
+          <div id="soalEditorContainer"></div>
+          <div class="row" style="margin-top:14px;">
+            <button class="secondary" onclick="tambahSoalPilgan()"><svg class="ico"><use href="#i-check-square"/></svg> Tambah Pilihan Ganda</button>
+            <button class="secondary" onclick="tambahSoalUraian()"><svg class="ico"><use href="#i-edit"/></svg> Tambah Uraian</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <button class="success" onclick="simpanTugas()"><svg class="ico"><use href="#i-save"/></svg> Simpan Tugas & Generate Kode</button>
+            <button class="secondary" onclick="tutupEditorTugas()"><svg class="ico"><use href="#i-close"/></svg> Batal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="gtab-hasil" class="gtab-content hidden">
+      <div class="card">
+        <h2><svg class="ico"><use href="#i-chart"/></svg> Hasil Penilaian Siswa</h2>
+        <label>Filter Berdasarkan Tugas</label>
+        <select id="filterTugas" onchange="muatHasil()"><option value="">-- Semua Tugas --</option></select>
+        <div class="row" style="margin-top:12px;">
+          <button class="secondary" onclick="muatHasil()"><svg class="ico"><use href="#i-play"/></svg> Refresh</button>
+          <button class="success" onclick="exportCSV()"><svg class="ico"><use href="#i-download"/></svg> Export CSV</button>
+          <button class="danger" onclick="hapusSemuaHasil()"><svg class="ico"><use href="#i-trash"/></svg> Hapus Semua Hasil</button>
+        </div>
+        <div id="hasilContainer" style="margin-top:16px;"></div>
+      </div>
+    </div>
+
+    <div id="gtab-pengaturan" class="gtab-content hidden">
+      <div class="card">
+        <h2><svg class="ico"><use href="#i-user"/></svg> Info Guru</h2>
+        <div class="guru-info" id="guruInfoBox"></div>
+      </div>
+      <div class="card">
+        <h2><svg class="ico"><use href="#i-lock"/></svg> Ganti Password</h2>
+        <label>Password Lama</label>
+        <div class="pass-wrap"><input type="password" id="oldPass" placeholder="Password lama"><button class="pass-toggle" onclick="togglePass('oldPass', this)" type="button"><svg class="ico"><use href="#i-eye"/></svg></button></div>
+        <label>Password Baru (min 6 karakter)</label>
+        <div class="pass-wrap"><input type="password" id="newPass" placeholder="Password baru"><button class="pass-toggle" onclick="togglePass('newPass', this)" type="button"><svg class="ico"><use href="#i-eye"/></svg></button></div>
+        <label>Ulangi Password Baru</label>
+        <div class="pass-wrap"><input type="password" id="newPass2" placeholder="Ulangi password"><button class="pass-toggle" onclick="togglePass('newPass2', this)" type="button"><svg class="ico"><use href="#i-eye"/></svg></button></div>
+        <button onclick="gantiPassword()"><svg class="ico"><use href="#i-save"/></svg> Ganti Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PANEL ADMIN ==================== -->
+<div id="adminPage" class="hidden">
+  <div class="container">
+    <div class="app-header">
+      <div class="brand">
+        <img src="https://iili.io/noOE5EN.md.png" alt="MUARA">
+        <div class="txt"><b>MUARA Admin</b><small>SMP Negeri 10 Samarinda</small></div>
+      </div>
+      <div class="user" id="adminUserInfo"></div>
+      <button class="danger sm" onclick="logoutAdmin()"><svg class="ico"><use href="#i-power"/></svg> Keluar</button>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-atab="daftar" onclick="switchATab('daftar')"><svg class="ico"><use href="#i-people"/></svg> Daftar Guru</div>
+      <div class="tab" data-atab="tambah" onclick="switchATab('tambah')"><svg class="ico"><use href="#i-plus"/></svg> Tambah Guru</div>
+      <div class="tab" data-atab="reset" onclick="switchATab('reset')"><svg class="ico"><use href="#i-key"/></svg> Reset Password</div>
+      <div class="tab" data-atab="pengaturan" onclick="switchATab('pengaturan')"><svg class="ico"><use href="#i-gear"/></svg> Pengaturan</div>
+    </div>
+
+    <div id="atab-daftar" class="atab-content">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <h2 style="margin:0"><svg class="ico"><use href="#i-people"/></svg> Daftar Guru Terdaftar</h2>
+          <span class="badge" id="totalGuruBadge">0 guru</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead>
+              <tr><th style="width:40px;">No</th><th>Nama</th><th>Email</th><th>Password Aktif</th><th style="width:180px;">Aksi</th></tr>
+            </thead>
+            <tbody id="guruTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="atab-tambah" class="atab-content hidden">
+      <div class="card">
+        <h2><svg class="ico"><use href="#i-plus"/></svg> Tambah Guru Baru</h2>
+        <label>Nama Lengkap</label>
+        <input type="text" id="newGuruNama" placeholder="Nama lengkap guru">
+        <label>Email</label>
+        <input type="email" id="newGuruEmail" placeholder="email@sekolah.sch.id" autocomplete="off">
+        <label>Password Awal (min 6 karakter)</label>
+        <div class="pass-wrap">
+          <input type="password" id="newGuruPass" placeholder="Password awal">
+          <button class="pass-toggle" onclick="togglePass('newGuruPass', this)" type="button"><svg class="ico"><use href="#i-eye"/></svg></button>
+        </div>
+        <button class="success" onclick="tambahGuru()"><svg class="ico"><use href="#i-save"/></svg> Simpan Guru Baru</button>
+        <div id="tambahGuruStatus" class="ok-msg"></div>
+      </div>
+    </div>
+
+    <div id="atab-reset" class="atab-content hidden">
+      <div class="card">
+        <h2><svg class="ico"><use href="#i-key"/></svg> Reset Password Guru</h2>
+        <label>Email Guru</label>
+        <input type="email" id="resetEmail" placeholder="email guru" autocomplete="off">
+        <label>Password Baru (min 6 karakter)</label>
+        <div class="pass-wrap">
+          <input type="password" id="resetPass" placeholder="Password baru">
+          <button class="pass-toggle" onclick="togglePass('resetPass', this)" type="button"><svg class="ico"><use href="#i-eye"/></svg></button>
+        </div>
+        <button class="warning" onclick="resetPasswordGuru()"><svg class="ico"><use href="#i-refresh"/></svg> Reset Password</button>
+        <div id="resetStatus" class="ok-msg"></div>
+      </div>
+    </div>
+
+    <div id="atab-pengaturan" class="atab-content hidden">
+      <div class="card">
+        <h2><svg class="ico"><use href="#i-user"/></svg> Info Admin</h2>
+        <div class="guru-info" id="adminInfoBox"></div>
+      </div>
+      <div class="card">
+        <h2><svg class="ico"><use href="#i-lock"/></svg> Ganti Password Admin</h2>
+        <label>Password Lama</label>
+        <div class="pass-wrap"><input type="password" id="adminOldPass" placeholder="Password lama"><button class="pass-toggle" onclick="togglePass('adminOldPass', this)" type="button"><svg class="ico"><use href="#i-eye"/></svg></button></div>
+        <label>Password Baru (min 6 karakter)</label>
+        <div class="pass-wrap"><input type="password" id="adminNewPass" placeholder="Password baru"><button class="pass-toggle" onclick="togglePass('adminNewPass', this)" type="button"><svg class="ico"><use href="#i-eye"/></svg></button></div>
+        <label>Ulangi Password Baru</label>
+        <div class="pass-wrap"><input type="password" id="adminNewPass2" placeholder="Ulangi password"><button class="pass-toggle" onclick="togglePass('adminNewPass2', this)" type="button"><svg class="ico"><use href="#i-eye"/></svg></button></div>
+        <button onclick="gantiPasswordAdmin()"><svg class="ico"><use href="#i-save"/></svg> Ganti Password Admin</button>
+      </div>
+      <div class="card">
+        <h2><svg class="ico"><use href="#i-download"/></svg> Backup Data Guru</h2>
+        <button class="success" onclick="exportGuruCSV()"><svg class="ico"><use href="#i-download"/></svg> Export Daftar Guru (CSV)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// KONFIGURASI
+// ============================================================
+const GURU_DEFAULT = [
+  { nama: "Ahmat Sofii", email: "ahmatsofiismp10@gmail.com", password: "#Smpn10smd" },
+  { nama: "Alfina Damayanti", email: "alfinadamayanti1518@gmail.com", password: "#Smpn10smd" },
+  { nama: "Ali Husni", email: "aliehuzney89@gmail.com", password: "#Smpn10smd" },
+  { nama: "Alifian Nabila", email: "alifiannabila@gmail.com", password: "#Smpn10smd" },
+  { nama: "Ana Nyina Huvat", email: "anahuvat@gmail.com", password: "#Smpn10smd" },
+  { nama: "Andhini Sagita Putri", email: "andhini409@gmail.com", password: "#Smpn10smd" },
+  { nama: "Anggrey Yani Marheles Sinulingga", email: "anggreyyani885@gmail.com", password: "#Smpn10smd" },
+  { nama: "Ari Setiawan", email: "arie.infokom@gmail.com", password: "#Smpn10smd" },
+  { nama: "Aulia Jasmine", email: "jasmincaulia1110@gmail.com", password: "#Smpn10smd" },
+  { nama: "Cicih Winarni", email: "cicih.winarni@gmail.com", password: "#Smpn10smd" },
+  { nama: "Cikal Chynthia Marbun", email: "cikalmarbun@gmail.com", password: "#Smpn10smd" },
+  { nama: "Devi Fatmawati", email: "devifat2505@gmail.com", password: "#Smpn10smd" },
+  { nama: "Dir Indarmaji", email: "indarmajidir@gmail.com", password: "#Smpn10smd" },
+  { nama: "Elyanazintha Tising B", email: "elyanazintha@gmail.com", password: "#Smpn10smd" },
+  { nama: "Febiola Tudang", email: "febiolaturdang01@gmail.com", password: "#Smpn10smd" },
+  { nama: "Fikri Yassaar Arrazaq", email: "fikriya90@gmail.com", password: "#Smpn10smd" },
+  { nama: "Hatija Tihurua", email: "narsia@gmail.com", password: "#Smpn10smd" },
+  { nama: "Henny Kusumastuty", email: "hennykusumastuty15@gmail.com", password: "#Smpn10smd" },
+  { nama: "Hermansyah", email: "hermansyah0135@gmail.com", password: "#Smpn10smd" },
+  { nama: "I Nengah Sukalana", email: "inengahsukalana9@gmail.com", password: "#Smpn10smd" },
+  { nama: "Ida Purwanti", email: "purwaida24@yahoo.com", password: "#Smpn10smd" },
+  { nama: "Idrus", email: "idrussalmansyah6500@gmail.com", password: "#Smpn10smd" },
+  { nama: "Indah Nur Fitriana", email: "indah.nurfi40301@gmail.com", password: "#Smpn10smd" },
+  { nama: "Indun", email: "indunabid1@gmail.com", password: "#Smpn10smd" },
+  { nama: "Januar Ismar", email: "janekagaku@gmail.com", password: "#Smpn10smd" },
+  { nama: "Juraidah", email: "bsjuraidah@gmail.com", password: "#Smpn10smd" },
+  { nama: "Linda", email: "lindalinda35486@gmail.com", password: "#Smpn10smd" },
+  { nama: "Luh Putu Sri Agustini", email: "putuagustini536@gmail.com", password: "#Smpn10smd" },
+  { nama: "MUHAMMAD IBNU SYAMWARDANA", email: "muhammadibnusyamwardana@gmail.com", password: "#Smpn10smd" },
+  { nama: "Muhammad Juli Rizki Cahyadi", email: "cahyadirizki850723@gmail.com", password: "#Smpn10smd" },
+  { nama: "Muhammad Rifai", email: "rifaimuhammad1402@gmail.com", password: "#Smpn10smd" },
+  { nama: "Nurul Fajrin", email: "nurulfajrin483@gmail.com", password: "#Smpn10smd" },
+  { nama: "Parjan", email: "ahsanfirdaus2011@gmail.com", password: "#Smpn10smd" },
+  { nama: "Pazru Rahman", email: "pazrurahman@gmail.com", password: "#Smpn10smd" },
+  { nama: "Rainy Annissa Khairyah", email: "rainyannissa99@gmail.com", password: "#Smpn10smd" },
+  { nama: "Ramdani Muntaha Putra", email: "ramdanimuntahaputra@gmail.com", password: "#Smpn10smd" },
+  { nama: "RIFQI HIDAYAT", email: "rifday48@gmail.com", password: "#Smpn10smd" },
+  { nama: "Rina Wahyuni", email: "rinawahyuni0488@gmail.com", password: "#Smpn10smd" },
+  { nama: "Riswin Wuliantini", email: "winwuliantini29@gmail.com", password: "#Smpn10smd" },
+  { nama: "Riyanto", email: "riyantotimiunta3773@gmail.com", password: "#Smpn10smd" },
+  { nama: "Rona Theresa Idang Ngo", email: "tonatheresaa@gmail.com", password: "#Smpn10smd" },
+  { nama: "Ruli Amirudin", email: "tujuhbelas1726@gmail.com", password: "#Smpn10smd" },
+  { nama: "SEPTI TRI NURHAENY", email: "septinurhaeny@gmail.com", password: "#Smpn10smd" },
+  { nama: "Shinta Mayasari", email: "mayasarishinta92@gmail.com", password: "#Smpn10smd" },
+  { nama: "Siska Susilawati", email: "siskaslwt01@gmail.com", password: "#Smpn10smd" },
+  { nama: "Solik Isrotin", email: "solikisrotin123@gmail.com", password: "#Smpn10smd" },
+  { nama: "Sriani", email: "naiylafadhila97@gmail.com", password: "#Smpn10smd" },
+  { nama: "Sugiharti", email: "sugihartymf@yahoo.co.id", password: "#Smpn10smd" },
+  { nama: "Tony Tawakaluddin", email: "tawakalt96@gmail.com", password: "#Smpn10smd" },
+  { nama: "Trifina Song Lung", email: "trifina_smpn45@yahoo.com", password: "#Smpn10smd" },
+  { nama: "Tsania Lathifa Hani", email: "tsanialathifahani@gmail.com", password: "#Smpn10smd" },
+  { nama: "Umi Nadhiroh", email: "uminadhiroh32@gmail.com", password: "#Smpn10smd" },
+  { nama: "Yani Sulis Setyaningsih", email: "yanisulisgeo@gmail.com", password: "#Smpn10smd" },
+  { nama: "Yuli Rahmawati", email: "yuli.rahmawati.1985@gmail.com", password: "#Smpn10smd" }
+];
+
+const ADMIN_DEFAULT = { nama: "Administrator MUARA", email: "admin@muara.local", password: "AdminMuara10SMP@" };
+const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/";
+
+const PROMPT_AI = {
+  pilgan: `Saya adalah guru. Ubah draf soal PILIHAN GANDA berikut agar otomatis sesuai dengan format sistem ujian online:
+
+Aturan Format:
+- Penomoran berurutan (1., 2., 3., dst.).
+- Opsi A., B., C., D., E. masing-masing berada di baris baru.
+- Tulis "Kunci Jawaban: [Huruf]" tepat di bawah opsi E.
+
+Draf Soal:
+[TEMPEL DRAF SOAL PILIHAN GANDA DI SINI]`,
+
+  uraian: `Saya adalah guru. Ubah draf soal URAIAN berikut agar otomatis sesuai dengan format sistem ujian online:
+
+Aturan Format:
+- Penomoran berurutan (1., 2., 3., dst.).
+- Tulis "Jawaban Ideal: [Isi jawaban yang lengkap, padat, dan akurat]" tepat di bawah setiap soal.
+
+Draf Soal:
+[TEMPEL DRAF SOAL URAIAN DI SINI]`,
+
+  gabungan: `Saya adalah guru. Ubah draf soal gabungan berikut agar otomatis sesuai dengan format sistem ujian online. Pisahkan menjadi dua bagian utama:
+
+BAGIAN 1: PILIHAN GANDA
+- Penomoran berurutan (1., 2., 3., dst.).
+- Opsi A., B., C., D., E. berada di baris baru.
+- Sertakan "Kunci Jawaban: [Huruf]" di bawah opsi E.
+
+BAGIAN 2: URAIAN
+- Penomoran berurutan (1., 2., 3., dst.).
+- Sertakan "Jawaban Ideal: [Isi jawaban padat dan jelas]" tepat di bawah tiap soal.
+
+Draf Soal:
+[TEMPEL SEMUA DRAF SOAL DI SINI]`
+};
+
+const RUBRIK_PRESET = {
+  pilgan: `RUBRIK PENILAIAN — PILIHAN GANDA
+1. Jawaban benar: mendapat nilai penuh sesuai bobot soal.
+2. Jawaban salah atau kosong: 0 poin.
+3. Tidak perlu feedback panjang, cukup singkat.
+
+Total skor maksimal: 100 poin.`,
+
+  uraian: `RUBRIK PENILAIAN — URAIAN UMUM
+1. Kedalaman analisis dan pemahaman konsep (0-40 poin)
+2. Penggunaan bukti, data, atau contoh pendukung (0-30 poin)
+3. Koherensi dan struktur argumen (0-20 poin)
+4. Penggunaan bahasa Indonesia yang baik dan benar (0-10 poin)
+
+Total skor maksimal: 100 poin.`,
+
+  matematika: `RUBRIK PENILAIAN — URAIAN MATEMATIKA
+1. Pemahaman soal & penulisan yang diketahui/ditanya (0-10 poin)
+2. Ketepatan rumus atau konsep yang dipakai (0-30 poin)
+3. Langkah pengerjaan sistematis dan logis (0-35 poin)
+4. Ketepatan hasil akhir dan satuan (0-20 poin)
+5. Kerapian penulisan (0-5 poin)
+
+Total skor maksimal: 100 poin.
+PENTING: Nilai proses pengerjaan, bukan hanya jawaban akhir.`,
+
+  ipa: `RUBRIK PENILAIAN — URAIAN IPA (SAINS)
+1. Pemahaman konsep ilmiah (0-30 poin)
+2. Ketepatan prosedur/metode ilmiah (0-25 poin)
+3. Penggunaan istilah ilmiah yang tepat (0-15 poin)
+4. Analisis data atau pengamatan (0-20 poin)
+5. Kesimpulan yang logis (0-10 poin)
+
+Total skor maksimal: 100 poin.`,
+
+  informatika: `RUBRIK PENILAIAN — URAIAN INFORMATIKA
+1. Pemahaman masalah & tujuan program/algoritma (0-15 poin)
+2. Ketepatan logika/algoritma (0-30 poin)
+3. Sintaks kode atau notasi yang benar (0-25 poin)
+4. Efisiensi & kejelasan solusi (0-20 poin)
+5. Dokumentasi/penjelasan singkat (0-10 poin)
+
+Total skor maksimal: 100 poin.`,
+
+  bahasa: `RUBRIK PENILAIAN — URAIAN BAHASA ASING
+1. Ketepatan tata bahasa (grammar) (0-30 poin)
+2. Penggunaan kosakata yang sesuai konteks (0-25 poin)
+3. Kejelasan makna & koherensi (0-25 poin)
+4. Kelancaran & struktur kalimat (0-20 poin)
+
+Total skor maksimal: 100 poin.`,
+
+  hitung: `RUBRIK PENILAIAN — URAIAN HITUNGAN SINGKAT
+1. Ketepatan jawaban akhir (0-60 poin)
+2. Ketepatan cara singkat/langkah (0-25 poin)
+3. Ketepatan satuan/notasi (0-10 poin)
+4. Kerapian penulisan (0-5 poin)
+
+Total skor maksimal: 100 poin.`,
+
+  gabunganUmum: `RUBRIK PENILAIAN — GABUNGAN (PILIHAN GANDA + URAIAN UMUM)
+
+BAGIAN A — PILIHAN GANDA:
+1. Jawaban benar: nilai penuh sesuai bobot.
+2. Jawaban salah atau kosong: 0 poin.
+3. Tidak perlu feedback panjang, cukup singkat.
+
+BAGIAN B — URAIAN:
+1. Kedalaman analisis dan pemahaman konsep (0-40 poin)
+2. Penggunaan bukti, data, atau contoh pendukung (0-30 poin)
+3. Koherensi dan struktur argumen (0-20 poin)
+4. Penggunaan bahasa Indonesia yang baik dan benar (0-10 poin)
+
+Total skor maksimal: 100 poin (disesuaikan dengan bobot tiap soal).`,
+
+  gabunganSains: `RUBRIK PENILAIAN — GABUNGAN SAINS (PILIHAN GANDA + URAIAN IPA/MATEMATIKA)
+
+BAGIAN A — PILIHAN GANDA:
+1. Jawaban benar: nilai penuh sesuai bobot.
+2. Jawaban salah atau kosong: 0 poin.
+3. Tidak perlu feedback panjang, cukup singkat.
+
+BAGIAN B — URAIAN SAINS/MATEMATIKA:
+1. Pemahaman konsep & identifikasi informasi (0-15 poin)
+2. Ketepatan rumus/konsep ilmiah (0-30 poin)
+3. Langkah pengerjaan sistematis dan logis (0-35 poin)
+4. Ketepatan hasil akhir dan satuan (0-15 poin)
+5. Kerapian penulisan (0-5 poin)
+
+PENTING: Nilai proses pengerjaan, bukan hanya jawaban akhir.
+Total skor maksimal: 100 poin (disesuaikan dengan bobot tiap soal).`,
+
+  gabunganBahasa: `RUBRIK PENILAIAN — GABUNGAN BAHASA (PILIHAN GANDA + URAIAN BAHASA)
+
+BAGIAN A — PILIHAN GANDA:
+1. Jawaban benar: nilai penuh sesuai bobot.
+2. Jawaban salah atau kosong: 0 poin.
+3. Tidak perlu feedback panjang, cukup singkat.
+
+BAGIAN B — URAIAN BAHASA:
+1. Ketepatan isi & pemahaman teks (0-30 poin)
+2. Struktur & koherensi tulisan (0-25 poin)
+3. Penggunaan kosakata & tata bahasa (0-25 poin)
+4. Kreativitas & gaya bahasa (0-20 poin)
+
+Total skor maksimal: 100 poin (disesuaikan dengan bobot tiap soal).`
+};
+
+const KETENTUAN_PRESET = {
+  pilgan: `1. Tugas bersifat individu, tidak boleh bekerja sama.
+2. Soal berisi Pilihan Ganda. Pilih satu jawaban yang paling tepat.
+3. Setelah mengumpulkan, nilai akan muncul otomatis.`,
+
+  uraian: `1. Tugas bersifat individu, tidak boleh bekerja sama.
+2. Soal berisi Uraian. Tulis jawaban dengan bahasa sendiri.
+3. Jawaban boleh diketik atau difoto (untuk soal hitungan/gambar).
+4. Setelah mengumpulkan, nilai akan muncul otomatis.`,
+
+  keduanya: `1. Tugas bersifat individu, tidak boleh bekerja sama.
+2. Tugas berisi Pilihan Ganda dan Uraian.
+3. Untuk Pilihan Ganda: pilih satu jawaban yang paling tepat.
+4. Untuk Uraian: tulis jawaban dengan bahasa sendiri (boleh diketik atau difoto).
+5. Setelah mengumpulkan, nilai akan muncul otomatis.`
+};
+
+let state;
+try { state = JSON.parse(localStorage.getItem('MUARA_v7') || '{}'); } catch (e) { state = {}; }
+if (!state.tugas) state.tugas = [];
+if (!state.hasil) state.hasil = [];
+if (!state.guruList) state.guruList = JSON.parse(JSON.stringify(GURU_DEFAULT));
+if (!state.customPasswords) state.customPasswords = {};
+if (!state.admin) state.admin = { ...ADMIN_DEFAULT };
+
+let currentUser = { role: null, nama: '', kelas: '', email: '' };
+let currentTugas = null;
+let editingTugasId = null;
+let editorSoal = [];
+let jawabanSementara = {};
+let rubrikTabAktif = 'pilgan';
+let promptTabAktif = 'pilgan';
+
+function simpanState() { try { localStorage.setItem('MUARA_v7', JSON.stringify(state)); } catch (e) { console.error(e); } }
+function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s) { return String(s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+function generateKodeUnik() {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let kode = ''; let attempts = 0;
+  do {
+    kode = '';
+    for (let i = 0; i < 6; i++) kode += chars[Math.floor(Math.random() * chars.length)];
+    attempts++;
+    if (attempts > 500) break;
+  } while (state.tugas.some(t => t.kode === kode));
+  return kode;
+}
+
+function togglePass(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPass = input.type === 'password';
+  input.type = isPass ? 'text' : 'password';
+  btn.innerHTML = `<svg class="ico"><use href="${isPass ? '#i-eye-off' : '#i-eye'}"/></svg>`;
+}
+
+function showLogin(role) {
+  document.getElementById('roleChoice').classList.toggle('hidden', role !== null);
+  document.getElementById('loginGuru').classList.toggle('hidden', role !== 'guru');
+  document.getElementById('loginLupa').classList.toggle('hidden', role !== 'lupaPassword');
+  document.getElementById('loginSiswa').classList.toggle('hidden', role !== 'siswa');
+  document.getElementById('loginAdmin').classList.toggle('hidden', role !== 'admin');
+  document.getElementById('guruError').textContent = '';
+  document.getElementById('siswaError').textContent = '';
+  document.getElementById('adminError').textContent = '';
+  document.getElementById('lupaStatus').textContent = '';
+  if (role === 'guru') document.getElementById('guruEmailLogin').focus();
+  if (role === 'siswa') document.getElementById('kodeInput').focus();
+  if (role === 'admin') document.getElementById('adminEmailLogin').focus();
+  if (role === 'lupaPassword') document.getElementById('lupaEmail').focus();
+}
+
+function loginGuru() {
+  const emailInput = document.getElementById('guruEmailLogin').value.trim().toLowerCase();
+  const pass = document.getElementById('guruPassLogin').value;
+  const err = document.getElementById('guruError');
+  err.textContent = '';
+  if (!emailInput) { err.textContent = 'Email belum diisi.'; return; }
+  if (!pass) { err.textContent = 'Password belum diisi.'; return; }
+  const guru = state.guruList.find(g => g.email.toLowerCase() === emailInput);
+  if (!guru) { err.textContent = 'Email tidak terdaftar sebagai guru.'; return; }
+  const expectedPass = state.customPasswords[emailInput] || guru.password;
+  if (pass.trim() !== expectedPass) { err.textContent = 'Password salah.'; return; }
+  currentUser = { role: 'guru', nama: guru.nama, email: guru.email };
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('guruPage').classList.remove('hidden');
+  document.getElementById('guruUserInfo').innerHTML = `<svg class="ico"><use href="#i-teacher"/></svg> <b>${escapeHtml(guru.nama)}</b> <small>(${escapeHtml(guru.email)})</small>`;
+  const infoBox = document.getElementById('guruInfoBox');
+  if (infoBox) infoBox.innerHTML = `<b>Nama:</b> ${escapeHtml(guru.nama)}<br><b>Email:</b> ${escapeHtml(guru.email)}<br><b>Password:</b> ${state.customPasswords[emailInput] ? '(sudah diganti)' : '(default)'}`;
+  try { renderTugasList(); muatFilterTugas(); } catch (e) { console.error(e); }
+}
+
+async function prosesLupaPassword() {
+  const email = document.getElementById('lupaEmail').value.trim().toLowerCase();
+  const st = document.getElementById('lupaStatus');
+  const btn = document.getElementById('btnLupa');
+  st.className = 'error-msg'; st.textContent = '';
+  if (!email) { st.textContent = 'Email belum diisi.'; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { st.textContent = 'Format email tidak valid.'; return; }
+  const guru = state.guruList.find(g => g.email.toLowerCase() === email);
+  if (!guru) { st.textContent = 'Email tidak terdaftar.'; return; }
+  const tempPass = generateTempPassword();
+  state.customPasswords[email] = tempPass;
+  simpanState();
+  btn.disabled = true;
+  st.className = 'ok-msg';
+  st.innerHTML = `Mengirim password baru ke <b>${escapeHtml(email)}</b>...`;
+  try {
+    const res = await fetch(FORMSUBMIT_ENDPOINT + encodeURIComponent(email), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        _subject: 'MUARA — Password Baru Akun Guru',
+        _template: 'table', _captcha: 'false',
+        Nama: guru.nama, Email: guru.email, PasswordBaru: tempPass,
+        Pesan: 'Password baru Anda untuk login ke sistem MUARA SMP Negeri 10 Samarinda.',
+        Waktu: new Date().toLocaleString('id-ID')
+      })
+    });
+    if (!res.ok) throw new Error('Gagal kirim');
+    st.className = 'ok-msg';
+    st.innerHTML = `Password baru berhasil dikirim ke <b>${escapeHtml(email)}</b>.<br><small style="color:#718096;">Cek inbox atau folder spam.</small>`;
+  } catch (e) {
+    st.className = 'error-msg';
+    st.innerHTML = `Pengiriman email gagal. Password darurat:<br><b style="font-family:monospace; background:#f0fff4; padding:6px 12px; border-radius:6px; display:inline-block; margin-top:8px; font-size:1rem; color:#38a169;">${tempPass}</b>`;
+  } finally { btn.disabled = false; }
+}
+
+function generateTempPassword() {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let p = 'TMP-';
+  for (let i = 0; i < 5; i++) p += chars[Math.floor(Math.random() * chars.length)];
+  return p;
+}
+
+function validasiKode() {
+  const kode = document.getElementById('kodeInput').value.trim().toUpperCase();
+  const err = document.getElementById('siswaError');
+  if (kode.length !== 6) { err.textContent = 'Kode harus 6 karakter.'; return; }
+  const tugas = state.tugas.find(t => t.kode === kode);
+  if (!tugas) { err.textContent = 'Kode tidak valid.'; return; }
+  if (!tugas.aktif) { err.textContent = 'Tugas ini sudah ditutup.'; return; }
+  if (!tugas.apiKey) { err.textContent = 'Tugas belum memiliki API Key.'; return; }
+  err.textContent = '';
+  currentTugas = tugas;
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('previewPage').classList.remove('hidden');
+  document.getElementById('previewJudul').innerHTML = '<svg class="ico"><use href="#i-book"/></svg> ' + escapeHtml(tugas.judul || 'Tugas');
+  document.getElementById('previewInfo').innerHTML = `<svg class="ico"><use href="#i-info"/></svg><span><b>${escapeHtml(tugas.mapel || '-')}</b> | Kelas: <b>${escapeHtml(tugas.kelas || '-')}</b> | KKM: <b>${tugas.kkm}</b> | Jumlah soal: <b>${tugas.soal.length}</b>` + (tugas.durasi > 0 ? ` | Durasi: <b>${tugas.durasi} menit</b>` : '') + '</span>';
+  document.getElementById('previewKetentuan').textContent = tugas.ketentuan || '(Guru tidak menuliskan ketentuan khusus.)';
+  document.getElementById('siswaNama').focus();
+}
+
+function batalPreview() {
+  currentTugas = null;
+  document.getElementById('previewPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+  document.getElementById('kodeInput').value = '';
+  showLogin('siswa');
+}
+
+function loginAdmin() {
+  const email = document.getElementById('adminEmailLogin').value.trim().toLowerCase();
+  const pass = document.getElementById('adminPassLogin').value;
+  const err = document.getElementById('adminError');
+  err.textContent = '';
+  if (!email) { err.textContent = 'Email admin belum diisi.'; return; }
+  if (!pass) { err.textContent = 'Password admin belum diisi.'; return; }
+  if (email !== state.admin.email.toLowerCase()) { err.textContent = 'Email admin salah.'; return; }
+  if (pass !== state.admin.password) { err.textContent = 'Password admin salah.'; return; }
+  currentUser = { role: 'admin', nama: state.admin.nama, email: state.admin.email };
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('adminPage').classList.remove('hidden');
+  document.getElementById('adminUserInfo').innerHTML = `<svg class="ico"><use href="#i-admin"/></svg> <b>${escapeHtml(state.admin.nama)}</b>`;
+  const info = document.getElementById('adminInfoBox');
+  if (info) info.innerHTML = `<b>Nama:</b> ${escapeHtml(state.admin.nama)}<br><b>Email:</b> ${escapeHtml(state.admin.email)}<br><b>Total Guru:</b> ${state.guruList.length}`;
+  renderGuruTable();
+}
+
+function logoutAdmin() {
+  if (!confirm('Yakin keluar dari panel admin?')) return;
+  currentUser = { role: null, nama: '', email: '' };
+  document.getElementById('adminPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+  showLogin(null);
+  document.getElementById('adminEmailLogin').value = '';
+  document.getElementById('adminPassLogin').value = '';
+}
+
+function switchATab(tab) {
+  document.querySelectorAll('#adminPage .tab').forEach(t => { t.classList.remove('active'); if (t.dataset.atab === tab) t.classList.add('active'); });
+  document.querySelectorAll('.atab-content').forEach(t => t.classList.add('hidden'));
+  const target = document.getElementById('atab-' + tab); if (target) target.classList.remove('hidden');
+  if (tab === 'daftar') renderGuruTable();
+}
+
+function renderGuruTable() {
+  const tbody = document.getElementById('guruTableBody');
+  if (!tbody) return;
+  const totalBadge = document.getElementById('totalGuruBadge');
+  if (totalBadge) totalBadge.textContent = state.guruList.length + ' guru';
+  tbody.innerHTML = state.guruList.map((g, i) => {
+    const passAktif = state.customPasswords[g.email.toLowerCase()] || g.password;
+    const isCustom = !!state.customPasswords[g.email.toLowerCase()];
+    return `<tr><td>${i+1}</td><td><b>${escapeHtml(g.nama)}</b></td><td class="email-cell">${escapeHtml(g.email)}</td><td><span style="font-family:monospace; font-size:0.8rem; background:#f7fafc; padding:3px 8px; border-radius:4px;">${escapeHtml(passAktif)}</span>${isCustom ? '<span class="badge orange" style="margin-left:6px; font-size:0.65rem;">diubah</span>' : '<span class="badge gray" style="margin-left:6px; font-size:0.65rem;">default</span>'}</td><td><div class="actions"><button class="sm warning" onclick="quickReset('${escapeHtml(g.email)}')"><svg class="ico"><use href="#i-key"/></svg> Reset</button><button class="sm danger" onclick="hapusGuru('${escapeHtml(g.email)}')"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button></div></td></tr>`;
+  }).join('');
+}
+
+function quickReset(email) {
+  const guru = state.guruList.find(g => g.email.toLowerCase() === email.toLowerCase());
+  if (!guru) return;
+  const newPass = prompt(`Reset password untuk ${guru.nama}\n\nMasukkan password baru (min 6 karakter):`, '');
+  if (newPass === null) return;
+  if (newPass.length < 6) return alert('Password minimal 6 karakter.');
+  state.customPasswords[email.toLowerCase()] = newPass;
+  simpanState(); renderGuruTable();
+  alert(`Password ${guru.nama} berhasil direset menjadi: ${newPass}`);
+}
+
+function hapusGuru(email) {
+  const guru = state.guruList.find(g => g.email.toLowerCase() === email.toLowerCase());
+  if (!guru) return;
+  if (!confirm(`Hapus guru "${guru.nama}" dari sistem?`)) return;
+  state.guruList = state.guruList.filter(g => g.email.toLowerCase() !== email.toLowerCase());
+  delete state.customPasswords[email.toLowerCase()];
+  simpanState(); renderGuruTable();
+}
+
+function tambahGuru() {
+  const nama = document.getElementById('newGuruNama').value.trim();
+  const email = document.getElementById('newGuruEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('newGuruPass').value;
+  const st = document.getElementById('tambahGuruStatus');
+  st.textContent = ''; st.className = 'error-msg';
+  if (!nama) { st.textContent = 'Nama belum diisi.'; return; }
+  if (!email) { st.textContent = 'Email belum diisi.'; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { st.textContent = 'Format email tidak valid.'; return; }
+  if (!pass || pass.length < 6) { st.textContent = 'Password minimal 6 karakter.'; return; }
+  if (state.guruList.some(g => g.email.toLowerCase() === email)) { st.textContent = 'Email sudah terdaftar.'; return; }
+  state.guruList.push({ nama, email, password: pass });
+  simpanState();
+  st.className = 'ok-msg';
+  st.textContent = `Guru "${nama}" berhasil ditambahkan.`;
+  document.getElementById('newGuruNama').value = '';
+  document.getElementById('newGuruEmail').value = '';
+  document.getElementById('newGuruPass').value = '';
+  renderGuruTable();
+}
+
+function resetPasswordGuru() {
+  const email = document.getElementById('resetEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('resetPass').value;
+  const st = document.getElementById('resetStatus');
+  st.textContent = ''; st.className = 'error-msg';
+  if (!email) { st.textContent = 'Email belum diisi.'; return; }
+  if (!pass || pass.length < 6) { st.textContent = 'Password baru minimal 6 karakter.'; return; }
+  const guru = state.guruList.find(g => g.email.toLowerCase() === email);
+  if (!guru) { st.textContent = 'Email tidak terdaftar.'; return; }
+  state.customPasswords[email] = pass;
+  simpanState();
+  st.className = 'ok-msg';
+  st.textContent = `Password ${guru.nama} berhasil direset.`;
+  document.getElementById('resetEmail').value = '';
+  document.getElementById('resetPass').value = '';
+  renderGuruTable();
+}
+
+function gantiPasswordAdmin() {
+  const old = document.getElementById('adminOldPass').value;
+  const p1 = document.getElementById('adminNewPass').value;
+  const p2 = document.getElementById('adminNewPass2').value;
+  if (old !== state.admin.password) return alert('Password lama salah!');
+  if (p1.length < 6) return alert('Password baru minimal 6 karakter.');
+  if (p1 !== p2) return alert('Password baru tidak sama!');
+  state.admin.password = p1;
+  simpanState();
+  document.getElementById('adminOldPass').value = '';
+  document.getElementById('adminNewPass').value = '';
+  document.getElementById('adminNewPass2').value = '';
+  alert('Password admin berhasil diganti!');
+}
+
+function exportGuruCSV() {
+  let csv = 'No,Nama,Email,Password Aktif,Status\n';
+  state.guruList.forEach((g, i) => {
+    const passAktif = state.customPasswords[g.email.toLowerCase()] || g.password;
+    const status = state.customPasswords[g.email.toLowerCase()] ? 'diubah' : 'default';
+    csv += `${i+1},"${g.nama}","${g.email}","${passAktif}","${status}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `daftar-guru-MUARA-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function logout() {
+  if (!confirm('Yakin keluar dari panel guru?')) return;
+  currentUser = { role: null, nama: '', kelas: '', email: '' };
+  currentTugas = null; editingTugasId = null; editorSoal = []; jawabanSementara = {};
+  document.getElementById('guruPage').classList.add('hidden');
+  document.getElementById('tugasPage').classList.add('hidden');
+  document.getElementById('previewPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+  showLogin(null);
+  ['guruEmailLogin','guruPassLogin','kodeInput'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+
+function mulaiKerjakan() {
+  const nama = document.getElementById('siswaNama').value.trim();
+  const kelas = document.getElementById('siswaKelas').value;
+  if (!nama) return alert('Isi nama lengkap Anda.');
+  if (!kelas) return alert('Pilih kelas Anda.');
+  currentUser = { role: 'siswa', nama, kelas };
+  jawabanSementara = {};
+  document.getElementById('previewPage').classList.add('hidden');
+  document.getElementById('tugasPage').classList.remove('hidden');
+  document.getElementById('tugasUserInfo').innerHTML = `<svg class="ico"><use href="#i-student"/></svg> <b>${escapeHtml(nama)}</b> <small>(${escapeHtml(kelas)}) - Kode: ${currentTugas.kode}</small>`;
+  document.getElementById('tugasJudul').innerHTML = '<svg class="ico"><use href="#i-book"/></svg> ' + escapeHtml(currentTugas.judul || 'Tugas');
+  document.getElementById('tugasKetentuanSingkat').innerHTML = `<svg class="ico"><use href="#i-info"/></svg><span>${escapeHtml(currentTugas.mapel || '-')} | Kelas: ${escapeHtml(currentTugas.kelas || '-')} | KKM: ${currentTugas.kkm}` + (currentTugas.durasi > 0 ? ` | Durasi: ${currentTugas.durasi} menit` : '') + '</span>';
+  renderSoalSiswa();
+}
+
+function renderSoalSiswa() {
+  const c = document.getElementById('jawabanContainer');
+  c.innerHTML = '';
+  currentTugas.soal.forEach((s, i) => {
+    const jawab = jawabanSementara[i] || { mode: 'teks', teks: '', fotoData: '', mimeType: '', pilgan: '' };
+    jawabanSementara[i] = jawab;
+
+    if (s.jenis === 'pilgan') {
+      const opsi = s.opsi || [];
+      const huruf = ['A', 'B', 'C', 'D', 'E'];
+      c.innerHTML += `
+        <div class="question-box" style="border-left-color:#6a1b9a;">
+          <b>Soal #${i+1}</b> <span class="badge purple">Pilihan Ganda</span> <span class="badge">Bobot ${s.bobot}</span>
+          <p style="margin:8px 0; white-space:pre-wrap;">${escapeHtml(s.pertanyaan) || '(Soal kosong)'}</p>
+          <div class="opts-grid">
+            ${opsi.map((o, j) => `
+              <label class="kunci-pilih" style="display:flex; padding:10px; border-radius:8px; cursor:pointer; ${jawab.pilgan === huruf[j] ? 'background:#e8f5e9; border-color:#38a169;' : ''}" onclick="pilihJawabanPilgan(${i}, '${huruf[j]}')">
+                <input type="radio" name="pilgan-${i}" value="${huruf[j]}" ${jawab.pilgan === huruf[j] ? 'checked' : ''} onchange="pilihJawabanPilgan(${i}, '${huruf[j]}')">
+                <span style="font-weight:700; color:#6a1b9a; margin-right:6px;">${huruf[j]}.</span>
+                <span>${escapeHtml(o)}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>`;
+    } else {
+      const teksClass = jawab.mode === 'teks' ? 'active' : '';
+      const fotoClass = jawab.mode === 'foto' ? 'active' : '';
+      const showTeks = jawab.mode === 'teks';
+      const showFoto = jawab.mode === 'foto';
+      c.innerHTML += `
+        <div class="question-box">
+          <b>Soal #${i+1}</b> <span class="badge">Uraian</span> <span class="badge">Bobot ${s.bobot}</span>
+          <p style="margin:8px 0; white-space:pre-wrap;">${escapeHtml(s.pertanyaan) || '(Soal kosong)'}</p>
+          <div class="answer-tabs">
+            <div class="answer-tab ${teksClass}" onclick="gantiMode(${i}, 'teks')"><svg class="ico"><use href="#i-edit"/></svg> Ketik Jawaban</div>
+            <div class="answer-tab ${fotoClass}" onclick="gantiMode(${i}, 'foto')"><svg class="ico"><use href="#i-camera"/></svg> Foto / Upload Gambar</div>
+          </div>
+          <div id="modeTeks-${i}" class="${showTeks ? '' : 'hidden'}">
+            <textarea id="jw-${i}" placeholder="Tulis jawaban Anda di sini..." onchange="simpanTeks(${i}, this.value)">${escapeHtml(jawab.teks)}</textarea>
+          </div>
+          <div id="modeFoto-${i}" class="${showFoto ? '' : 'hidden'}">
+            <div class="photo-note">
+              <svg class="ico"><use href="#i-warn"/></svg>
+              <div><b>Catatan kualitas foto:</b><br>1. Pencahayaan cukup.<br>2. Foto tegak lurus, tidak blur.<br>3. Seluruh jawaban terlihat.<br>4. Tulisan jelas & kontras.<br>5. Format JPG/PNG, maks 5 MB.<br><i>Jika foto kurang jelas, akan diminta unggah ulang atau lapor guru.</i></div>
+            </div>
+            <div class="photo-zone" onclick="document.getElementById('foto-${i}').click()">
+              <svg class="ico ico-lg"><use href="#i-camera"/></svg>
+              <div class="main">Klik untuk pilih foto jawaban</div>
+              <div class="hint">atau ambil langsung dari kamera (HP)</div>
+            </div>
+            <input type="file" id="foto-${i}" class="file-input-hidden" accept="image/*" capture="environment" onchange="prosesFoto(${i}, event)">
+            <div id="preview-${i}">${jawab.fotoData ? `<img src="${jawab.fotoData}" class="photo-preview" alt="Preview">` : ''}</div>
+          </div>
+        </div>`;
+    }
+  });
+}
+
+function pilihJawabanPilgan(i, val) {
+  jawabanSementara[i].pilgan = val;
+  renderSoalSiswa();
+}
+
+function gantiMode(i, mode) {
+  jawabanSementara[i].mode = mode;
+  document.getElementById('modeTeks-' + i).classList.toggle('hidden', mode !== 'teks');
+  document.getElementById('modeFoto-' + i).classList.toggle('hidden', mode !== 'foto');
+  const qBox = document.getElementById('modeTeks-' + i).closest('.question-box');
+  const tabs = qBox.querySelectorAll('.answer-tab');
+  if (tabs[0] && tabs[1]) {
+    tabs[0].classList.toggle('active', mode === 'teks');
+    tabs[1].classList.toggle('active', mode === 'foto');
+  }
+}
+
+function simpanTeks(i, val) { jawabanSementara[i].teks = val; }
+
+function prosesFoto(i, event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) return alert('Ukuran foto terlalu besar (maks 5 MB).');
+  if (!file.type.startsWith('image/')) return alert('File harus berupa gambar.');
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    jawabanSementara[i].fotoData = e.target.result;
+    jawabanSementara[i].mimeType = file.type;
+    const prev = document.getElementById('preview-' + i);
+    if (prev) prev.innerHTML = `<img src="${e.target.result}" class="photo-preview" alt="Preview">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function kirimJawaban() {
+  for (let i = 0; i < currentTugas.soal.length; i++) {
+    const j = jawabanSementara[i];
+    const soal = currentTugas.soal[i];
+    if (!j) return alert(`Soal #${i+1} belum dijawab.`);
+    if (soal.jenis === 'pilgan') {
+      if (!j.pilgan) return alert(`Soal #${i+1} (pilihan ganda) belum dipilih jawabannya.`);
+    } else {
+      if (j.mode === 'teks' && !j.teks.trim()) return alert(`Soal #${i+1} belum diisi.`);
+      if (j.mode === 'foto' && !j.fotoData) return alert(`Soal #${i+1} belum ada foto.`);
+    }
+  }
+  if (!confirm('Kumpulkan jawaban sekarang?')) return;
+  const btn = document.getElementById('btnKirim');
+  btn.disabled = true;
+  document.getElementById('hasilSiswa').innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span><span class="msg">Silakan tunggu 1-5 menit, jawaban anda sedang dikoreksi</span><span class="sub">Mohon jangan menutup atau me-refresh halaman ini.</span></div></div>';
+  try {
+    const hasil = await koreksiAI(currentUser.nama, currentUser.kelas, jawabanSementara);
+    if (hasil.perluUploadUlang && hasil.perluUploadUlang.length > 0) {
+      const daftar = hasil.perluUploadUlang.map(x => `Soal #${x.nomor} (${x.alasan})`).join('<br>');
+      document.getElementById('hasilSiswa').innerHTML = `<div class="card info warning"><svg class="ico"><use href="#i-warn"/></svg><div><b>Foto jawaban kurang jelas.</b><br>AI tidak dapat membaca dengan baik pada:<br>${daftar}<br><br><b>Silakan:</b><br>1. Upload ulang foto lebih baik, atau<br>2. Laporkan ke guru Anda.<br><br><button class="warning sm" onclick="cobaLagi()">Coba Lagi</button></div></div>`;
+      return;
+    }
+    tampilkanHasilSiswa(hasil);
+    state.hasil.push({ tugasId: currentTugas.id, tugasKode: currentTugas.kode, tugasJudul: currentTugas.judul, tugasMapel: currentTugas.mapel, tugasKelas: currentTugas.kelas, guruEmail: currentTugas.guruEmail, nama: currentUser.nama, kelas: currentUser.kelas, waktu: new Date().toISOString(), ...hasil });
+    simpanState();
+    document.getElementById('jawabanContainer').innerHTML = '';
+    btn.classList.add('hidden');
+  } catch (e) {
+    document.getElementById('hasilSiswa').innerHTML = `<div class="card info red"><svg class="ico"><use href="#i-warn"/></svg><div><b>Terjadi kesalahan:</b><br>${escapeHtml(e.message)}</div></div>`;
+    btn.disabled = false;
+  }
+}
+
+function cobaLagi() {
+  document.getElementById('hasilSiswa').innerHTML = '';
+  document.getElementById('btnKirim').disabled = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function koreksiAI(nama, kelas, jawaban) {
+  const parts = [];
+  let promptText = `Anda guru ${currentTugas.mapel || 'umum'} yang adil menilai tugas siswa.
+
+RUBRIK PENILAIAN:
+${currentTugas.rubrik}
+
+TUGAS: ${currentTugas.judul}
+KELAS: ${currentTugas.kelas || '-'}
+NAMA SISWA: ${nama} (${kelas})
+
+INSTRUKSI KHUSUS:
+1. Setiap soal punya bobot. Nilai maksimal = bobot soal.
+2. Untuk soal jenis "PILIHAN GANDA":
+   - Bandingkan huruf jawaban siswa dengan kunci. Jika SAMA dapat nilai penuh. Jika BEDA 0.
+   - Tidak perlu feedback panjang, cukup singkat.
+3. Untuk soal jenis "URAIAN":
+   - Nilai sesuai RUBRIK di atas.
+   - Jika jawaban berupa FOTO dan TIDAK JELAS/BLUR/TERPOTONG, masukkan nomor soal ke "perluUploadUlang".
+4. Skor total 0-100 (disesuaikan dengan bobot).
+5. Kesimpulan umum.
+
+Balas HANYA JSON valid:
+{"perluUploadUlang":[{"nomor":1,"alasan":"..."}],"skorPerSoal":[{"nomor":1,"skor":0,"maks":100,"feedback":"..."}],"skorTotal":0,"kesimpulan":"..."}
+
+Jika semua dapat dinilai, "perluUploadUlang": [].
+
+Berikut jawaban siswa:
+`;
+  parts.push({ text: promptText });
+  for (let i = 0; i < currentTugas.soal.length; i++) {
+    const s = currentTugas.soal[i];
+    const j = jawaban[i];
+
+    if (s.jenis === 'pilgan') {
+      const huruf = ['A', 'B', 'C', 'D', 'E'];
+      const opsiList = (s.opsi || []).map((o, idx) => `  ${huruf[idx]}. ${o}`).join('\n');
+      const kunciIdx = huruf.indexOf(s.kunci);
+      const kunciTeks = kunciIdx >= 0 ? s.opsi[kunciIdx] : '-';
+      parts.push({ text: `\n\n--- SOAL ${i+1} (Bobot ${s.bobot}) [JENIS: PILIHAN GANDA] ---\nPERTANYAAN: ${s.pertanyaan}\nOPSI:\n${opsiList}\nKUNCI JAWABAN: ${s.kunci}. ${kunciTeks}\nJAWABAN SISWA: ${j.pilgan || '(tidak dijawab)'}\n` });
+    } else {
+      parts.push({ text: `\n\n--- SOAL ${i+1} (Bobot ${s.bobot}) [JENIS: URAIAN] ---\nPERTANYAAN: ${s.pertanyaan}\nKUNCI: ${s.kunci || '(tidak ada)'}\nTIPE: ${j.mode === 'foto' ? 'FOTO' : 'TEKS'}\n` });
+      if (j.mode === 'teks') parts.push({ text: `JAWABAN (TEKS):\n${j.teks}` });
+      else if (j.mode === 'foto' && j.fotoData) {
+        parts.push({ text: `JAWABAN (FOTO):` });
+        const base64 = j.fotoData.split(',')[1];
+        parts.push({ inline_data: { mime_type: j.mimeType || 'image/jpeg', data: base64 } });
+      }
+    }
+  }
+  const MODEL = 'gemini-3.6-flash';
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${currentTugas.apiKey}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts }], generationConfig: { temperature: 0.3, responseMimeType: 'application/json' } })
+  });
+  if (!res.ok) throw new Error(`Gemini API error (${res.status}).`);
+  const data = await res.json();
+  let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  text = text.replace(/```json|```/g, '').trim();
+  try { const parsed = JSON.parse(text); if (!parsed.perluUploadUlang) parsed.perluUploadUlang = []; return parsed; }
+  catch (e) { throw new Error('Format AI tidak valid. Coba lagi.'); }
+}
+
+function tampilkanHasilSiswa(hasil) {
+  const lulus = hasil.skorTotal >= currentTugas.kkm;
+  const warna = lulus ? '#38a169' : '#e53e3e';
+  const status = lulus ? 'LULUS' : 'BELUM LULUS';
+  let html = `<div class="card" id="hasilCard"><h2><svg class="ico"><use href="#i-check"/></svg> Hasil Penilaian Anda</h2><div class="score-big" style="color:${warna};">${hasil.skorTotal} / 100</div><p style="text-align:center; color:${warna}; font-weight:700; margin-top:8px;">${status} (KKM: ${currentTugas.kkm})</p><h3><svg class="ico"><use href="#i-doc"/></svg> Rincian Per Soal</h3>`;
+  (hasil.skorPerSoal || []).forEach(s => { html += `<div class="result-box"><b>Soal #${s.nomor}</b> — Skor: <b>${s.skor}/${s.maks}</b><div class="feedback">${escapeHtml(s.feedback)}</div></div>`; });
+  html += `<h3><svg class="ico"><use href="#i-info"/></svg> Kesimpulan Guru</h3><div class="feedback">${escapeHtml(hasil.kesimpulan)}</div><div class="info green" style="margin-top:16px;"><svg class="ico"><use href="#i-check"/></svg><span>Nilai Anda sudah otomatis terkirim ke guru.</span></div>
+    <h3 style="margin-top:20px;"><svg class="ico"><use href="#i-download"/></svg> Unduh Hasil Penilaian</h3>
+    <p style="font-size:0.85rem; color:#718096; margin-bottom:6px;">Pilih format unduhan:</p>
+    <div class="unduh-row">
+      <button class="pdf" onclick="unduhHasilPDF()"><svg class="ico"><use href="#i-file-pdf"/></svg> Unduh PDF</button>
+      <button class="img" onclick="unduhHasilGambar()"><svg class="ico"><use href="#i-image"/></svg> Unduh Gambar (PNG)</button>
+    </div>
+    </div>`;
+  document.getElementById('hasilSiswa').innerHTML = html;
+  window.scrollTo({ top: document.getElementById('hasilSiswa').offsetTop, behavior: 'smooth' });
+}
+
+// ============================================================
+// UNDUH HASIL — PDF & GAMBAR
+// ============================================================
+
+function buildHasilRenderHTML(hasil) {
+  const lulus = hasil.skorTotal >= currentTugas.kkm;
+  const warna = lulus ? '#38a169' : '#e53e3e';
+  const status = lulus ? 'LULUS' : 'BELUM LULUS';
+  const tgl = new Date(hasil.waktu).toLocaleString('id-ID', {
+    day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+
+  let html = `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;background:#fff;padding:30px;width:720px;color:#222;">
+      <div style="text-align:center;border-bottom:3px solid #0d47a1;padding-bottom:12px;margin-bottom:18px;">
+        <div style="font-size:1.6rem;font-weight:800;color:#0d47a1;letter-spacing:1px;">MUARA</div>
+        <div style="font-size:0.88rem;font-weight:700;color:#0d47a1;margin-top:2px;">SMP Negeri 10 Samarinda</div>
+        <div style="font-size:0.78rem;color:#00695c;font-style:italic;margin-top:2px;">Mesin Ujian &amp; Analisis Respons Alternatif</div>
+        <div style="font-size:0.95rem;font-weight:700;margin-top:8px;">LAPORAN HASIL PENILAIAN TUGAS</div>
+      </div>
+
+      <table style="width:100%;font-size:0.88rem;border-collapse:collapse;margin-bottom:14px;">
+        <tr><td style="padding:3px 0;width:140px;"><b>Nama Siswa</b></td><td>: ${escapeHtml(hasil.nama)}</td></tr>
+        <tr><td style="padding:3px 0;"><b>Kelas</b></td><td>: ${escapeHtml(hasil.kelas)}</td></tr>
+        <tr><td style="padding:3px 0;"><b>Mata Pelajaran</b></td><td>: ${escapeHtml(hasil.tugasMapel || '-')}</td></tr>
+        <tr><td style="padding:3px 0;"><b>Judul Tugas</b></td><td>: ${escapeHtml(hasil.tugasJudul || '-')}</td></tr>
+        <tr><td style="padding:3px 0;"><b>Kode Tugas</b></td><td>: ${escapeHtml(hasil.tugasKode || '-')}</td></tr>
+        <tr><td style="padding:3px 0;"><b>Waktu Kumpul</b></td><td>: ${tgl}</td></tr>
+        <tr><td style="padding:3px 0;"><b>KKM</b></td><td>: ${currentTugas.kkm}</td></tr>
+      </table>
+
+      <div style="text-align:center;padding:16px;border:3px solid ${warna};border-radius:10px;background:${lulus?'#f0fff4':'#fff5f5'};margin-bottom:18px;">
+        <div style="font-size:2.4rem;font-weight:800;color:${warna};line-height:1.1;">${hasil.skorTotal} / 100</div>
+        <div style="font-size:1rem;font-weight:700;color:${warna};margin-top:4px;">${status}</div>
+      </div>
+
+      <h3 style="font-size:1rem;color:#0d47a1;border-bottom:2px solid #0d47a1;padding-bottom:4px;margin-bottom:10px;">Rincian Per Soal</h3>`;
+
+  (hasil.skorPerSoal || []).forEach(s => {
+    html += `
+      <div style="border:1px solid #cbd5e0;border-radius:8px;padding:12px;margin-bottom:10px;background:#f7fafc;">
+        <div style="font-weight:700;color:#0d47a1;display:flex;justify-content:space-between;">
+          <span>Soal #${s.nomor}</span>
+          <span style="color:${warna};">${s.skor} / ${s.maks}</span>
+        </div>
+        <div style="font-size:0.85rem;line-height:1.5;margin-top:6px;padding-left:8px;border-left:3px solid #38a169;background:#fff;padding:8px;">${escapeHtml(s.feedback)}</div>
+      </div>`;
+  });
+
+  html += `
+      <h3 style="font-size:1rem;color:#0d47a1;border-bottom:2px solid #0d47a1;padding-bottom:4px;margin:18px 0 10px;">Kesimpulan</h3>
+      <div style="background:#fffaf0;border-left:4px solid #dd6b20;padding:12px;border-radius:6px;font-size:0.88rem;line-height:1.6;">
+        ${escapeHtml(hasil.kesimpulan)}
+      </div>
+
+      <div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #cbd5e0;font-size:0.75rem;color:#718096;">
+        Dokumen ini dihasilkan otomatis oleh sistem MUARA — SMP Negeri 10 Samarinda.<br>
+        ${new Date().toLocaleString('id-ID')}
+      </div>
+    </div>`;
+  return html;
+}
+
+function getHasilSiswa() {
+  const hasilList = state.hasil.filter(h =>
+    h.nama === currentUser.nama &&
+    h.kelas === currentUser.kelas &&
+    h.tugasId === currentTugas.id
+  );
+  if (hasilList.length === 0) {
+    alert('Data hasil tidak ditemukan.');
+    return null;
+  }
+  return hasilList[hasilList.length - 1];
+}
+
+function showUnduhLoading(pesan) {
+  document.getElementById('hasilSiswa').insertAdjacentHTML('afterbegin',
+    `<div id="unduhLoading" class="card info green" style="text-align:center;">
+      <svg class="ico"><use href="#i-info"/></svg>
+      <span>${pesan}</span>
+    </div>`);
+}
+
+function hideUnduhLoading() {
+  const el = document.getElementById('unduhLoading');
+  if (el) el.remove();
+}
+
+// ============= UNDUH PDF =============
+async function unduhHasilPDF() {
+  const hasil = getHasilSiswa();
+  if (!hasil) return;
+
+  if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+    alert('Pustaka PDF belum termuat. Periksa koneksi internet, lalu refresh halaman.');
+    return;
+  }
+
+  showUnduhLoading('Menyiapkan PDF... Mohon tunggu.');
+  try {
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'fixed';
+    wrapper.style.left = '-9999px';
+    wrapper.style.top = '0';
+    wrapper.style.background = '#fff';
+    wrapper.innerHTML = buildHasilRenderHTML(hasil);
+    document.body.appendChild(wrapper);
+
+    const target = wrapper.firstElementChild;
+    const canvas = await html2canvas(target, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      logging: false
+    });
+
+    document.body.removeChild(wrapper);
+
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgWidth = pdfWidth;
+    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pdfHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+    }
+
+    const namaFile = `Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.pdf`;
+    pdf.save(namaFile);
+  } catch (e) {
+    console.error(e);
+    alert('Gagal membuat PDF: ' + e.message);
+  } finally {
+    hideUnduhLoading();
+  }
+}
+
+// ============= UNDUH GAMBAR (PNG) =============
+async function unduhHasilGambar() {
+  const hasil = getHasilSiswa();
+  if (!hasil) return;
+
+  if (typeof html2canvas === 'undefined') {
+    alert('Pustaka gambar belum termuat. Periksa koneksi internet, lalu refresh halaman.');
+    return;
+  }
+
+  showUnduhLoading('Menyiapkan gambar... Mohon tunggu.');
+  try {
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'fixed';
+    wrapper.style.left = '-9999px';
+    wrapper.style.top = '0';
+    wrapper.style.background = '#fff';
+    wrapper.innerHTML = buildHasilRenderHTML(hasil);
+    document.body.appendChild(wrapper);
+
+    const target = wrapper.firstElementChild;
+    const canvas = await html2canvas(target, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      logging: false
+    });
+
+    document.body.removeChild(wrapper);
+
+    const link = document.createElement('a');
+    link.download = `Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (e) {
+    console.error(e);
+    alert('Gagal membuat gambar: ' + e.message);
+  } finally {
+    hideUnduhLoading();
+  }
+}
+
+// ============================================================
+// PANEL GURU
+// ============================================================
+function switchGTab(tab) {
+  document.querySelectorAll('#guruPage .tab').forEach(t => { t.classList.remove('active'); if (t.dataset.gtab === tab) t.classList.add('active'); });
+  document.querySelectorAll('.gtab-content').forEach(t => t.classList.add('hidden'));
+  const target = document.getElementById('gtab-' + tab); if (target) target.classList.remove('hidden');
+  if (tab === 'hasil') { muatFilterTugas(); muatHasil(); }
+}
+
+function renderTugasList() {
+  const c = document.getElementById('tugasList'); if (!c) return;
+  if (state.tugas.length === 0) { c.innerHTML = '<div class="info warning"><svg class="ico"><use href="#i-warn"/></svg><span>Belum ada tugas. Klik "Input Soal" untuk memulai.</span></div>'; return; }
+  c.innerHTML = state.tugas.slice().reverse().map(e => {
+    const jmlHasil = state.hasil.filter(h => h.tugasId === e.id).length;
+    const jmlPilgan = e.soal.filter(s => s.jenis === 'pilgan').length;
+    const jmlUraian = e.soal.filter(s => s.jenis !== 'pilgan').length;
+    const pembuat = e.guruNama ? ` | Dibuat oleh: ${escapeHtml(e.guruNama)}` : '';
+    const kelasInfo = e.kelas ? ` | Kelas: ${escapeHtml(e.kelas)}` : '';
+    const jenisInfo = ` | ${jmlPilgan} pilgan + ${jmlUraian} uraian`;
+    return `<div class="exam-item"><h3><svg class="ico"><use href="#i-exam"/></svg> ${escapeHtml(e.judul) || '(Tanpa judul)'} <span class="badge ${e.aktif ? 'green' : 'gray'}">${e.aktif ? 'AKTIF' : 'DITUTUP'}</span></h3><div class="meta">${escapeHtml(e.mapel || '-')}${kelasInfo} | KKM: ${e.kkm}${jenisInfo} | ${jmlHasil} siswa${pembuat}</div><div style="font-size:0.82rem; color:#718096; margin-bottom:6px;">Kode Tugas:</div><div class="code-badge">${e.kode}</div><div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"><button class="sm secondary" onclick="salinKode('${e.kode}')"><svg class="ico"><use href="#i-copy"/></svg> Salin Kode</button><button class="sm secondary" onclick="bukaEditorTugas('${e.id}')"><svg class="ico"><use href="#i-edit"/></svg> Edit</button><button class="sm ${e.aktif ? 'warning' : 'success'}" onclick="toggleAktif('${e.id}')"><svg class="ico"><use href="${e.aktif ? '#i-pause' : '#i-play'}"/></svg> ${e.aktif ? 'Tutup' : 'Buka'}</button><button class="sm danger" onclick="hapusTugas('${e.id}')"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button></div></div>`;
+  }).join('');
+}
+
+function salinKode(code) { navigator.clipboard.writeText(code).then(() => alert('Kode ' + code + ' tersalin!')).catch(() => prompt('Salin manual:', code)); }
+function toggleAktif(id) { const e = state.tugas.find(x => x.id === id); e.aktif = !e.aktif; simpanState(); renderTugasList(); }
+function hapusTugas(id) { if (!confirm('Hapus tugas ini?')) return; state.tugas = state.tugas.filter(x => x.id !== id); simpanState(); renderTugasList(); }
+
+function mulaiInputSoal() {
+  document.getElementById('tugasListView').classList.add('hidden');
+  document.getElementById('tugasChoiceView').classList.remove('hidden');
+  document.getElementById('tugasTempelView').classList.add('hidden');
+  document.getElementById('tugasEditorView').classList.add('hidden');
+}
+
+function tutupPilihanBuat() {
+  document.getElementById('tugasListView').classList.remove('hidden');
+  document.getElementById('tugasChoiceView').classList.add('hidden');
+  document.getElementById('tugasTempelView').classList.add('hidden');
+  document.getElementById('tugasEditorView').classList.add('hidden');
+}
+
+function pilihModeBuat(mode) {
+  if (mode === 'manual') {
+    editingTugasId = null;
+    document.getElementById('tugasChoiceView').classList.add('hidden');
+    document.getElementById('tugasEditorView').classList.remove('hidden');
+    document.getElementById('editorTitle').innerHTML = `<svg class="ico"><use href="#i-edit"/></svg> Input Soal (Manual)`;
+    document.getElementById('exMapel').value = '';
+    document.getElementById('exJudul').value = '';
+    document.getElementById('exKelas').value = '';
+    document.getElementById('exDurasi').value = 0;
+    document.getElementById('exKkm').value = 75;
+    document.getElementById('exApiKey').value = '';
+    document.getElementById('exJenisTugas').value = '';
+    document.getElementById('exKetentuan').value = '';
+    document.getElementById('exRubrik').value = '';
+    editorSoal = [{ jenis: 'uraian', pertanyaan: '', kunci: '', bobot: 100 }];
+    renderEditorSoal();
+    switchRubrikTab('pilgan');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (mode === 'tempel') {
+    document.getElementById('tugasChoiceView').classList.add('hidden');
+    document.getElementById('tugasTempelView').classList.remove('hidden');
+    document.getElementById('tempelJenis').value = '';
+    document.getElementById('tempelInputPilgan').value = '';
+    document.getElementById('tempelInputUraian').value = '';
+    document.getElementById('tempelInputKeduanya').value = '';
+    document.getElementById('tempelStatus').innerHTML = '';
+    ubahTempelJenis();
+    switchPromptTab('pilgan');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function switchPromptTab(tab) {
+  promptTabAktif = tab;
+  document.querySelectorAll('.prompt-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.prompt === tab);
+  });
+  document.getElementById('promptContent').textContent = PROMPT_AI[tab] || '';
+}
+
+function copyPromptSaatIni() {
+  const teks = PROMPT_AI[promptTabAktif] || '';
+  navigator.clipboard.writeText(teks).then(() => {
+    alert('✅ Prompt berhasil disalin!\n\nTempel di Google Gemini, ganti bagian [TEMPEL DRAF SOAL DI SINI] dengan draf soal Anda.');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = teks;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('✅ Prompt berhasil disalin!');
+  });
+}
+
+function toggleLangkahPraktis() {
+  document.getElementById('langkahPraktis').classList.toggle('hidden');
+}
+
+function ubahTempelJenis() {
+  const jenis = document.getElementById('tempelJenis').value;
+  const boxPilgan = document.getElementById('tempelBoxPilgan');
+  const boxUraian = document.getElementById('tempelBoxUraian');
+  const boxKeduanya = document.getElementById('tempelBoxKeduanya');
+  const info = document.getElementById('tempelInfo');
+  boxPilgan.classList.add('hidden');
+  boxUraian.classList.add('hidden');
+  boxKeduanya.classList.add('hidden');
+  info.classList.add('hidden');
+  info.innerHTML = '';
+
+  if (jenis === 'pilgan') {
+    boxPilgan.classList.remove('hidden');
+    info.classList.remove('hidden');
+    info.innerHTML = `<b>Sistem Deteksi Otomatis — Pilihan Ganda:</b>
+<pre>1. Apa ibu kota Indonesia?
+A. Bandung
+B. Jakarta
+C. Surabaya
+D. Medan
+Kunci Jawaban: B</pre>
+Format didukung: <code>1.</code> <code>1)</code> <code>(1)</code> <code>Soal 1</code>, opsi <code>A.</code> <code>a)</code> <code>(A)</code> <code>A-</code>, dan label <code>Kunci Jawaban:</code> <code>Jawaban:</code> <code>Kunci:</code> <code>Answer:</code> — semua dideteksi otomatis.`;
+  } else if (jenis === 'uraian') {
+    boxUraian.classList.remove('hidden');
+    info.classList.remove('hidden');
+    info.innerHTML = `<b>Sistem Deteksi Otomatis — Uraian:</b>
+<pre>1. Jelaskan pengertian gotong royong!
+Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama...</pre>
+Format didukung: <code>1.</code> <code>1)</code> <code>(1)</code> <code>Soal 1</code>, dan label <code>Jawaban Ideal:</code> <code>Jawaban:</code> <code>Kunci:</code> <code>Pembahasan:</code> — semua dideteksi otomatis.`;
+  } else if (jenis === 'keduanya') {
+    boxKeduanya.classList.remove('hidden');
+    info.classList.remove('hidden');
+    info.innerHTML = `<b>Mode Keduanya (1 Kotak):</b> Paste soal <b>Pilihan Ganda</b> dan <b>Uraian</b> dalam satu kotak. Sistem otomatis mendeteksi jenis tiap soal — soal PG dikenali dari adanya opsi <code>A.</code> <code>B.</code> <code>C.</code> <code>D.</code>, soal Uraian dikenali dari label <code>Jawaban Ideal:</code> / <code>Kunci:</code> / <code>Pembahasan:</code>.`;
+  }
+}
+
+function prosesTempelSoal() {
+  const jenis = document.getElementById('tempelJenis').value;
+  const status = document.getElementById('tempelStatus');
+  status.innerHTML = '';
+
+  if (!jenis) {
+    status.innerHTML = '<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><span>Pilih jenis soal dulu.</span></div>';
+    return;
+  }
+
+  let teksPilgan = '';
+  let teksUraian = '';
+  let teksKeduanya = '';
+
+  if (jenis === 'pilgan') {
+    teksPilgan = document.getElementById('tempelInputPilgan').value;
+  } else if (jenis === 'uraian') {
+    teksUraian = document.getElementById('tempelInputUraian').value;
+  } else if (jenis === 'keduanya') {
+    teksKeduanya = document.getElementById('tempelInputKeduanya').value;
+  }
+
+  if (jenis === 'pilgan') {
+    if (!teksPilgan || !teksPilgan.trim()) {
+      status.innerHTML = '<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><span>Kotak teks soal Pilihan Ganda masih kosong.</span></div>';
+      return;
+    }
+  } else if (jenis === 'uraian') {
+    if (!teksUraian || !teksUraian.trim()) {
+      status.innerHTML = '<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><span>Kotak teks soal Uraian masih kosong.</span></div>';
+      return;
+    }
+  } else if (jenis === 'keduanya') {
+    if (!teksKeduanya || !teksKeduanya.trim()) {
+      status.innerHTML = '<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><span>Kotak teks soal gabungan masih kosong.</span></div>';
+      return;
+    }
+  }
+
+  try {
+    let semuaSoal = [];
+
+    if (jenis === 'pilgan') {
+      const hasil = parseTeksSoal(teksPilgan.trim(), 'pilgan');
+      semuaSoal = hasil.soal;
+    } else if (jenis === 'uraian') {
+      const hasil = parseTeksSoal(teksUraian.trim(), 'uraian');
+      semuaSoal = hasil.soal;
+    } else if (jenis === 'keduanya') {
+      // 1 KOTAK: parser otomatis memisahkan PG dan Uraian per blok soal
+      const hasil = parseTeksSoal(teksKeduanya.trim(), 'keduanya');
+      semuaSoal = hasil.soal;
+    }
+
+    if (!semuaSoal || semuaSoal.length === 0) {
+      status.innerHTML = '<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><div><b>Tidak menemukan soal.</b><br>Pastikan format nomor soal seperti "1." atau "1)" di awal baris.</div></div>';
+      return;
+    }
+
+    const jmlPilgan = semuaSoal.filter(s => s.jenis === 'pilgan').length;
+    const jmlUraian = semuaSoal.filter(s => s.jenis === 'uraian').length;
+
+    if (semuaSoal.length > 0) {
+      const totalBobot = semuaSoal.reduce((sum, s) => sum + (s.bobot || 0), 0);
+      if (totalBobot === 0 || Math.abs(totalBobot - 100) > 0.01) {
+        const bobotPerSoal = Math.round(100 / semuaSoal.length);
+        let sisa = 100 - (bobotPerSoal * semuaSoal.length);
+        semuaSoal.forEach((s, i) => {
+          s.bobot = bobotPerSoal + (i === 0 ? sisa : 0);
+        });
+      }
+    }
+
+    editingTugasId = null;
+    document.getElementById('tugasTempelView').classList.add('hidden');
+    document.getElementById('tugasEditorView').classList.remove('hidden');
+    document.getElementById('editorTitle').innerHTML = `<svg class="ico"><use href="#i-clipboard"/></svg> Input Soal (dari Tempel)`;
+    document.getElementById('exMapel').value = '';
+    document.getElementById('exJudul').value = '';
+    document.getElementById('exKelas').value = '';
+    document.getElementById('exDurasi').value = 0;
+    document.getElementById('exKkm').value = 75;
+    document.getElementById('exApiKey').value = '';
+    document.getElementById('exJenisTugas').value = jenis;
+    document.getElementById('exKetentuan').value = KETENTUAN_PRESET[jenis] || '';
+    document.getElementById('exRubrik').value = '';
+    editorSoal = semuaSoal;
+    renderEditorSoal();
+
+    if (jenis === 'pilgan') {
+      switchRubrikTab('pilgan');
+      document.getElementById('exRubrik').value = RUBRIK_PRESET.pilgan;
+    } else if (jenis === 'uraian') {
+      switchRubrikTab('uraian');
+    } else {
+      switchRubrikTab('gabungan');
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    alert(`Berhasil memproses!\n\n- ${jmlPilgan} soal Pilihan Ganda\n- ${jmlUraian} soal Uraian\n\nSilakan periksa & lengkapi (mapel, judul, kelas, API key, kunci jawaban).`);
+  } catch (e) {
+    status.innerHTML = `<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><div><b>Gagal memproses:</b><br>${escapeHtml(e.message)}</div></div>`;
+  }
+}
+
+function parseTeksSoal(teks, jenisMode) {
+  let t = String(teks)
+    .replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+  const lines = t.split('\n');
+  const soalBlocks = [];
+  let current = null;
+
+  const startSoalRegex = /^\s*(?:\(\s*\d+\s*\)|(?:Soal|soal|SOAL)\s+\d+\s*[.:)]?|\d+\s*[.)]\s*)/;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (startSoalRegex.test(line) && line.trim().length > 2) {
+      if (current) soalBlocks.push(current);
+      const isiBersih = line.replace(startSoalRegex, '').trim();
+      current = { isiLines: [isiBersih] };
+    } else {
+      if (current) current.isiLines.push(line);
+    }
+  }
+  if (current) soalBlocks.push(current);
+  if (soalBlocks.length === 0) soalBlocks.push({ isiLines: t.split('\n') });
+
+  const hasil = [];
+
+  for (const block of soalBlocks) {
+    const blockText = block.isiLines.join('\n').trim();
+    if (!blockText) continue;
+
+    if (jenisMode === 'pilgan') {
+      const p = cobaParsePilgan(blockText);
+      if (p) hasil.push(p);
+      else {
+        const u = cobaParseUraian(blockText);
+        if (u) { u.jenis = 'pilgan'; u.opsi = ['Opsi A', 'Opsi B', 'Opsi C', 'Opsi D']; u.kunci = 'A'; hasil.push(u); }
+      }
+    } else if (jenisMode === 'uraian') {
+      const u = cobaParseUraian(blockText);
+      // FIX: kunci TIDAK dihapus lagi — inilah penyebab "Jawaban Ideal" hilang
+      if (u) { u.jenis = 'uraian'; delete u.opsi; hasil.push(u); }
+    } else {
+      // Mode 'keduanya' / 'gabungan': auto-detect tiap blok
+      const pilgan = cobaParsePilgan(blockText);
+      if (pilgan) hasil.push(pilgan);
+      else {
+        const uraian = cobaParseUraian(blockText);
+        if (uraian) hasil.push(uraian);
+      }
+    }
+  }
+
+  if (hasil.length > 0) {
+    const totalBobot = hasil.reduce((sum, s) => sum + (s.bobot || 0), 0);
+    if (totalBobot === 0 || Math.abs(totalBobot - 100) > 0.01) {
+      const bobotPerSoal = Math.round(100 / hasil.length);
+      let sisa = 100 - (bobotPerSoal * hasil.length);
+      hasil.forEach((s, i) => {
+        s.bobot = bobotPerSoal + (i === 0 ? sisa : 0);
+      });
+    }
+  }
+
+  return { soal: hasil };
+}
+
+function cobaParsePilgan(blockText) {
+  const lines = blockText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length < 3) return null;
+
+  const opsiRegex = /^\s*[\(\[]?\s*([A-Ea-e])\s*[.):\-]\s*(.+)$/;
+  const opsiMap = {};
+  const opsiIndex = [];
+  let pertanyaanLines = [];
+  let kunciIdx = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const kunciMatch = line.match(/^\s*(?:Kunci\s+Jawaban|Jawaban|Kunci|Answer|JAWABAN|KUNCI|Pembahasan)\s*[:.=]?\s*([A-Ea-e])\b/i);
+    if (kunciMatch) { kunciIdx = kunciMatch[1].toUpperCase(); continue; }
+    const kunciMatch2 = line.match(/\b(?:Kunci\s+Jawaban|Jawaban|Kunci|Answer|Pembahasan)\s*[:.=]\s*([A-Ea-e])\b/i);
+    if (kunciMatch2) { kunciIdx = kunciMatch2[1].toUpperCase(); continue; }
+
+    const opsiMatch = line.match(opsiRegex);
+    if (opsiMatch) {
+      const huruf = opsiMatch[1].toUpperCase();
+      const isi = opsiMatch[2].trim();
+      if (!opsiMap[huruf]) {
+        opsiMap[huruf] = isi;
+        opsiIndex.push(huruf);
+      }
+    } else {
+      if (opsiIndex.length === 0) pertanyaanLines.push(line);
+    }
+  }
+
+  if (opsiIndex.length < 2) return null;
+
+  const opsi = [];
+  ['A','B','C','D','E'].forEach(h => { if (opsiMap[h]) opsi.push(opsiMap[h]); });
+  const pertanyaan = pertanyaanLines.join(' ').trim();
+  if (!pertanyaan || pertanyaan.length < 3) return null;
+
+  let kunci = kunciIdx || 'A';
+  const idxKunci = ['A','B','C','D','E'].indexOf(kunci);
+  if (idxKunci >= opsi.length) kunci = 'A';
+
+  return { jenis: 'pilgan', pertanyaan, opsi, kunci, bobot: 100 };
+}
+
+// ============================================================
+// cobaParseUraian — VERSI DIPERBAIKI
+// - Mendukung label inline: "1. Pertanyaan? Jawaban Ideal: ..." dalam 1 baris
+// - Mendukung pemisah : . - =
+// - Case-insensitive
+// ============================================================
+function cobaParseUraian(blockText) {
+  const lines = blockText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length === 0) return null;
+
+  const labelRegex = /(?:Jawaban\s+Ideal|Kunci\s+Jawaban|Jawaban|Kunci|Answer|Pembahasan)\s*[:.\-=]/i;
+
+  // Cari baris pertama yang memuat label kunci
+  let kunciIdx = -1;
+  let inlinePos = -1;
+  let inlineLen = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(labelRegex);
+    if (m) {
+      kunciIdx = i;
+      inlinePos = m.index;
+      inlineLen = m[0].length;
+      break;
+    }
+  }
+
+  let pertanyaan = '';
+  let kunci = '';
+
+  if (kunciIdx >= 0) {
+    const beforeLabel = lines[kunciIdx].slice(0, inlinePos).trim();
+    const afterLabel = lines[kunciIdx].slice(inlinePos + inlineLen).trim();
+    const pertanyaanLines = lines.slice(0, kunciIdx);
+    if (beforeLabel) pertanyaanLines.push(beforeLabel);
+    pertanyaan = pertanyaanLines.join(' ').trim();
+
+    const kunciLines = [];
+    if (afterLabel) kunciLines.push(afterLabel);
+    kunciLines.push(...lines.slice(kunciIdx + 1));
+    kunci = kunciLines.join('\n').trim();
+  } else {
+    pertanyaan = lines.join(' ').trim();
+  }
+
+  if (!pertanyaan || pertanyaan.length < 3) return null;
+  if (!kunci && pertanyaan.length > 800) return null;
+
+  return { jenis: 'uraian', pertanyaan, kunci, bobot: 100 };
+}
+
+function switchRubrikTab(tab) {
+  rubrikTabAktif = tab;
+  document.getElementById('rubrikTabPilgan').classList.toggle('active', tab === 'pilgan');
+  document.getElementById('rubrikTabUraian').classList.toggle('active', tab === 'uraian');
+  document.getElementById('rubrikTabGabungan').classList.toggle('active', tab === 'gabungan');
+  document.getElementById('rubrikContentPilgan').classList.toggle('hidden', tab !== 'pilgan');
+  document.getElementById('rubrikContentUraian').classList.toggle('hidden', tab !== 'uraian');
+  document.getElementById('rubrikContentGabungan').classList.toggle('hidden', tab !== 'gabungan');
+}
+
+function pakaiRubrik(jenis) {
+  const rub = RUBRIK_PRESET[jenis];
+  if (!rub) return;
+  document.getElementById('exRubrik').value = rub;
+}
+
+function ubahJenisTugas() {
+  const jenis = document.getElementById('exJenisTugas').value;
+  if (jenis && KETENTUAN_PRESET[jenis]) {
+    document.getElementById('exKetentuan').value = KETENTUAN_PRESET[jenis];
+  }
+}
+
+function isiTemplateKetentuan() {
+  const jenis = document.getElementById('exJenisTugas').value;
+  if (jenis && KETENTUAN_PRESET[jenis]) {
+    document.getElementById('exKetentuan').value = KETENTUAN_PRESET[jenis];
+  } else {
+    document.getElementById('exKetentuan').value = KETENTUAN_PRESET.keduanya;
+  }
+}
+
+function bukaEditorTugas(id) {
+  editingTugasId = id;
+  const e = id ? state.tugas.find(x => x.id === id) : null;
+  document.getElementById('tugasListView').classList.add('hidden');
+  document.getElementById('tugasChoiceView').classList.add('hidden');
+  document.getElementById('tugasTempelView').classList.add('hidden');
+  document.getElementById('tugasEditorView').classList.remove('hidden');
+  document.getElementById('editorTitle').innerHTML = `<svg class="ico"><use href="#i-edit"/></svg> ${e ? 'Edit Soal' : 'Input Soal'}`;
+  document.getElementById('exMapel').value = e?.mapel || '';
+  document.getElementById('exJudul').value = e?.judul || '';
+  document.getElementById('exKelas').value = e?.kelas || '';
+  document.getElementById('exDurasi').value = e?.durasi || 0;
+  document.getElementById('exKkm').value = e?.kkm || 75;
+  document.getElementById('exApiKey').value = e?.apiKey || '';
+  document.getElementById('exJenisTugas').value = e?.jenisTugas || '';
+  document.getElementById('exKetentuan').value = e?.ketentuan || '';
+  document.getElementById('exRubrik').value = e?.rubrik || '';
+  editorSoal = e ? JSON.parse(JSON.stringify(e.soal)) : [{ jenis: 'uraian', pertanyaan: '', kunci: '', bobot: 100 }];
+  editorSoal.forEach(s => {
+    if (!s.jenis) s.jenis = (s.opsi && s.opsi.length > 0) ? 'pilgan' : 'uraian';
+    if (s.jenis === 'esai' || s.jenis === 'isianGanda') s.jenis = 'uraian';
+  });
+  renderEditorSoal();
+  if (e?.jenisTugas === 'pilgan') switchRubrikTab('pilgan');
+  else if (e?.jenisTugas === 'uraian') switchRubrikTab('uraian');
+  else if (e?.jenisTugas === 'keduanya') switchRubrikTab('gabungan');
+  else switchRubrikTab('pilgan');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function tutupEditorTugas() {
+  editingTugasId = null;
+  document.getElementById('tugasEditorView').classList.add('hidden');
+  document.getElementById('tugasListView').classList.remove('hidden');
+  renderTugasList();
+}
+
+function renderEditorSoal() {
+  const c = document.getElementById('soalEditorContainer');
+  c.innerHTML = '';
+  const huruf = ['A', 'B', 'C', 'D', 'E'];
+  editorSoal.forEach((s, i) => {
+    const jenis = s.jenis || 'uraian';
+    const badge = jenis === 'pilgan' ? '<span class="badge purple">Pilihan Ganda</span>' : '<span class="badge">Uraian</span>';
+    let konten = '';
+
+    if (jenis === 'pilgan') {
+      const opsi = s.opsi || ['', '', '', ''];
+      while (opsi.length < 4) opsi.push('');
+      konten = `
+        <label>Pertanyaan</label>
+        <textarea onchange="updateEditorSoal(${i},'pertanyaan',this.value)" placeholder="Tulis pertanyaan pilihan ganda...">${escapeHtml(s.pertanyaan)}</textarea>
+        <label>Opsi Jawaban</label>
+        <div class="opts-grid">
+          ${opsi.map((o, j) => `
+            <div class="opt-row">
+              <span class="opt-label">${huruf[j]}.</span>
+              <input type="text" value="${escapeAttr(o)}" placeholder="Opsi ${huruf[j]}" onchange="updateOpsi(${i}, ${j}, this.value)">
+              ${opsi.length > 2 ? `<button class="danger sm" onclick="hapusOpsi(${i}, ${j})" type="button"><svg class="ico"><use href="#i-trash"/></svg></button>` : ''}
+            </div>
+          `).join('')}
+        </div>
+        <button class="secondary sm" onclick="tambahOpsi(${i})" type="button"><svg class="ico"><use href="#i-plus"/></svg> Tambah Opsi</button>
+        <label style="margin-top:12px;">Kunci Jawaban (pilih satu)</label>
+        <div class="kunci-pilih">
+          ${opsi.map((_, j) => `
+            <label class="${s.kunci === huruf[j] ? 'selected' : ''}" onclick="setKunciPilgan(${i}, '${huruf[j]}')">
+              <input type="radio" name="kunci-${i}" value="${huruf[j]}" ${s.kunci === huruf[j] ? 'checked' : ''}>
+              ${huruf[j]}
+            </label>
+          `).join('')}
+        </div>
+        <label style="margin-top:12px;">Bobot Nilai</label>
+        <input type="number" value="${s.bobot || 100}" min="1" max="100" onchange="updateEditorSoal(${i},'bobot',parseInt(this.value))">
+      `;
+    } else {
+      konten = `
+        <label>Pertanyaan</label>
+        <textarea onchange="updateEditorSoal(${i},'pertanyaan',this.value)" placeholder="Tulis pertanyaan uraian...">${escapeHtml(s.pertanyaan)}</textarea>
+        <label>Kunci Jawaban / Poin Penting (dibaca AI)</label>
+        <textarea onchange="updateEditorSoal(${i},'kunci',this.value)" placeholder="Poin-poin jawaban ideal...">${escapeHtml(s.kunci)}</textarea>
+        <label>Bobot Nilai</label>
+        <input type="number" value="${s.bobot || 100}" min="1" max="100" onchange="updateEditorSoal(${i},'bobot',parseInt(this.value))">
+      `;
+    }
+
+    c.innerHTML += `
+      <div class="question-box" style="${jenis === 'pilgan' ? 'border-left-color:#6a1b9a;' : ''}">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div>Soal #${i+1} ${badge}</div>
+          <button class="danger sm" onclick="hapusSoalEditor(${i})" type="button"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button>
+        </div>
+        ${konten}
+      </div>`;
+  });
+}
+
+function tambahSoalPilgan() { editorSoal.push({ jenis: 'pilgan', pertanyaan: '', opsi: ['', '', '', ''], kunci: 'A', bobot: 100 }); renderEditorSoal(); }
+function tambahSoalUraian() { editorSoal.push({ jenis: 'uraian', pertanyaan: '', kunci: '', bobot: 100 }); renderEditorSoal(); }
+function hapusSoalEditor(i) { if (editorSoal.length <= 1) return alert('Minimal 1 soal.'); if (!confirm('Hapus soal ini?')) return; editorSoal.splice(i, 1); renderEditorSoal(); }
+function updateEditorSoal(i, field, val) { editorSoal[i][field] = val; }
+function tambahOpsi(i) { if (!editorSoal[i].opsi) editorSoal[i].opsi = ['', '', '', '']; if (editorSoal[i].opsi.length >= 5) return alert('Maksimal 5 opsi (A-E).'); editorSoal[i].opsi.push(''); renderEditorSoal(); }
+function hapusOpsi(i, j) { if (!editorSoal[i].opsi) return; if (editorSoal[i].opsi.length <= 2) return alert('Minimal 2 opsi.'); editorSoal[i].opsi.splice(j, 1); renderEditorSoal(); }
+function updateOpsi(i, j, val) { if (!editorSoal[i].opsi) editorSoal[i].opsi = []; editorSoal[i].opsi[j] = val; }
+function setKunciPilgan(i, huruf) { editorSoal[i].kunci = huruf; renderEditorSoal(); }
+
+function simpanTugas() {
+  const mapel = document.getElementById('exMapel').value;
+  const judul = document.getElementById('exJudul').value.trim();
+  const kelas = document.getElementById('exKelas').value;
+  const durasi = parseInt(document.getElementById('exDurasi').value) || 0;
+  const kkm = parseInt(document.getElementById('exKkm').value) || 75;
+  const apiKey = document.getElementById('exApiKey').value.trim();
+  const jenisTugas = document.getElementById('exJenisTugas').value;
+  const ketentuan = document.getElementById('exKetentuan').value.trim();
+  const rubrik = document.getElementById('exRubrik').value.trim();
+
+  if (!mapel) return alert('Pilih mata pelajaran.');
+  if (!judul) return alert('Isi judul tugas.');
+  if (!kelas) return alert('Pilih kelas sasaran.');
+  if (!apiKey) return alert('Isi API Key untuk tugas ini.');
+  if (!jenisTugas) return alert('Pilih jenis tugas.');
+  if (!rubrik) return alert('Pilih atau tulis rubrik penilaian.');
+
+  const adaPilgan = editorSoal.some(s => s.jenis === 'pilgan');
+  const adaUraian = editorSoal.some(s => s.jenis !== 'pilgan');
+  if (jenisTugas === 'pilgan' && !adaPilgan) return alert('Jenis tugas "Pilihan Ganda" tetapi tidak ada soal pilihan ganda.');
+  if (jenisTugas === 'uraian' && !adaUraian) return alert('Jenis tugas "Uraian" tetapi tidak ada soal uraian.');
+  if (jenisTugas === 'keduanya' && (!adaPilgan || !adaUraian)) return alert('Jenis tugas "Keduanya" tetapi tidak ada salah satu jenis soal.');
+
+  for (let i = 0; i < editorSoal.length; i++) {
+    const s = editorSoal[i];
+    if (!s.pertanyaan || !s.pertanyaan.trim()) return alert(`Soal #${i+1} belum diisi pertanyaannya.`);
+    if (s.jenis === 'pilgan') {
+      const opsi = (s.opsi || []).filter(o => o && o.trim());
+      if (opsi.length < 2) return alert(`Soal #${i+1} (pilihan ganda) minimal punya 2 opsi.`);
+      if (!s.kunci) return alert(`Soal #${i+1} (pilihan ganda) belum ditentukan kuncinya.`);
+      const idxKunci = ['A','B','C','D','E'].indexOf(s.kunci);
+      if (idxKunci >= opsi.length) return alert(`Soal #${i+1} kunci jawaban (${s.kunci}) tidak ada di opsi.`);
+    } else {
+      if (!s.kunci || !s.kunci.trim()) {
+        if (!confirm(`Soal #${i+1} tidak memiliki kunci jawaban. Tetap simpan?`)) return;
+      }
+    }
+  }
+
+  if (editingTugasId) {
+    const e = state.tugas.find(x => x.id === editingTugasId);
+    Object.assign(e, { mapel, judul, kelas, durasi, kkm, apiKey, jenisTugas, ketentuan, rubrik, soal: editorSoal });
+    simpanState(); alert('Tugas diperbarui!');
+  } else {
+    const newTugas = {
+      id: 'tg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      kode: generateKodeUnik(),
+      mapel, judul, kelas, durasi, kkm, apiKey, jenisTugas, ketentuan, rubrik,
+      soal: editorSoal, aktif: true,
+      guruNama: currentUser.nama, guruEmail: currentUser.email,
+      createdAt: new Date().toISOString()
+    };
+    state.tugas.push(newTugas); simpanState();
+    alert(`Tugas berhasil dibuat!\n\nKODE TUGAS: ${newTugas.kode}\n\nBagikan kode ini ke siswa Anda.`);
+  }
+  tutupEditorTugas();
+}
+
+function muatFilterTugas() {
+  const sel = document.getElementById('filterTugas'); if (!sel) return;
+  const current = sel.value;
+  const tugasSaya = state.tugas.filter(e => e.guruEmail === currentUser.email);
+  sel.innerHTML = '<option value="">-- Semua Tugas Saya --</option>' + tugasSaya.map(e => `<option value="${e.id}">${escapeHtml(e.judul)} [${e.kode}]</option>`).join('');
+  sel.value = current;
+}
+
+function muatHasil() {
+  const filterId = document.getElementById('filterTugas').value;
+  let list = state.hasil.filter(h => h.guruEmail === currentUser.email);
+  if (filterId) list = list.filter(h => h.tugasId === filterId);
+  const c = document.getElementById('hasilContainer');
+  if (list.length === 0) { c.innerHTML = '<div class="info"><svg class="ico"><use href="#i-info"/></svg><span>Belum ada siswa yang mengumpulkan jawaban.</span></div>'; return; }
+  c.innerHTML = list.slice().reverse().map(h => {
+    const kkm = (state.tugas.find(e => e.id === h.tugasId)?.kkm) || 75;
+    const lulus = h.skorTotal >= kkm; const warna = lulus ? '#38a169' : '#e53e3e';
+    const tgl = new Date(h.waktu).toLocaleString('id-ID');
+    return `<div class="result-item" style="border-left-color:${warna};"><div class="name">${escapeHtml(h.nama)} <small style="color:#718096;">(${escapeHtml(h.kelas || '-')})</small><span class="score" style="color:${warna};">${h.skorTotal}/100</span></div><div style="font-size:0.8rem; color:#718096; margin-top:4px;">${escapeHtml(h.tugasJudul || '-')} - ${h.tugasKode} - ${tgl}</div><details style="margin-top:8px;"><summary style="cursor:pointer; color:#0d47a1; font-size:0.85rem;">Lihat detail</summary><div style="margin-top:8px;">${(h.skorPerSoal || []).map(s => `<div style="font-size:0.82rem; margin-bottom:6px;"><b>Soal ${s.nomor}:</b> ${s.skor}/${s.maks} - ${escapeHtml(s.feedback)}</div>`).join('')}<div style="font-size:0.85rem; margin-top:8px; padding-top:8px; border-top:1px solid #e2e8f0;"><b>Kesimpulan:</b> ${escapeHtml(h.kesimpulan)}</div></div></details></div>`;
+  }).join('');
+}
+
+function exportCSV() {
+  const filterId = document.getElementById('filterTugas').value;
+  let list = state.hasil.filter(h => h.guruEmail === currentUser.email);
+  if (filterId) list = list.filter(h => h.tugasId === filterId);
+  if (list.length === 0) return alert('Belum ada data.');
+  let csv = 'Nama,Kelas,Tugas,Kode Tugas,Waktu,Skor Total,Status\n';
+  list.forEach(h => {
+    const kkm = state.tugas.find(e => e.id === h.tugasId)?.kkm || 75;
+    const lulus = h.skorTotal >= kkm ? 'LULUS' : 'BELUM LULUS';
+    csv += `"${h.nama}","${h.kelas || '-'}","${h.tugasJudul || '-'}","${h.tugasKode}","${new Date(h.waktu).toLocaleString('id-ID')}",${h.skorTotal},${lulus}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `nilai_${Date.now()}.csv`; a.click(); URL.revokeObjectURL(url);
+}
+
+function hapusSemuaHasil() { if (!confirm('Hapus SEMUA hasil penilaian Anda?')) return; state.hasil = state.hasil.filter(h => h.guruEmail !== currentUser.email); simpanState(); muatHasil(); }
+
+function gantiPassword() {
+  const oldPass = document.getElementById('oldPass').value;
+  const p1 = document.getElementById('newPass').value;
+  const p2 = document.getElementById('newPass2').value;
+  const guru = state.guruList.find(g => g.email.toLowerCase() === currentUser.email.toLowerCase());
+  const expectedOld = state.customPasswords[currentUser.email.toLowerCase()] || guru.password;
+  if (oldPass !== expectedOld) return alert('Password lama salah!');
+  if (p1.length < 6) return alert('Password baru minimal 6 karakter.');
+  if (p1 !== p2) return alert('Password baru tidak sama!');
+  state.customPasswords[currentUser.email.toLowerCase()] = p1; simpanState();
+  document.getElementById('oldPass').value = ''; document.getElementById('newPass').value = ''; document.getElementById('newPass2').value = '';
+  alert('Password berhasil diganti!');
+}
+
+function konfirmasiKeluarTugas() {
+  if (!confirm('Yakin keluar? Jawaban yang belum dikumpulkan akan hilang.')) return;
+  currentTugas = null;
+  currentUser = { role: null, nama: '', kelas: '', email: '' };
+  jawabanSementara = {};
+  document.getElementById('tugasPage').classList.add('hidden');
+  document.getElementById('previewPage').classList.add('hidden');
+  document.getElementById('guruPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+  const hasilSiswa = document.getElementById('hasilSiswa'); if (hasilSiswa) hasilSiswa.innerHTML = '';
+  const kInput = document.getElementById('kodeInput'); if (kInput) kInput.value = '';
+  const sNama = document.getElementById('siswaNama'); const sKelas = document.getElementById('siswaKelas');
+  if (sNama) sNama.value = ''; if (sKelas) sKelas.value = '';
+  showLogin(null);
+}
+
+showLogin(null);
+switchPromptTab('pilgan');
+console.log('MUARA v7 siap. Total guru:', state.guruList.length);
+</script>
+</body>
+</html>
