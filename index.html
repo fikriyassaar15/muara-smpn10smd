@@ -183,45 +183,58 @@
     .choice-card { min-width: 100%; }
   }
   /* ============================================================
-     ENHANCEMENT: BLOKIR PASTE & LOCKDOWN MODE (SEMUA DEVICE)
+     BLOKIR COPY/PASTE + LOCKDOWN STYLE
      ============================================================ */
   #jawabanContainer textarea,
-  #jawabanContainer input {
+  #jawabanContainer input[type="text"] {
     -webkit-touch-callout: none !important;
     -webkit-user-drag: none !important;
     -khtml-user-drag: none !important;
     -moz-user-drag: none !important;
     -o-user-drag: none !important;
     user-drag: none !important;
-    -webkit-user-select: text !important;
-    user-select: text !important;
-    -webkit-user-modify: read-write !important;
-    touch-action: manipulation;
+    -webkit-user-select: text;
+    user-select: text;
   }
   body.lockdown-active {
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
     touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
   }
   body.lockdown-active #jawabanContainer textarea,
-  body.lockdown-active #jawabanContainer input {
+  body.lockdown-active #jawabanContainer input[type="text"] {
     -webkit-touch-callout: none !important;
-  }
-  @supports (-webkit-touch-callout: none) {
-    #jawabanContainer textarea::-webkit-input-placeholder { pointer-events: none; }
+    -webkit-user-select: text !important;
+    user-select: text !important;
   }
   #lockdownWarnOverlay {
-    position: fixed; inset: 0; z-index: 999999;
-    background: rgba(198,40,40,0.96); color: #fff;
+    position: fixed; inset: 0; z-index: 2147483647;
+    background: rgba(198,40,40,0.98); color: #fff;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     padding: 30px; text-align: center;
     font-family: 'Segoe UI', system-ui, sans-serif;
+    touch-action: none;
   }
-  #lockdownWarnOverlay .big { font-size: 1.6rem; font-weight: 800; margin-bottom: 14px; letter-spacing: 0.5px; }
-  #lockdownWarnOverlay .sub { font-size: 0.95rem; line-height: 1.7; max-width: 480px; opacity: 0.95; }
-  #lockdownWarnOverlay .count { font-size: 3rem; font-weight: 800; margin: 18px 0; font-variant-numeric: tabular-nums; }
-  #lockdownWarnOverlay button { margin-top: 22px; background: #fff; color: #c62828; border: none; padding: 12px 26px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
+  #lockdownWarnOverlay .big {
+    font-size: 1.6rem; font-weight: 800; margin-bottom: 14px;
+    letter-spacing: 0.5px;
+  }
+  #lockdownWarnOverlay .sub {
+    font-size: 0.95rem; line-height: 1.7; max-width: 480px;
+    opacity: 0.95;
+  }
+  #lockdownWarnOverlay .count {
+    font-size: 3.4rem; font-weight: 800; margin: 18px 0;
+    font-variant-numeric: tabular-nums;
+  }
+  #lockdownWarnOverlay button {
+    margin-top: 22px; background: #fff; color: #c62828;
+    border: none; padding: 12px 26px; border-radius: 10px;
+    font-weight: 800; font-size: 0.95rem; cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -535,18 +548,7 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama..."></textarea>
               <b>Mode Keduanya (1 Kotak):</b> Paste soal <b>Pilihan Ganda</b> dan <b>Uraian</b> dalam satu kotak. Sistem otomatis mendeteksi jenis tiap soal — soal PG dikenali dari adanya opsi <code>A. B. C. D.</code>, soal Uraian dikenali dari label <code>Jawaban Ideal:</code> / <code>Kunci:</code> / <code>Pembahasan:</code>.
             </div>
             <label>Teks Soal — Gabungan (Pilihan Ganda + Uraian)</label>
-            <textarea id="tempelInputKeduanya" class="paste-input" rows="18" placeholder="Paste soal pilihan ganda & uraian di sini...
-
-Contoh:
-1. Apa ibu kota Indonesia?
-A. Bandung
-B. Jakarta
-C. Surabaya
-D. Medan
-Kunci Jawaban: B
-
-2. Jelaskan pengertian gotong royong!
-Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
+            <textarea id="tempelInputKeduanya" class="paste-input" rows="18" placeholder="Paste soal pilihan ganda & uraian di sini..."></textarea>
           </div>
 
           <div class="row" style="margin-top:14px;">
@@ -996,48 +998,20 @@ function initFirebase() {
 
 function encEmail(e) { return String(e || '').toLowerCase().replace(/[.#$\[\]\/]/g, '_'); }
 
-async function cloudSaveGuru(guru) {
-  if (!firebaseReady) return;
-  try { await fbDb.ref('muara/guru/' + encEmail(guru.email)).set(guru); }
-  catch (e) { console.error('cloudSaveGuru', e); }
-}
-async function cloudRemoveGuru(email) {
-  if (!firebaseReady) return;
-  try { await fbDb.ref('muara/guru/' + encEmail(email)).remove(); }
-  catch (e) { console.error('cloudRemoveGuru', e); }
-}
-async function cloudSavePassword(email, pass) {
-  if (!firebaseReady) return;
-  try { await fbDb.ref('muara/passwords/' + encEmail(email)).set(pass); }
-  catch (e) { console.error('cloudSavePassword', e); }
-}
-async function cloudRemovePassword(email) {
-  if (!firebaseReady) return;
-  try { await fbDb.ref('muara/passwords/' + encEmail(email)).remove(); }
-  catch (e) { console.error('cloudRemovePassword', e); }
-}
-async function cloudSaveAdmin(admin) {
-  if (!firebaseReady) return;
-  try { await fbDb.ref('muara/admin').set(admin); }
-  catch (e) { console.error('cloudSaveAdmin', e); }
-}
-async function cloudSaveTugas(t) {
-  if (!firebaseReady) return;
-  try { await fbDb.ref('muara/tugas/' + t.id).set(t); }
-  catch (e) { console.error('cloudSaveTugas', e); }
-}
-async function cloudRemoveTugas(id) {
-  if (!firebaseReady) return;
-  try { await fbDb.ref('muara/tugas/' + id).remove(); }
-  catch (e) { console.error('cloudRemoveTugas', e); }
-}
+async function cloudSaveGuru(guru) { if (!firebaseReady) return; try { await fbDb.ref('muara/guru/' + encEmail(guru.email)).set(guru); } catch (e) {} }
+async function cloudRemoveGuru(email) { if (!firebaseReady) return; try { await fbDb.ref('muara/guru/' + encEmail(email)).remove(); } catch (e) {} }
+async function cloudSavePassword(email, pass) { if (!firebaseReady) return; try { await fbDb.ref('muara/passwords/' + encEmail(email)).set(pass); } catch (e) {} }
+async function cloudRemovePassword(email) { if (!firebaseReady) return; try { await fbDb.ref('muara/passwords/' + encEmail(email)).remove(); } catch (e) {} }
+async function cloudSaveAdmin(admin) { if (!firebaseReady) return; try { await fbDb.ref('muara/admin').set(admin); } catch (e) {} }
+async function cloudSaveTugas(t) { if (!firebaseReady) return; try { await fbDb.ref('muara/tugas/' + t.id).set(t); } catch (e) {} }
+async function cloudRemoveTugas(id) { if (!firebaseReady) return; try { await fbDb.ref('muara/tugas/' + id).remove(); } catch (e) {} }
 async function cloudAddHasil(hasil) {
   if (!firebaseReady) return null;
   try {
     const ref = fbDb.ref('muara/hasil').push();
     await ref.set(hasil);
     return ref.key;
-  } catch (e) { console.error('cloudAddHasil', e); return null; }
+  } catch (e) { return null; }
 }
 async function cloudRemoveHasilGuru(guruEmail) {
   if (!firebaseReady) return;
@@ -1047,50 +1021,34 @@ async function cloudRemoveHasilGuru(guruEmail) {
     const updates = {};
     Object.keys(v).forEach(k => { if (v[k].guruEmail === guruEmail) updates['muara/hasil/' + k] = null; });
     if (Object.keys(updates).length) await fbDb.ref().update(updates);
-  } catch (e) { console.error('cloudRemoveHasilGuru', e); }
+  } catch (e) {}
 }
 
 function setupFirebaseListeners() {
   if (!firebaseReady) return;
-
   fbDb.ref('.info/connected').on('value', snap => {
     if (snap.val() === true) setCloudStatus('online', '☁️ Cloud tersinkron');
     else setCloudStatus('offline', '📴 Offline');
   });
-
-  fbDb.ref('muara/admin').on('value', snap => {
-    const v = snap.val();
-    if (v) { state.admin = v; simpanLocal(); }
-  });
-
+  fbDb.ref('muara/admin').on('value', snap => { const v = snap.val(); if (v) { state.admin = v; simpanLocal(); } });
   fbDb.ref('muara/guru').on('value', snap => {
     const v = snap.val() || {};
     state.guruList = Object.values(v);
     simpanLocal();
     if (currentUser.role === 'admin') renderGuruTable();
   });
-
-  fbDb.ref('muara/passwords').on('value', snap => {
-    state.customPasswords = snap.val() || {};
-    simpanLocal();
-  });
-
+  fbDb.ref('muara/passwords').on('value', snap => { state.customPasswords = snap.val() || {}; simpanLocal(); });
   fbDb.ref('muara/tugas').on('value', snap => {
     const v = snap.val() || {};
     state.tugas = Object.values(v);
     simpanLocal();
-    if (currentUser.role === 'guru') {
-      try { renderTugasList(); muatFilterTugas(); } catch(e) {}
-    }
+    if (currentUser.role === 'guru') { try { renderTugasList(); muatFilterTugas(); } catch(e) {} }
   });
-
   fbDb.ref('muara/hasil').on('value', snap => {
     const v = snap.val() || {};
     state.hasil = Object.values(v);
     simpanLocal();
-    if (currentUser.role === 'guru') {
-      try { muatHasil(); } catch(e) {}
-    }
+    if (currentUser.role === 'guru') { try { muatHasil(); } catch(e) {} }
   });
 }
 
@@ -1100,7 +1058,6 @@ async function initialCloudLoad() {
     const snap = await fbDb.ref('muara').once('value');
     const data = snap.val() || {};
     const empty = !data.guru && !data.admin;
-
     if (empty) {
       const updates = {};
       state.guruList.forEach(g => { updates['muara/guru/' + encEmail(g.email)] = g; });
@@ -1114,9 +1071,7 @@ async function initialCloudLoad() {
       state.hasil = data.hasil ? Object.values(data.hasil) : [];
       simpanLocal();
     }
-  } catch (e) {
-    console.error('initialCloudLoad', e);
-  }
+  } catch (e) {}
 }
 
 const PROMPT_AI = {
@@ -1285,9 +1240,7 @@ let duplikatTugasId = null;
 let examTimerInterval = null;
 let examStartTime = null;
 
-function simpanLocal() {
-  try { localStorage.setItem('MUARA_v9', JSON.stringify(state)); } catch (e) { console.error(e); }
-}
+function simpanLocal() { try { localStorage.setItem('MUARA_v9', JSON.stringify(state)); } catch (e) {} }
 function simpanState() { simpanLocal(); }
 
 function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -1351,7 +1304,7 @@ function loginGuru() {
   document.getElementById('guruUserInfo').innerHTML = `<svg class="ico"><use href="#i-teacher"/></svg> <b>${escapeHtml(guru.nama)}</b> <small>(${escapeHtml(guru.email)})</small>`;
   const infoBox = document.getElementById('guruInfoBox');
   if (infoBox) infoBox.innerHTML = `<b>Nama:</b> ${escapeHtml(guru.nama)}<br><b>Email:</b> ${escapeHtml(guru.email)}<br><b>Password:</b> ${state.customPasswords[encEmail(emailInput)] ? '(sudah diganti)' : '(default)'}`;
-  try { renderTugasList(); muatFilterTugas(); } catch (e) { console.error(e); }
+  try { renderTugasList(); muatFilterTugas(); } catch (e) {}
 }
 
 async function prosesLupaPassword() {
@@ -1429,9 +1382,7 @@ function validasiKode() {
     if (tugas.waktuMulai || tugas.waktuSelesai) {
       wStr += `<b>Jendela Pengerjaan:</b> ${tugas.waktuMulai ? formatWaktu(tugas.waktuMulai) : 'sekarang'} s/d ${tugas.waktuSelesai ? formatWaktu(tugas.waktuSelesai) : 'selesai'}<br>`;
     }
-    if (tugas.durasi && tugas.durasi > 0) {
-      wStr += `<b>Durasi Maksimal:</b> ${tugas.durasi} menit dari mulai mengerjakan`;
-    }
+    if (tugas.durasi && tugas.durasi > 0) wStr += `<b>Durasi Maksimal:</b> ${tugas.durasi} menit dari mulai mengerjakan`;
     wrapWaktu.innerHTML = `<div class="info teal"><svg class="ico"><use href="#i-clock"/></svg><span>${wStr}</span></div>`;
   } else { wrapWaktu.innerHTML = ''; }
 
@@ -1702,197 +1653,174 @@ async function autoSubmitWaktuHabis() {
 }
 
 // ============================================================
-// BLOKIR PASTE / CLIPBOARD — VERSI ULTRA AGRESIF (SEMUA DEVICE)
+// BLOKIR COPY / PASTE / CLIPBOARD KEYBOARD — VERSI AGRESIF
 // ============================================================
 const _lastValueMap = new WeakMap();
-let _lastLegitInputTime = 0;
+let _lastLegitKeyTime = 0;
 let _inComposition = false;
+let _compositionBaseline = 0;
+let _touchHoldTimer = null;
 
-function isExamActive() {
-  return currentUser.role === 'siswa'
-      && !!currentTugas
-      && !document.getElementById('tugasPage').classList.contains('hidden');
-}
-function isAnswerInput(el) {
+function isAnswerTextarea(el) {
   if (!el) return false;
   if (el.tagName !== 'TEXTAREA' && el.tagName !== 'INPUT') return false;
   return !!(el.closest && el.closest('#jawabanContainer'));
 }
-function _getBaseline(el) {
-  if (_lastValueMap.has(el)) return _lastValueMap.get(el);
-  const d = el.getAttribute && el.getAttribute('data-muara-baseline');
-  if (d !== null && d !== undefined) return d;
-  return '';
+function shouldBlockClipboard() {
+  return currentUser.role === 'siswa'
+      && !!currentTugas
+      && !document.getElementById('tugasPage').classList.contains('hidden');
 }
-function _setBaseline(el, val) {
-  _lastValueMap.set(el, val);
-  try { el.setAttribute('data-muara-baseline', val); } catch(_) {}
-}
-function _revertInput(el, prevValue) {
+function _revertAnswerInput(el, prevValue) {
   try {
     el.value = prevValue;
-    try {
-      el.dispatchEvent(new Event('input',  { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    } catch(_) {}
+    el.dispatchEvent(new Event('input',  { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
   } catch (_) {}
 }
 
-// LAPIS 1: paste di SELURUH halaman selama ujian aktif
+// Baseline saat fokus
+document.addEventListener('focusin', (e) => {
+  if (!shouldBlockClipboard()) return;
+  if (!isAnswerTextarea(e.target)) return;
+  if (!_lastValueMap.has(e.target)) _lastValueMap.set(e.target, e.target.value || '');
+}, true);
+
+// Composition (IME mobile)
+document.addEventListener('compositionstart', (e) => {
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
+  _inComposition = true;
+  _lastLegitKeyTime = Date.now();
+  _compositionBaseline = (e.target.value || '').length;
+}, true);
+document.addEventListener('compositionupdate', (e) => {
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
+  _lastLegitKeyTime = Date.now();
+}, true);
+document.addEventListener('compositionend', (e) => {
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
+  _inComposition = false;
+  _lastLegitKeyTime = Date.now();
+  _lastValueMap.set(e.target, e.target.value || '');
+}, true);
+
+// paste/copy/cut
 document.addEventListener('paste', (e) => {
-  if (!isExamActive()) return;
-  e.preventDefault();
-  e.stopImmediatePropagation();
-  return false;
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
+  e.preventDefault(); e.stopImmediatePropagation(); return false;
 }, true);
-
 document.addEventListener('copy', (e) => {
-  if (!isExamActive()) return;
-  if (isAnswerInput(e.target)) {
-    e.preventDefault(); e.stopImmediatePropagation(); return false;
-  }
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
+  e.preventDefault(); e.stopImmediatePropagation(); return false;
 }, true);
-
 document.addEventListener('cut', (e) => {
-  if (!isExamActive()) return;
-  if (isAnswerInput(e.target)) {
-    e.preventDefault(); e.stopImmediatePropagation(); return false;
-  }
-}, true);
-
-document.addEventListener('drop', (e) => {
-  if (!isExamActive()) return;
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
   e.preventDefault(); e.stopImmediatePropagation(); return false;
 }, true);
 
-document.addEventListener('dragover', (e) => {
-  if (!isExamActive()) return;
-  if (isAnswerInput(e.target)) { e.preventDefault(); return false; }
+// drop/drag
+document.addEventListener('drop', (e) => {
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
+  e.preventDefault(); e.stopImmediatePropagation(); return false;
 }, true);
-
 document.addEventListener('dragstart', (e) => {
-  if (!isExamActive()) return;
-  if (isAnswerInput(e.target)) { e.preventDefault(); return false; }
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
+  e.preventDefault(); return false;
 }, true);
 
-// LAPIS 2: beforeinput
+// beforeinput — jalur utama
 document.addEventListener('beforeinput', (e) => {
-  if (!isExamActive()) return;
-  if (!isAnswerInput(e.target)) return;
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
   const t = e.inputType || '';
-  if (t === 'insertFromPaste' ||
-      t === 'insertFromPasteAsQuotation' ||
-      t === 'insertFromDrop' ||
+  // Block explicit paste types
+  if (t === 'insertFromPaste' || t === 'insertFromPasteAsQuotation' ||
+      t === 'insertFromDrop' || t === 'insertReplacementText' ||
       t === 'insertFromYank') {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    return false;
+    e.preventDefault(); e.stopImmediatePropagation(); return false;
+  }
+  // insertText: cek panjang data. Kalau lebih dari 1 karakter & bukan composition → curigakan (Gboard clipboard)
+  if (t === 'insertText' && !_inComposition) {
+    const data = e.data || '';
+    if (data.length > 1) {
+      e.preventDefault(); e.stopImmediatePropagation(); return false;
+    }
   }
   if (t.startsWith('insert') || t.startsWith('delete')) {
-    _lastLegitInputTime = Date.now();
+    _lastLegitKeyTime = Date.now();
   }
 }, true);
 
-// LAPIS 3: composition (IME mobile sah)
-document.addEventListener('compositionstart', (e) => {
-  if (!isExamActive() || !isAnswerInput(e.target)) return;
-  _inComposition = true;
-  _lastLegitInputTime = Date.now();
-}, true);
-document.addEventListener('compositionupdate', (e) => {
-  if (!isExamActive() || !isAnswerInput(e.target)) return;
-  _lastLegitInputTime = Date.now();
-}, true);
-document.addEventListener('compositionend', (e) => {
-  if (!isExamActive() || !isAnswerInput(e.target)) return;
-  _inComposition = false;
-  _lastLegitInputTime = Date.now();
-  _setBaseline(e.target, e.target.value || '');
-}, true);
-
-// LAPIS 4: keydown shortcut
+// keydown — perbarui waktu legal + blokir shortcut
 document.addEventListener('keydown', (e) => {
-  if (!isExamActive()) return;
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
+  _lastLegitKeyTime = Date.now();
+  _lastValueMap.set(e.target, e.target.value || '');
   const key = (e.key || '').toLowerCase();
   const ctrl = e.ctrlKey || e.metaKey;
-  if ((ctrl && key === 'v') ||
+  if ((ctrl && (key === 'v' || key === 'c' || key === 'x' || key === 'a' || key === 'z' || key === 'y')) ||
+      (ctrl && e.shiftKey && key === 'v') ||
       (e.shiftKey && key === 'insert') ||
       (ctrl && key === 'insert')) {
     e.preventDefault(); e.stopImmediatePropagation(); return false;
   }
-  if (isAnswerInput(e.target)) {
-    _lastLegitInputTime = Date.now();
-    _setBaseline(e.target, e.target.value || '');
-    if (ctrl && (key === 'c' || key === 'x')) {
-      e.preventDefault(); e.stopImmediatePropagation(); return false;
-    }
-  }
 }, true);
 
-// LAPIS 5: contextmenu (klik kanan + long-press)
-document.addEventListener('contextmenu', (e) => {
-  if (!isExamActive()) return;
-  if (isAnswerInput(e.target)) {
-    e.preventDefault(); e.stopImmediatePropagation(); return false;
-  }
-}, true);
-
-// LAPIS 6: focusin baseline + input fallback
-document.addEventListener('focusin', (e) => {
-  if (!isExamActive() || !isAnswerInput(e.target)) return;
-  _setBaseline(e.target, e.target.value || '');
-}, true);
-
+// input — penjaga terakhir
 document.addEventListener('input', (e) => {
-  if (!isExamActive() || !isAnswerInput(e.target)) return;
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
   const el = e.target;
-  const prev = _getBaseline(el);
-  const cur = el.value || '';
-  const now = Date.now();
+  const prev = _lastValueMap.get(el) || '';
+  const cur  = el.value || '';
+  const now  = Date.now();
 
-  if (_inComposition || (now - _lastLegitInputTime) < 300) {
-    _setBaseline(el, cur);
-    return;
-  }
+  if (_inComposition) { _lastValueMap.set(el, cur); return; }
+  if ((now - _lastLegitKeyTime) < 250) { _lastValueMap.set(el, cur); return; }
+
   const delta = cur.length - prev.length;
-  if (cur !== prev) {
-    if (delta < 0 && Math.abs(delta) <= 3) {
-      _setBaseline(el, cur);
-      return;
-    }
-    _revertInput(el, prev);
+  // Tidak ada keydown baru-baru ini, dan tiba-tiba nambah > 1 karakter → paste
+  if (delta > 1) {
+    _revertAnswerInput(el, prev);
     return;
   }
-  _setBaseline(el, cur);
+  _lastValueMap.set(el, cur);
 }, true);
 
-window.__muaraWatchInput = function(event, el) {
-  if (!isExamActive()) return;
-  const prev = _getBaseline(el);
-  const cur = el.value || '';
-  const now = Date.now();
-  if (_inComposition || (now - _lastLegitInputTime) < 300) {
-    _setBaseline(el, cur);
-    return;
-  }
-  if (cur !== prev) {
-    const delta = cur.length - prev.length;
-    if (delta < 0 && Math.abs(delta) <= 3) {
-      _setBaseline(el, cur);
-      return;
-    }
-    el.value = prev;
-    return;
-  }
-  _setBaseline(el, cur);
-};
+// contextmenu
+document.addEventListener('contextmenu', (e) => {
+  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
+  e.preventDefault(); e.stopImmediatePropagation(); return false;
+}, true);
+
+// long-press touch → blok
+document.addEventListener('touchstart', (e) => {
+  if (!shouldBlockClipboard()) return;
+  if (!isAnswerTextarea(e.target)) return;
+  if (_touchHoldTimer) clearTimeout(_touchHoldTimer);
+  const targetEl = e.target;
+  _touchHoldTimer = setTimeout(() => {
+    try { e.preventDefault(); } catch (_) {}
+    try {
+      const baseline = _lastValueMap.get(targetEl) || '';
+      if (targetEl.value !== baseline) _revertAnswerInput(targetEl, baseline);
+    } catch (_) {}
+  }, 400);
+}, { passive: false, capture: true });
+document.addEventListener('touchend', () => {
+  if (_touchHoldTimer) { clearTimeout(_touchHoldTimer); _touchHoldTimer = null; }
+}, true);
+document.addEventListener('touchcancel', () => {
+  if (_touchHoldTimer) { clearTimeout(_touchHoldTimer); _touchHoldTimer = null; }
+}, true);
+document.addEventListener('touchmove', () => {
+  if (_touchHoldTimer) { clearTimeout(_touchHoldTimer); _touchHoldTimer = null; }
+}, { passive: true, capture: true });
 
 // ============================================================
-// LOCKDOWN MODE — VERSI MAKSIMAL v2 (SEMUA DEVICE)
+// LOCKDOWN MODE — VERSI MAKSIMAL
 // ============================================================
 const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const isAndroidDevice = /Android/i.test(navigator.userAgent);
-const isIPadOS = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isMobileDevice = isIOSDevice || isAndroidDevice;
 
 let lockdownState = {
   active: false,
@@ -1900,21 +1828,24 @@ let lockdownState = {
   hiddenTimer: null,
   blurTimer: null,
   fullscreenRetryTimer: null,
+  fullscreenPollTimer: null,
   fullscreenRetries: 0,
   autoSubmitTriggered: false,
   originalOpen: null,
   wakeLock: null,
-  historyArmed: false
+  historyArmed: false,
+  lastFullscreenAt: 0
 };
 
+// ---------- Fullscreen ----------
 function requestFullscreenLockdown() {
-  if (isIOSDevice && !isIPadOS) return;
   const el = document.documentElement;
   const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
   if (!req) return;
   try {
     const p = req.call(el);
     if (p && typeof p.catch === 'function') p.catch(() => {});
+    lockdownState.lastFullscreenAt = Date.now();
   } catch (e) {}
 }
 function exitFullscreenIfAny() {
@@ -1926,6 +1857,8 @@ function exitFullscreenIfAny() {
 function isFullscreenNow() {
   return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
 }
+
+// ---------- Wake Lock ----------
 async function requestWakeLockLockdown() {
   if (!('wakeLock' in navigator)) return;
   try {
@@ -1934,26 +1867,18 @@ async function requestWakeLockLockdown() {
   } catch (e) {}
 }
 async function releaseWakeLockLockdown() {
-  try {
-    if (lockdownState.wakeLock) {
-      await lockdownState.wakeLock.release();
-      lockdownState.wakeLock = null;
-    }
-  } catch (e) {}
-}
-async function lockOrientationLockdown() {
-  try {
-    if (screen.orientation && screen.orientation.lock) {
-      await screen.orientation.lock('portrait');
-    }
-  } catch (e) {}
-}
-async function unlockOrientationLockdown() {
-  try {
-    if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
-  } catch (e) {}
+  try { if (lockdownState.wakeLock) { await lockdownState.wakeLock.release(); lockdownState.wakeLock = null; } } catch (e) {}
 }
 
+// ---------- Orientation ----------
+async function lockOrientationLockdown() {
+  try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('portrait'); } catch (e) {}
+}
+async function unlockOrientationLockdown() {
+  try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
+}
+
+// ---------- Badge & Overlay ----------
 function tampilLockdownBadge() {
   let el = document.getElementById('lockdownBadge');
   if (!el) {
@@ -1962,9 +1887,7 @@ function tampilLockdownBadge() {
     el.className = 'lockdown-badge';
     el.innerHTML = '🔒 Mode Ujian Terkunci';
     document.body.appendChild(el);
-  } else {
-    el.classList.remove('hidden');
-  }
+  } else el.classList.remove('hidden');
 }
 function sembunyiLockdownBadge() {
   const el = document.getElementById('lockdownBadge');
@@ -1977,15 +1900,12 @@ function tampilLockdownWarnOverlay(alasan) {
   el.id = 'lockdownWarnOverlay';
   el.innerHTML = `
     <div class="big">⚠️ UJIAN TERKUNCI</div>
-    <div class="sub">
-      Anda terdeteksi <b>${alasan}</b>.<br>
-      Jawaban Anda akan dikumpulkan otomatis dalam:
-    </div>
-    <div class="count" id="lockdownWarnCount">5</div>
-    <div class="sub">Segera kembali ke halaman ujian. Jika tidak, jawaban akan dikumpulkan otomatis.</div>
+    <div class="sub">Anda terdeteksi <b>${alasan}</b>.<br>Jawaban Anda akan dikumpulkan otomatis dalam:</div>
+    <div class="count" id="lockdownWarnCount">3</div>
+    <div class="sub">Segera kembali ke halaman ujian.</div>
   `;
   document.body.appendChild(el);
-  let n = 5;
+  let n = 3;
   const intv = setInterval(() => {
     n--;
     const c = document.getElementById('lockdownWarnCount');
@@ -1998,26 +1918,41 @@ function sembunyiLockdownWarnOverlay() {
   if (el) el.remove();
 }
 
+// ---------- Handlers ----------
 function handleVisibilityLockdown() {
   if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-  const hidden = document.hidden || document.visibilityState === 'hidden';
+  const hidden = document.hidden || document.visibilityState !== 'visible';
   if (hidden) {
+    // Mobile: langsung submit tanpa grace period
+    if (isMobileDevice) {
+      lockdownState.violations++;
+      autoSubmitLockdown('pindah aplikasi / buka notifikasi');
+      return;
+    }
+    // Desktop: 400ms grace
     if (lockdownState.hiddenTimer) clearTimeout(lockdownState.hiddenTimer);
     lockdownState.hiddenTimer = setTimeout(() => {
-      const stillHidden = document.hidden || document.visibilityState === 'hidden';
-      if (lockdownState.active && stillHidden && !lockdownState.autoSubmitTriggered) {
+      if ((document.hidden || document.visibilityState !== 'visible') && !lockdownState.autoSubmitTriggered) {
         lockdownState.violations++;
-        autoSubmitLockdown('pindah tab / minimize');
+        autoSubmitLockdown('pindah tab');
       }
-    }, 1200);
+    }, 400);
   } else {
     if (lockdownState.hiddenTimer) { clearTimeout(lockdownState.hiddenTimer); lockdownState.hiddenTimer = null; }
     sembunyiLockdownWarnOverlay();
+    // Kalau fullscreen hilang, langsung minta lagi
+    if (!isFullscreenNow()) requestFullscreenLockdown();
   }
 }
 
 function handleWindowBlurLockdown() {
   if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  // Mobile: langsung
+  if (isMobileDevice) {
+    lockdownState.violations++;
+    autoSubmitLockdown('keluar dari jendela ujian');
+    return;
+  }
   if (lockdownState.blurTimer) clearTimeout(lockdownState.blurTimer);
   lockdownState.blurTimer = setTimeout(() => {
     if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
@@ -2025,12 +1960,13 @@ function handleWindowBlurLockdown() {
       lockdownState.violations++;
       autoSubmitLockdown('keluar dari jendela ujian');
     }
-  }, 1200);
+  }, 400);
 }
 function handleWindowFocusLockdown() {
   if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
   if (lockdownState.blurTimer) { clearTimeout(lockdownState.blurTimer); lockdownState.blurTimer = null; }
   sembunyiLockdownWarnOverlay();
+  if (!isFullscreenNow()) requestFullscreenLockdown();
 }
 
 function handlePageHideLockdown() {
@@ -2048,38 +1984,41 @@ function handleFullscreenChangeLockdown() {
   if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
   if (isFullscreenNow()) {
     lockdownState.fullscreenRetries = 0;
-    if (lockdownState.fullscreenRetryTimer) { clearTimeout(lockdownState.fullscreenRetryTimer); lockdownState.fullscreenRetryTimer = null; }
-    sembunyiLockdownWarnOverlay();
     return;
   }
+  // Coba re-enter berkali-kali sangat cepat
   let attempts = 0;
   const tryReenter = () => {
     if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-    if (isFullscreenNow()) { lockdownState.fullscreenRetries = 0; return; }
+    if (isFullscreenNow()) return;
     attempts++;
-    if (attempts <= 3) {
+    if (attempts <= 8) {
       requestFullscreenLockdown();
-      setTimeout(tryReenter, 400);
+      setTimeout(tryReenter, 150);
     } else {
+      // Gagal 8x → auto-submit
       if (lockdownState.fullscreenRetryTimer) clearTimeout(lockdownState.fullscreenRetryTimer);
       lockdownState.fullscreenRetryTimer = setTimeout(() => {
         if (lockdownState.active && !isFullscreenNow() && !lockdownState.autoSubmitTriggered) {
           lockdownState.violations++;
           autoSubmitLockdown('keluar dari mode fullscreen');
         }
-      }, 1800);
+      }, 800);
     }
   };
-  setTimeout(tryReenter, 200);
+  setTimeout(tryReenter, 100);
 }
 
 function handleKeydownLockdown(e) {
   if (!lockdownState.active) return;
   const k = (e.key || '').toLowerCase();
   const ctrl = e.ctrlKey || e.metaKey;
-  if (ctrl && ['t','n','w','r','p','s','o','u'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
-  if (ctrl && e.shiftKey && ['t','n','w','r','i','j','c'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  // Blokir ESC (best-effort — browser mungkin masih keluar)
+  if (k === 'escape') { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  if (ctrl && ['t','n','w','r','p','s','o','u','l'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  if (ctrl && e.shiftKey && ['t','n','w','r','i','j','c','q'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
   if (k === 'f5' || k === 'f11' || k === 'f12') { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  if (e.altKey && (k === 'f4' || k === 'tab')) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
 }
 
 function blockContextMenuLockdown(e) {
@@ -2095,6 +2034,7 @@ function handleBeforeUnloadLockdown(e) {
   return '';
 }
 
+// History trap
 function armHistoryTrapLockdown() {
   if (lockdownState.historyArmed) return;
   try {
@@ -2109,6 +2049,24 @@ function handlePopstateLockdown() {
   autoSubmitLockdown('menekan tombol kembali');
 }
 
+// Poll fullscreen (jaga fullscreen terus aktif)
+function startFullscreenPollLockdown() {
+  if (lockdownState.fullscreenPollTimer) clearInterval(lockdownState.fullscreenPollTimer);
+  lockdownState.fullscreenPollTimer = setInterval(() => {
+    if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+    if (!isFullscreenNow()) {
+      requestFullscreenLockdown();
+    }
+  }, 1000);
+}
+
+// Auto re-request fullscreen setiap ada interaksi user (karena gesture)
+function handleUserInteractionLockdown() {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  if (!isFullscreenNow()) requestFullscreenLockdown();
+}
+
+// ---------- Aktifkan / Non-aktifkan ----------
 function aktifkanLockdown() {
   if (lockdownState.active) return;
   lockdownState.active = true;
@@ -2119,12 +2077,14 @@ function aktifkanLockdown() {
   document.body.classList.add('lockdown-active');
   tampilLockdownBadge();
 
+  // Fullscreen + wake lock + orientasi
   requestFullscreenLockdown();
   requestWakeLockLockdown();
   lockOrientationLockdown();
   armHistoryTrapLockdown();
 
   document.addEventListener('visibilitychange', handleVisibilityLockdown, true);
+  document.addEventListener('webkitvisibilitychange', handleVisibilityLockdown, true);
   document.addEventListener('keydown', handleKeydownLockdown, true);
   document.addEventListener('contextmenu', blockContextMenuLockdown, true);
   document.addEventListener('fullscreenchange', handleFullscreenChangeLockdown, true);
@@ -2135,8 +2095,13 @@ function aktifkanLockdown() {
   window.addEventListener('blur', handleWindowBlurLockdown, true);
   window.addEventListener('focus', handleWindowFocusLockdown, true);
   window.addEventListener('pagehide', handlePageHideLockdown, true);
+  window.addEventListener('pageshow', handleWindowFocusLockdown, true);
   document.addEventListener('freeze', handlePageFreezeLockdown, true);
   window.addEventListener('popstate', handlePopstateLockdown, true);
+  // Re-request fullscreen on user interaction
+  document.addEventListener('click', handleUserInteractionLockdown, true);
+  document.addEventListener('touchstart', handleUserInteractionLockdown, true);
+  document.addEventListener('keydown', handleUserInteractionLockdown, true);
 
   try {
     lockdownState.originalOpen = window.open;
@@ -2144,6 +2109,7 @@ function aktifkanLockdown() {
   } catch (e) {}
 
   try { document.documentElement.style.overscrollBehavior = 'none'; } catch (e) {}
+  startFullscreenPollLockdown();
 }
 
 function nonaktifkanLockdown() {
@@ -2152,9 +2118,12 @@ function nonaktifkanLockdown() {
   if (lockdownState.hiddenTimer) { clearTimeout(lockdownState.hiddenTimer); lockdownState.hiddenTimer = null; }
   if (lockdownState.blurTimer) { clearTimeout(lockdownState.blurTimer); lockdownState.blurTimer = null; }
   if (lockdownState.fullscreenRetryTimer) { clearTimeout(lockdownState.fullscreenRetryTimer); lockdownState.fullscreenRetryTimer = null; }
+  if (lockdownState.fullscreenPollTimer) { clearInterval(lockdownState.fullscreenPollTimer); lockdownState.fullscreenPollTimer = null; }
+  if (_touchHoldTimer) { clearTimeout(_touchHoldTimer); _touchHoldTimer = null; }
 
   document.body.classList.remove('lockdown-active');
   document.removeEventListener('visibilitychange', handleVisibilityLockdown, true);
+  document.removeEventListener('webkitvisibilitychange', handleVisibilityLockdown, true);
   document.removeEventListener('keydown', handleKeydownLockdown, true);
   document.removeEventListener('contextmenu', blockContextMenuLockdown, true);
   document.removeEventListener('fullscreenchange', handleFullscreenChangeLockdown, true);
@@ -2165,8 +2134,12 @@ function nonaktifkanLockdown() {
   window.removeEventListener('blur', handleWindowBlurLockdown, true);
   window.removeEventListener('focus', handleWindowFocusLockdown, true);
   window.removeEventListener('pagehide', handlePageHideLockdown, true);
+  window.removeEventListener('pageshow', handleWindowFocusLockdown, true);
   document.removeEventListener('freeze', handlePageFreezeLockdown, true);
   window.removeEventListener('popstate', handlePopstateLockdown, true);
+  document.removeEventListener('click', handleUserInteractionLockdown, true);
+  document.removeEventListener('touchstart', handleUserInteractionLockdown, true);
+  document.removeEventListener('keydown', handleUserInteractionLockdown, true);
 
   if (lockdownState.originalOpen) { try { window.open = lockdownState.originalOpen; } catch (e) {} lockdownState.originalOpen = null; }
 
@@ -2184,12 +2157,8 @@ async function autoSubmitLockdown(alasan) {
   if (lockdownState.autoSubmitTriggered) return;
   lockdownState.autoSubmitTriggered = true;
   tampilLockdownWarnOverlay(alasan || '');
-  try {
-    await kirimJawaban(true, 'lockdown', alasan || '');
-  } catch (e) { console.error('autoSubmitLockdown error:', e); }
-  setTimeout(() => {
-    nonaktifkanLockdown();
-  }, 800);
+  try { await kirimJawaban(true, 'lockdown', alasan || ''); } catch (e) {}
+  setTimeout(() => { nonaktifkanLockdown(); }, 600);
 }
 
 function renderSoalSiswa() {
@@ -2222,9 +2191,7 @@ function renderSoalSiswa() {
       const showTeks = jawab.mode === 'teks';
       const showFoto = allowFoto && jawab.mode === 'foto';
       let tabsHtml = `<div class="answer-tab ${showTeks ? 'active' : ''}" onclick="gantiMode(${i}, 'teks')"><svg class="ico"><use href="#i-edit"/></svg> Ketik Jawaban</div>`;
-      if (allowFoto) {
-        tabsHtml += `<div class="answer-tab ${showFoto ? 'active' : ''}" onclick="gantiMode(${i}, 'foto')"><svg class="ico"><use href="#i-camera"/></svg> Foto / Upload Gambar</div>`;
-      }
+      if (allowFoto) tabsHtml += `<div class="answer-tab ${showFoto ? 'active' : ''}" onclick="gantiMode(${i}, 'foto')"><svg class="ico"><use href="#i-camera"/></svg> Foto / Upload Gambar</div>`;
       let fotoHtml = '';
       if (allowFoto) {
         fotoHtml = `
@@ -2248,19 +2215,7 @@ function renderSoalSiswa() {
           <p style="margin:8px 0; white-space:pre-wrap;">${escapeHtml(s.pertanyaan) || '(Soal kosong)'}</p>
           <div class="answer-tabs">${tabsHtml}</div>
           <div id="modeTeks-${i}" class="${showTeks ? '' : 'hidden'}">
-            <textarea id="jw-${i}"
-              placeholder="Tulis jawaban Anda di sini..."
-              onchange="simpanTeks(${i}, this.value)"
-              onpaste="event.preventDefault(); event.stopImmediatePropagation(); return false;"
-              ondrop="event.preventDefault(); event.stopImmediatePropagation(); return false;"
-              ondragover="event.preventDefault(); return false;"
-              oncopy="event.preventDefault(); return false;"
-              oncut="event.preventDefault(); return false;"
-              onbeforeinput="if(event.inputType && (event.inputType==='insertFromPaste'||event.inputType==='insertFromPasteAsQuotation'||event.inputType==='insertFromDrop'||event.inputType==='insertFromYank')){event.preventDefault(); event.stopImmediatePropagation(); return false;}"
-              oncontextmenu="event.preventDefault(); return false;"
-              oninput="window.__muaraWatchInput(event, this)"
-              autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false"
-              data-muara-baseline="${escapeAttr(jawab.teks)}">${escapeHtml(jawab.teks)}</textarea>
+            <textarea id="jw-${i}" placeholder="Tulis jawaban Anda di sini..." onchange="simpanTeks(${i}, this.value)" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false">${escapeHtml(jawab.teks)}</textarea>
           </div>
           ${fotoHtml}
         </div>`;
@@ -2314,12 +2269,8 @@ function buildSoalSnapshot() {
 function buildJawabanSnapshot() {
   return currentTugas.soal.map((s, i) => {
     const j = jawabanSementara[i] || {};
-    if (s.jenis === 'pilgan') {
-      return { jenis: 'pilgan', pilgan: j.pilgan || '' };
-    }
-    if (j.mode === 'foto' && j.fotoData) {
-      return { jenis: 'uraian', mode: 'foto', fotoData: j.fotoData, mimeType: j.mimeType || 'image/jpeg' };
-    }
+    if (s.jenis === 'pilgan') return { jenis: 'pilgan', pilgan: j.pilgan || '' };
+    if (j.mode === 'foto' && j.fotoData) return { jenis: 'uraian', mode: 'foto', fotoData: j.fotoData, mimeType: j.mimeType || 'image/jpeg' };
     return { jenis: 'uraian', mode: 'teks', teks: j.teks || '' };
   });
 }
@@ -2357,21 +2308,11 @@ async function kirimJawaban(paksa, trigger, alasan) {
       return;
     }
     const record = {
-      tugasId: currentTugas.id,
-      tugasKode: currentTugas.kode,
-      tugasJudul: currentTugas.judul,
-      tugasMapel: currentTugas.mapel,
-      tugasKelas: currentTugas.kelas,
-      tugasKkm: currentTugas.kkm,
-      guruEmail: currentTugas.guruEmail,
-      nama: currentUser.nama,
-      kelas: currentUser.kelas,
-      waktu: new Date().toISOString(),
-      trigger: trigger || 'manual',
-      alasanSubmit: alasan || '',
-      ...hasil,
-      soalSnapshot: soalSnapshot,
-      jawabanSiswa: jawabanSiswaSnapshot
+      tugasId: currentTugas.id, tugasKode: currentTugas.kode, tugasJudul: currentTugas.judul,
+      tugasMapel: currentTugas.mapel, tugasKelas: currentTugas.kelas, tugasKkm: currentTugas.kkm,
+      guruEmail: currentTugas.guruEmail, nama: currentUser.nama, kelas: currentUser.kelas,
+      waktu: new Date().toISOString(), trigger: trigger || 'manual', alasanSubmit: alasan || '',
+      ...hasil, soalSnapshot: soalSnapshot, jawabanSiswa: jawabanSiswaSnapshot
     };
     tampilkanHasilSiswa(record);
     state.hasil.push(record);
@@ -2381,14 +2322,9 @@ async function kirimJawaban(paksa, trigger, alasan) {
     document.getElementById('jawabanContainer').innerHTML = '';
     document.getElementById('examTimerWrap').innerHTML = '';
     btn.classList.add('hidden');
-
     nonaktifkanLockdown();
     const btnKeluar = document.getElementById('btnKeluarTugas');
-    if (btnKeluar) {
-      btnKeluar.disabled = false;
-      btnKeluar.style.opacity = '1';
-      btnKeluar.style.cursor = 'pointer';
-    }
+    if (btnKeluar) { btnKeluar.disabled = false; btnKeluar.style.opacity = '1'; btnKeluar.style.cursor = 'pointer'; }
   } catch (e) {
     document.getElementById('hasilSiswa').innerHTML = `<div class="card info red"><svg class="ico"><use href="#i-warn"/></svg><div><b>Terjadi kesalahan:</b><br>${escapeHtml(e.message)}</div></div>`;
     btn.disabled = false;
@@ -2486,11 +2422,7 @@ function buildHasilRenderHTML(hasil) {
   const lulus = hasil.skorTotal >= kkm;
   const warna = lulus ? '#38a169' : '#e53e3e';
   const status = lulus ? 'LULUS' : 'BELUM LULUS';
-  const tgl = new Date(hasil.waktu).toLocaleString('id-ID', {
-    day: '2-digit', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
-
+  const tgl = new Date(hasil.waktu).toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   const huruf = ['A', 'B', 'C', 'D', 'E'];
 
   let html = `
@@ -2549,9 +2481,7 @@ function buildHasilRenderHTML(hasil) {
       soal.opsi.forEach((o, j) => {
         const isKunci = soal.kunci === huruf[j];
         const isDipilih = jaw.pilgan === huruf[j];
-        let bg = 'transparent';
-        let weight = 'normal';
-        let mark = '';
+        let bg = 'transparent'; let weight = 'normal'; let mark = '';
         if (isKunci) { bg = '#e8f5e9'; weight = 'bold'; mark = ' ✓'; }
         if (isDipilih && !isKunci) { bg = '#fff5f5'; weight = 'bold'; mark = ' ✗ (dipilih)'; }
         if (isDipilih && isKunci) mark = ' ✓ (dipilih - benar)';
@@ -2631,7 +2561,7 @@ async function unduhHasilPDF() {
   const hasil = getHasilSiswa();
   if (!hasil) return;
   if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') { alert('Pustaka PDF belum termuat.'); return; }
-  showUnduhLoading('Menyiapkan PDF... Mohon tunggu, soal & jawaban Anda sedang disusun.');
+  showUnduhLoading('Menyiapkan PDF... Mohon tunggu.');
   try {
     const wrapper = document.createElement('div');
     wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '0'; wrapper.style.background = '#fff';
@@ -2658,7 +2588,7 @@ async function unduhHasilPDF() {
       heightLeft -= pdfHeight;
     }
     pdf.save(`Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.pdf`);
-  } catch (e) { console.error(e); alert('Gagal membuat PDF: ' + e.message); }
+  } catch (e) { alert('Gagal membuat PDF: ' + e.message); }
   finally { hideUnduhLoading(); }
 }
 
@@ -2666,7 +2596,7 @@ async function unduhHasilGambar() {
   const hasil = getHasilSiswa();
   if (!hasil) return;
   if (typeof html2canvas === 'undefined') { alert('Pustaka gambar belum termuat.'); return; }
-  showUnduhLoading('Menyiapkan gambar... Mohon tunggu, soal & jawaban Anda sedang disusun.');
+  showUnduhLoading('Menyiapkan gambar... Mohon tunggu.');
   try {
     const wrapper = document.createElement('div');
     wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '0'; wrapper.style.background = '#fff';
@@ -2679,7 +2609,7 @@ async function unduhHasilGambar() {
     link.download = `Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-  } catch (e) { console.error(e); alert('Gagal membuat gambar: ' + e.message); }
+  } catch (e) { alert('Gagal membuat gambar: ' + e.message); }
   finally { hideUnduhLoading(); }
 }
 
@@ -2757,11 +2687,9 @@ async function konfirmasiDuplikat() {
   baru.aktif = bukaSekarang;
   baru.createdAt = new Date().toISOString();
   state.tugas.push(baru);
-  simpanLocal();
-  renderTugasList();
-  tutupDuplikat();
+  simpanLocal(); renderTugasList(); tutupDuplikat();
   await cloudSaveTugas(baru);
-  alert(`Tugas berhasil diduplikat!\n\nKelas Baru: ${kelasBaru}\nKode Tugas Baru: ${baru.kode}\nStatus: ${bukaSekarang ? 'AKTIF' : 'DITUTUP (draf)'}\n\nBagikan kode baru ini ke siswa kelas ${kelasBaru}.`);
+  alert(`Tugas berhasil diduplikat!\n\nKelas Baru: ${kelasBaru}\nKode Tugas Baru: ${baru.kode}\nStatus: ${bukaSekarang ? 'AKTIF' : 'DITUTUP (draf)'}`);
 }
 
 function mulaiInputSoal() {
@@ -2846,17 +2774,15 @@ A. Bandung
 B. Jakarta
 C. Surabaya
 D. Medan
-Kunci Jawaban: B</pre>
-Format didukung: <code>1.</code> <code>1)</code> <code>(1)</code> <code>Soal 1</code>, opsi <code>A.</code> <code>a)</code> <code>(A)</code> <code>A-</code>, dan label <code>Kunci Jawaban:</code> <code>Jawaban:</code> <code>Kunci:</code> <code>Answer:</code> — semua dideteksi otomatis.`;
+Kunci Jawaban: B</pre>`;
   } else if (jenis === 'uraian') {
     boxUraian.classList.remove('hidden'); info.classList.remove('hidden');
     info.innerHTML = `<b>Sistem Deteksi Otomatis — Uraian:</b>
 <pre>1. Jelaskan pengertian gotong royong!
-Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama...</pre>
-Format didukung: <code>1.</code> <code>1)</code> <code>(1)</code> <code>Soal 1</code>, dan label <code>Jawaban Ideal:</code> <code>Jawaban:</code> <code>Kunci:</code> <code>Pembahasan:</code> — semua dideteksi otomatis.`;
+Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama...</pre>`;
   } else if (jenis === 'keduanya') {
     boxKeduanya.classList.remove('hidden'); info.classList.remove('hidden');
-    info.innerHTML = `<b>Mode Keduanya (1 Kotak):</b> Paste soal <b>Pilihan Ganda</b> dan <b>Uraian</b> dalam satu kotak. Sistem otomatis mendeteksi jenis tiap soal.`;
+    info.innerHTML = `<b>Mode Keduanya (1 Kotak):</b> Paste soal <b>Pilihan Ganda</b> dan <b>Uraian</b> dalam satu kotak.`;
   }
 }
 
@@ -2887,7 +2813,6 @@ function prosesTempelSoal() {
 
     const jmlPilgan = semuaSoal.filter(s => s.jenis === 'pilgan').length;
     const jmlUraian = semuaSoal.filter(s => s.jenis === 'uraian').length;
-
     const totalBobot = semuaSoal.reduce((sum, s) => sum + (s.bobot || 0), 0);
     if (totalBobot === 0 || Math.abs(totalBobot - 100) > 0.01) {
       const bobotPerSoal = Math.round(100 / semuaSoal.length);
@@ -2914,7 +2839,7 @@ function prosesTempelSoal() {
     else switchRubrikTab('gabungan');
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    alert(`Berhasil memproses!\n\n- ${jmlPilgan} soal Pilihan Ganda\n- ${jmlUraian} soal Uraian\n\nSilakan periksa & lengkapi (mapel, judul, kelas, API key, kunci jawaban).`);
+    alert(`Berhasil memproses!\n\n- ${jmlPilgan} soal Pilihan Ganda\n- ${jmlUraian} soal Uraian\n\nSilakan periksa & lengkapi.`);
   } catch (e) {
     status.innerHTML = `<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><div><b>Gagal memproses:</b><br>${escapeHtml(e.message)}</div></div>`;
   }
@@ -2944,10 +2869,7 @@ function parseTeksSoal(teks, jenisMode) {
     if (jenisMode === 'pilgan') {
       const p = cobaParsePilgan(blockText);
       if (p) hasil.push(p);
-      else {
-        const u = cobaParseUraian(blockText);
-        if (u) { u.jenis = 'pilgan'; u.opsi = ['Opsi A', 'Opsi B', 'Opsi C', 'Opsi D']; u.kunci = 'A'; hasil.push(u); }
-      }
+      else { const u = cobaParseUraian(blockText); if (u) { u.jenis = 'pilgan'; u.opsi = ['Opsi A', 'Opsi B', 'Opsi C', 'Opsi D']; u.kunci = 'A'; hasil.push(u); } }
     } else if (jenisMode === 'uraian') {
       const u = cobaParseUraian(blockText);
       if (u) { u.jenis = 'uraian'; delete u.opsi; hasil.push(u); }
@@ -3319,7 +3241,7 @@ function konfirmasiKeluarTugas() {
   } else {
     console.warn('MUARA berjalan dalam mode LOCAL (tanpa Firebase).');
   }
-  console.log('MUARA v12 (paste-lock ultra + lockdown-max) siap. Mode:', firebaseReady ? 'CLOUD' : 'LOCAL', '| Total guru:', state.guruList.length);
+  console.log('MUARA v12 (hard-lock) siap. Mode:', firebaseReady ? 'CLOUD' : 'LOCAL', '| Total guru:', state.guruList.length);
 })();
 </script>
 </body>
