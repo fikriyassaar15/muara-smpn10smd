@@ -168,6 +168,10 @@
   .cloud-status.offline { background: #fff5f5; color: #742a2a; border: 2px solid #e53e3e; }
   .cloud-status.loading { background: #fffaf0; color: #7b341e; border: 2px solid #dd6b20; }
   .cloud-status .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  /* LOCKDOWN BADGE */
+  .lockdown-badge { position: fixed; top: 12px; left: 12px; z-index: 99998; background: linear-gradient(135deg, #c62828, #e53935); color: #fff; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; box-shadow: 0 4px 14px rgba(198,40,40,0.45); letter-spacing: 0.4px; pointer-events: none; animation: pulse-lockdown 2s infinite; display: flex; align-items: center; gap: 6px; }
+  .lockdown-badge.hidden { display: none; }
+  @keyframes pulse-lockdown { 50% { opacity: 0.78; } }
   @media (max-width: 600px) {
     .tabs { flex-direction: column; }
     .score-big { font-size: 2rem; }
@@ -322,6 +326,7 @@
       <h2 id="previewJudul"><svg class="ico"><use href="#i-book"/></svg> Judul Tugas</h2>
       <div class="info" id="previewInfo"></div>
       <div id="previewWaktuInfo"></div>
+      <div id="previewLockdownInfo"></div>
       <h3><svg class="ico"><use href="#i-doc"/></svg> Ketentuan Tugas</h3>
       <div class="ketentuan-box" id="previewKetentuan"></div>
       <h3><svg class="ico"><use href="#i-edit"/></svg> Data Peserta</h3>
@@ -351,7 +356,7 @@
         <div class="txt"><b>MUARA</b><small>SMP Negeri 10 Samarinda</small></div>
       </div>
       <div class="user" id="tugasUserInfo"></div>
-      <button class="danger sm" onclick="konfirmasiKeluarTugas()"><svg class="ico"><use href="#i-power"/></svg> Keluar</button>
+      <button class="danger sm" onclick="konfirmasiKeluarTugas()" id="btnKeluarTugas"><svg class="ico"><use href="#i-power"/></svg> Keluar</button>
     </div>
     <div class="card">
       <h2 id="tugasJudul"></h2>
@@ -605,11 +610,11 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
             </div>
           </label>
 
-          <label class="toggle-line" style="margin-top:10px;">
-            <input type="checkbox" id="exLockdownMode">
+          <label class="toggle-line" style="margin-top:10px; border-color:#e53e3e; background:#fff5f5;">
+            <input type="checkbox" id="exLockdownMode" style="accent-color:#c62828;">
             <div>
-              <div class="txt"><svg class="ico" style="vertical-align:-0.15em;"><use href="#i-lock"/></svg> Aktifkan Lockdown Mode</div>
-              <div class="sub">Siswa tidak dapat menempel (paste) atau menyalin jawaban dari sumber luar. Jawaban hanya dapat diketik manual.</div>
+              <div class="txt" style="color:#c62828;">🔒 Lockdown Mode (Ujian Terkunci)</div>
+              <div class="sub">Saat aktif, siswa <b>terkunci di halaman ujian</b>. Tidak dapat pindah tab, minimize, atau keluar browser sebelum menyelesaikan tugas. Keluar dari halaman ujian → <b>jawaban otomatis dikumpulkan</b>.</div>
             </div>
           </label>
         </div>
@@ -840,7 +845,7 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
       </div>
     </label>
 
-    <div class="info" style="margin-top:12px;"><svg class="ico"><use href="#i-info"/></svg><span>Seluruh soal, kunci, rubrik, ketentuan, API Key, dan pengaturan foto akan ikut diduplikat. <b>Kode tugas baru akan digenerate otomatis.</b></span></div>
+    <div class="info" style="margin-top:12px;"><svg class="ico"><use href="#i-info"/></svg><span>Seluruh soal, kunci, rubrik, ketentuan, API Key, pengaturan foto, dan pengaturan <b>Lockdown Mode</b> akan ikut diduplikat. Kode tugas baru akan digenerate otomatis.</span></div>
 
     <div class="row" style="margin-top:14px;">
       <button class="success" onclick="konfirmasiDuplikat()"><svg class="ico"><use href="#i-copy"/></svg> Duplikat Sekarang</button>
@@ -851,7 +856,7 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
 
 <script>
 // ============================================================
-// FIREBASE CONFIG — SUDAH DIISI UNTUK SMPN 10 SAMARINDA
+// FIREBASE CONFIG
 // ============================================================
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDfGGkiVl1JPdY1BHWQ31NdmrsjL10ZdWw",
@@ -1255,56 +1260,6 @@ function formatWaktu(iso) {
   catch (e) { return iso; }
 }
 
-// ============================================================
-// LOCKDOWN MODE — Blokir paste/cut/drag-drop, tanpa notifikasi
-// ============================================================
-function blockLockdownKeys(e) {
-  const k = (e.key || '').toLowerCase();
-  // Blokir Ctrl+V / Cmd+V (paste), Ctrl+X / Cmd+X (cut), Ctrl+Insert / Cmd+Insert (copy di Linux/Win)
-  if ((e.ctrlKey || e.metaKey) && (k === 'v' || k === 'x' || k === 'insert')) {
-    e.preventDefault(); return false;
-  }
-  // Blokir Shift+Insert (paste alternatif)
-  if (e.shiftKey && k === 'insert') {
-    e.preventDefault(); return false;
-  }
-  return true;
-}
-
-function setupLockdownContainer() {
-  const container = document.getElementById('jawabanContainer');
-  if (!container || container._lockdownApplied) return;
-  container._lockdownApplied = true;
-
-  const blockFn = (e) => {
-    // Cek apakah lockdown aktif untuk tugas yang sedang dikerjakan
-    if (currentTugas && currentTugas.lockdownMode === true) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-  };
-  // Blokir paste, cut, drop, drag — semua event di-capture (useCapture: true)
-  ['paste', 'cut', 'drop', 'dragover'].forEach(evt => {
-    container.addEventListener(evt, blockFn, true);
-  });
-
-  // Blokir keyboard shortcut paste/cut
-  container.addEventListener('keydown', (e) => {
-    if (!currentTugas || currentTugas.lockdownMode !== true) return;
-    blockLockdownKeys(e);
-  }, true);
-
-  // Blokir input event yang tidak wajar (fallback untuk browser tertentu)
-  container.addEventListener('beforeinput', (e) => {
-    if (!currentTugas || currentTugas.lockdownMode !== true) return;
-    if (e.inputType === 'insertFromPaste' || e.inputType === 'insertFromDrop' || e.inputType === 'insertFromYank') {
-      e.preventDefault();
-      return false;
-    }
-  }, true);
-}
-
 function generateKodeUnik() {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   let kode = ''; let attempts = 0;
@@ -1441,6 +1396,12 @@ function validasiKode() {
     }
     wrapWaktu.innerHTML = `<div class="info teal"><svg class="ico"><use href="#i-clock"/></svg><span>${wStr}</span></div>`;
   } else { wrapWaktu.innerHTML = ''; }
+
+  const wrapLock = document.getElementById('previewLockdownInfo');
+  if (tugas.lockdownMode) {
+    wrapLock.innerHTML = `<div class="info red"><svg class="ico"><use href="#i-shield"/></svg><span><b>🔒 Ujian Terkunci (Lockdown Mode Aktif)</b><br>Setelah Anda mulai, layar akan terkunci penuh. Anda <b>tidak dapat pindah tab, minimize, atau keluar</b> sebelum menyelesaikan tugas. Keluar dari halaman ujian akan <b>mengumpulkan jawaban otomatis</b>.</span></div>`;
+  } else { wrapLock.innerHTML = ''; }
+
   document.getElementById('previewKetentuan').textContent = tugas.ketentuan || '(Guru tidak menuliskan ketentuan khusus.)';
   document.getElementById('siswaNama').focus();
 }
@@ -1629,6 +1590,25 @@ function mulaiKerjakan() {
   document.getElementById('tugasKetentuanSingkat').innerHTML = `<svg class="ico"><use href="#i-info"/></svg><span>${escapeHtml(currentTugas.mapel || '-')} | Kelas: ${escapeHtml(currentTugas.kelas || '-')} | KKM: ${currentTugas.kkm}</span>`;
   renderSoalSiswa();
   mulaiTimerUjian();
+
+  // Aktifkan lockdown jika di-set oleh guru
+  if (currentTugas.lockdownMode) {
+    // Tombol keluar di-disable
+    const btnKeluar = document.getElementById('btnKeluarTugas');
+    if (btnKeluar) {
+      btnKeluar.disabled = true;
+      btnKeluar.style.opacity = '0.4';
+      btnKeluar.style.cursor = 'not-allowed';
+    }
+    aktifkanLockdown();
+  } else {
+    const btnKeluar = document.getElementById('btnKeluarTugas');
+    if (btnKeluar) {
+      btnKeluar.disabled = false;
+      btnKeluar.style.opacity = '1';
+      btnKeluar.style.cursor = 'pointer';
+    }
+  }
 }
 
 function hentikanTimerUjian() {
@@ -1684,12 +1664,287 @@ async function autoSubmitWaktuHabis() {
   await kirimJawaban(true);
 }
 
+// ============================================================
+// BLOKIR PASTE / CLIPBOARD (SILENT — TANPA PERINGATAN)
+// Hanya aktif saat siswa di halaman ujian, dan hanya untuk
+// textarea jawaban di dalam #jawabanContainer
+// ============================================================
+function isAnswerTextarea(el) {
+  if (!el) return false;
+  if (el.tagName !== 'TEXTAREA' && el.tagName !== 'INPUT') return false;
+  return !!(el.closest && el.closest('#jawabanContainer'));
+}
+function shouldBlockClipboard() {
+  return currentUser.role === 'siswa'
+      && !!currentTugas
+      && !document.getElementById('tugasPage').classList.contains('hidden');
+}
+// 1) paste event
+document.addEventListener('paste', (e) => {
+  if (!shouldBlockClipboard()) return;
+  if (isAnswerTextarea(e.target)) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    return false;
+  }
+}, true);
+// 2) drop (drag & drop teks)
+document.addEventListener('drop', (e) => {
+  if (!shouldBlockClipboard()) return;
+  if (isAnswerTextarea(e.target)) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    return false;
+  }
+}, true);
+// 3) beforeinput (iOS / Android modern, insertFromPaste)
+document.addEventListener('beforeinput', (e) => {
+  if (!shouldBlockClipboard()) return;
+  if (isAnswerTextarea(e.target)) {
+    const t = e.inputType || '';
+    if (t === 'insertFromPaste' || t === 'insertFromPasteAsQuotation' || t === 'insertFromDrop' || t === 'insertReplacementText') {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      return false;
+    }
+  }
+}, true);
+// 4) keydown shortcut paste (Ctrl+V, Cmd+V, Shift+Insert, Ctrl+Insert)
+document.addEventListener('keydown', (e) => {
+  if (!shouldBlockClipboard()) return;
+  if (!isAnswerTextarea(e.target)) return;
+  const key = (e.key || '').toLowerCase();
+  const ctrl = e.ctrlKey || e.metaKey;
+  if ((ctrl && key === 'v') ||
+      (ctrl && e.shiftKey && key === 'v') ||
+      (e.shiftKey && key === 'insert') ||
+      (ctrl && key === 'insert')) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    return false;
+  }
+}, true);
+// 5) contextmenu (mencegah menu Paste lewat klik kanan / long-press)
+document.addEventListener('contextmenu', (e) => {
+  if (!shouldBlockClipboard()) return;
+  if (isAnswerTextarea(e.target)) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    return false;
+  }
+}, true);
+// 6) input fallback: deteksi lonjakan teks (paste via jalur tak terduga)
+const _lastValueMap = new WeakMap();
+document.addEventListener('input', (e) => {
+  if (!shouldBlockClipboard()) return;
+  if (!isAnswerTextarea(e.target)) return;
+  const el = e.target;
+  const prev = _lastValueMap.get(el) || '';
+  const cur = el.value || '';
+  // Kalau bertambah >15 karakter dalam satu event tanpa keydown normal → kemungkinan paste
+  if (cur.length - prev.length > 15) {
+    // Revert ke nilai sebelumnya (silent)
+    el.value = prev;
+    // Trigger onchange supaya state tetap konsisten (jika ada)
+    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch(_) {}
+  } else {
+    _lastValueMap.set(el, cur);
+  }
+}, true);
+// Simpan baseline setiap kali keydown normal
+document.addEventListener('keydown', (e) => {
+  if (!shouldBlockClipboard()) return;
+  if (!isAnswerTextarea(e.target)) return;
+  const el = e.target;
+  _lastValueMap.set(el, el.value || '');
+}, true);
+
+// ============================================================
+// LOCKDOWN MODE
+// ============================================================
+const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isAndroidDevice = /Android/i.test(navigator.userAgent);
+
+let lockdownState = {
+  active: false,
+  violations: 0,
+  hiddenTimer: null,
+  fullscreenRetryTimer: null,
+  fullscreenRetries: 0,
+  autoSubmitTriggered: false,
+  originalOpen: null
+};
+
+function requestFullscreenLockdown() {
+  if (isIOSDevice) return; // iOS Safari tidak support Fullscreen API untuk elemen biasa
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (!req) return;
+  try {
+    const p = req.call(el);
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  } catch(e) { /* silent */ }
+}
+
+function exitFullscreenIfAny() {
+  const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+  if (!exit) return;
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+  if (isFs) { try { exit.call(document); } catch(e) {} }
+}
+
+function isFullscreenNow() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+}
+
+function tampilLockdownBadge() {
+  let el = document.getElementById('lockdownBadge');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'lockdownBadge';
+    el.className = 'lockdown-badge';
+    el.innerHTML = '🔒 Mode Ujian Terkunci';
+    document.body.appendChild(el);
+  } else {
+    el.classList.remove('hidden');
+  }
+}
+function sembunyiLockdownBadge() {
+  const el = document.getElementById('lockdownBadge');
+  if (el) el.classList.add('hidden');
+}
+
+function handleVisibilityLockdown() {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  const hidden = document.hidden || document.visibilityState === 'hidden';
+  if (hidden) {
+    if (lockdownState.hiddenTimer) clearTimeout(lockdownState.hiddenTimer);
+    lockdownState.hiddenTimer = setTimeout(() => {
+      const stillHidden = document.hidden || document.visibilityState === 'hidden';
+      if (lockdownState.active && stillHidden && !lockdownState.autoSubmitTriggered) {
+        lockdownState.violations++;
+        autoSubmitLockdown('pindah tab / minimize');
+      }
+    }, 3000);
+  } else {
+    if (lockdownState.hiddenTimer) { clearTimeout(lockdownState.hiddenTimer); lockdownState.hiddenTimer = null; }
+  }
+}
+
+function handleFullscreenChangeLockdown() {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  if (isFullscreenNow()) {
+    lockdownState.fullscreenRetries = 0;
+    if (lockdownState.fullscreenRetryTimer) { clearTimeout(lockdownState.fullscreenRetryTimer); lockdownState.fullscreenRetryTimer = null; }
+    return;
+  }
+  // Keluar dari fullscreen → coba re-enter beberapa kali
+  let attempts = 0;
+  const tryReenter = () => {
+    if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+    if (isFullscreenNow()) { lockdownState.fullscreenRetries = 0; return; }
+    attempts++;
+    if (attempts <= 3) {
+      requestFullscreenLockdown();
+      setTimeout(tryReenter, 400);
+    } else {
+      // Gagal re-enter → cek lagi setelah 2 detik
+      if (lockdownState.fullscreenRetryTimer) clearTimeout(lockdownState.fullscreenRetryTimer);
+      lockdownState.fullscreenRetryTimer = setTimeout(() => {
+        if (lockdownState.active && !isFullscreenNow() && !lockdownState.autoSubmitTriggered) {
+          lockdownState.violations++;
+          autoSubmitLockdown('keluar dari mode fullscreen');
+        }
+      }, 2500);
+    }
+  };
+  setTimeout(tryReenter, 200);
+}
+
+function handleKeydownLockdown(e) {
+  if (!lockdownState.active) return;
+  const k = (e.key || '').toLowerCase();
+  const ctrl = e.ctrlKey || e.metaKey;
+
+  // Blokir shortcut browser yang membuka/menutup tab/window
+  if (ctrl && ['t','n','w','r','p','s','o','u'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  if (ctrl && e.shiftKey && ['t','n','w','r','i','j','c'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  if (k === 'f5' || k === 'f11' || k === 'f12') { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+}
+
+function blockContextMenuLockdown(e) {
+  if (!lockdownState.active) return;
+  e.preventDefault();
+  return false;
+}
+
+function handleBeforeUnloadLockdown(e) {
+  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+  e.preventDefault();
+  e.returnValue = '';
+  return '';
+}
+
+function aktifkanLockdown() {
+  if (lockdownState.active) return;
+  lockdownState.active = true;
+  lockdownState.violations = 0;
+  lockdownState.autoSubmitTriggered = false;
+  lockdownState.fullscreenRetries = 0;
+
+  tampilLockdownBadge();
+  requestFullscreenLockdown();
+
+  document.addEventListener('visibilitychange', handleVisibilityLockdown, true);
+  document.addEventListener('keydown', handleKeydownLockdown, true);
+  document.addEventListener('contextmenu', blockContextMenuLockdown, true);
+  document.addEventListener('fullscreenchange', handleFullscreenChangeLockdown, true);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChangeLockdown, true);
+  document.addEventListener('mozfullscreenchange', handleFullscreenChangeLockdown, true);
+  document.addEventListener('MSFullscreenChange', handleFullscreenChangeLockdown, true);
+  window.addEventListener('beforeunload', handleBeforeUnloadLockdown, true);
+
+  // Blokir window.open
+  try {
+    lockdownState.originalOpen = window.open;
+    window.open = function() { return null; };
+  } catch(e) {}
+}
+
+function nonaktifkanLockdown() {
+  if (!lockdownState.active) return;
+  lockdownState.active = false;
+  if (lockdownState.hiddenTimer) { clearTimeout(lockdownState.hiddenTimer); lockdownState.hiddenTimer = null; }
+  if (lockdownState.fullscreenRetryTimer) { clearTimeout(lockdownState.fullscreenRetryTimer); lockdownState.fullscreenRetryTimer = null; }
+
+  document.removeEventListener('visibilitychange', handleVisibilityLockdown, true);
+  document.removeEventListener('keydown', handleKeydownLockdown, true);
+  document.removeEventListener('contextmenu', blockContextMenuLockdown, true);
+  document.removeEventListener('fullscreenchange', handleFullscreenChangeLockdown, true);
+  document.removeEventListener('webkitfullscreenchange', handleFullscreenChangeLockdown, true);
+  document.removeEventListener('mozfullscreenchange', handleFullscreenChangeLockdown, true);
+  document.removeEventListener('MSFullscreenChange', handleFullscreenChangeLockdown, true);
+  window.removeEventListener('beforeunload', handleBeforeUnloadLockdown, true);
+
+  if (lockdownState.originalOpen) { try { window.open = lockdownState.originalOpen; } catch(e) {} lockdownState.originalOpen = null; }
+
+  exitFullscreenIfAny();
+  sembunyiLockdownBadge();
+}
+
+async function autoSubmitLockdown(alasan) {
+  if (lockdownState.autoSubmitTriggered) return;
+  lockdownState.autoSubmitTriggered = true;
+  try {
+    await kirimJawaban(true, 'lockdown', alasan || '');
+  } catch(e) { console.error('autoSubmitLockdown error:', e); }
+  nonaktifkanLockdown();
+}
+
 function renderSoalSiswa() {
   const c = document.getElementById('jawabanContainer');
   c.innerHTML = '';
   const allowFoto = currentTugas.aktifkanFoto !== false;
-  const lockdown = currentTugas.lockdownMode === true;
-
   currentTugas.soal.forEach((s, i) => {
     const jawab = jawabanSementara[i] || { mode: 'teks', teks: '', fotoData: '', mimeType: '', pilgan: '' };
     if (!allowFoto && jawab.mode === 'foto') jawab.mode = 'teks';
@@ -1736,17 +1991,13 @@ function renderSoalSiswa() {
             <div id="preview-${i}">${jawab.fotoData ? `<img src="${jawab.fotoData}" class="photo-preview" alt="Preview">` : ''}</div>
           </div>`;
       }
-      // Lockdown attributes untuk textarea (hanya bila lockdown ON)
-      const lockAttrs = lockdown
-        ? 'onpaste="return false;" oncut="return false;" ondrop="return false;" ondragover="return false;" onkeydown="return blockLockdownKeys(event);"'
-        : '';
       c.innerHTML += `
         <div class="question-box">
           <b>Soal #${i+1}</b> <span class="badge">Uraian</span> <span class="badge">Bobot ${s.bobot}</span>
           <p style="margin:8px 0; white-space:pre-wrap;">${escapeHtml(s.pertanyaan) || '(Soal kosong)'}</p>
           <div class="answer-tabs">${tabsHtml}</div>
           <div id="modeTeks-${i}" class="${showTeks ? '' : 'hidden'}">
-            <textarea id="jw-${i}" placeholder="Tulis jawaban Anda di sini..." ${lockAttrs} onchange="simpanTeks(${i}, this.value)">${escapeHtml(jawab.teks)}</textarea>
+            <textarea id="jw-${i}" placeholder="Tulis jawaban Anda di sini..." onchange="simpanTeks(${i}, this.value)" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false">${escapeHtml(jawab.teks)}</textarea>
           </div>
           ${fotoHtml}
         </div>`;
@@ -1810,19 +2061,20 @@ function buildJawabanSnapshot() {
   });
 }
 
-async function kirimJawaban(paksa) {
+async function kirimJawaban(paksa, trigger, alasan) {
+  // trigger opsional: 'lockdown' | 'waktu' | undefined (manual)
   for (let i = 0; i < currentTugas.soal.length; i++) {
     const j = jawabanSementara[i];
     const soal = currentTugas.soal[i];
     if (!j) {
-      if (paksa) { jawabanSementara[i] = { mode: 'teks', teks: '(tidak dijawab - waktu habis)', fotoData: '', mimeType: '', pilgan: '' }; continue; }
+      if (paksa) { jawabanSementara[i] = { mode: 'teks', teks: '(tidak dijawab)', fotoData: '', mimeType: '', pilgan: '' }; continue; }
       return alert(`Soal #${i+1} belum dijawab.`);
     }
     if (soal.jenis === 'pilgan') {
       if (!j.pilgan) { if (paksa) continue; return alert(`Soal #${i+1} (pilihan ganda) belum dipilih jawabannya.`); }
     } else {
-      if (j.mode === 'teks' && !j.teks.trim()) { if (paksa) { j.teks = '(tidak dijawab - waktu habis)'; continue; } return alert(`Soal #${i+1} belum diisi.`); }
-      if (j.mode === 'foto' && !j.fotoData) { if (paksa) { jawabanSementara[i] = { mode: 'teks', teks: '(tidak dijawab - waktu habis)', fotoData: '', mimeType: '', pilgan: '' }; continue; } return alert(`Soal #${i+1} belum ada foto.`); }
+      if (j.mode === 'teks' && !j.teks.trim()) { if (paksa) { j.teks = '(tidak dijawab)'; continue; } return alert(`Soal #${i+1} belum diisi.`); }
+      if (j.mode === 'foto' && !j.fotoData) { if (paksa) { jawabanSementara[i] = { mode: 'teks', teks: '(tidak dijawab)', fotoData: '', mimeType: '', pilgan: '' }; continue; } return alert(`Soal #${i+1} belum ada foto.`); }
     }
   }
   if (!paksa && !confirm('Kumpulkan jawaban sekarang?')) return;
@@ -1853,6 +2105,8 @@ async function kirimJawaban(paksa) {
       nama: currentUser.nama,
       kelas: currentUser.kelas,
       waktu: new Date().toISOString(),
+      trigger: trigger || 'manual',
+      alasanSubmit: alasan || '',
       ...hasil,
       soalSnapshot: soalSnapshot,
       jawabanSiswa: jawabanSiswaSnapshot
@@ -1865,6 +2119,15 @@ async function kirimJawaban(paksa) {
     document.getElementById('jawabanContainer').innerHTML = '';
     document.getElementById('examTimerWrap').innerHTML = '';
     btn.classList.add('hidden');
+
+    // Matikan lockdown setelah selesai
+    nonaktifkanLockdown();
+    const btnKeluar = document.getElementById('btnKeluarTugas');
+    if (btnKeluar) {
+      btnKeluar.disabled = false;
+      btnKeluar.style.opacity = '1';
+      btnKeluar.style.cursor = 'pointer';
+    }
   } catch (e) {
     document.getElementById('hasilSiswa').innerHTML = `<div class="card info red"><svg class="ico"><use href="#i-warn"/></svg><div><b>Terjadi kesalahan:</b><br>${escapeHtml(e.message)}</div></div>`;
     btn.disabled = false;
@@ -1940,11 +2203,10 @@ Berikut jawaban siswa:
 }
 
 function tampilkanHasilSiswa(hasil) {
-  const kkm = hasil.tugasKkm || currentTugas?.kkm || 75;
-  const lulus = hasil.skorTotal >= kkm;
+  const lulus = hasil.skorTotal >= (hasil.tugasKkm || currentTugas.kkm || 75);
   const warna = lulus ? '#38a169' : '#e53e3e';
   const status = lulus ? 'LULUS' : 'BELUM LULUS';
-  let html = `<div class="card" id="hasilCard"><h2><svg class="ico"><use href="#i-check"/></svg> Hasil Penilaian Anda</h2><div class="score-big" style="color:${warna};">${hasil.skorTotal} / 100</div><p style="text-align:center; color:${warna}; font-weight:700; margin-top:8px;">${status} (KKM: ${kkm})</p><h3><svg class="ico"><use href="#i-doc"/></svg> Rincian Per Soal</h3>`;
+  let html = `<div class="card" id="hasilCard"><h2><svg class="ico"><use href="#i-check"/></svg> Hasil Penilaian Anda</h2><div class="score-big" style="color:${warna};">${hasil.skorTotal} / 100</div><p style="text-align:center; color:${warna}; font-weight:700; margin-top:8px;">${status} (KKM: ${hasil.tugasKkm || currentTugas.kkm})</p><h3><svg class="ico"><use href="#i-doc"/></svg> Rincian Per Soal</h3>`;
   (hasil.skorPerSoal || []).forEach(s => { html += `<div class="result-box"><b>Soal #${s.nomor}</b> — Skor: <b>${s.skor}/${s.maks}</b><div class="feedback">${escapeHtml(s.feedback)}</div></div>`; });
   html += `<h3><svg class="ico"><use href="#i-info"/></svg> Kesimpulan Guru</h3><div class="feedback">${escapeHtml(hasil.kesimpulan)}</div><div class="info green" style="margin-top:16px;"><svg class="ico"><use href="#i-check"/></svg><span>Nilai Anda sudah otomatis terkirim ke guru.</span></div>
     <h3 style="margin-top:20px;"><svg class="ico"><use href="#i-download"/></svg> Unduh Hasil Penilaian</h3>
@@ -2181,7 +2443,7 @@ function renderTugasList() {
     if (e.waktuMulai || e.waktuSelesai) waktuInfo = ` | ⏰ ${e.waktuMulai ? formatWaktu(e.waktuMulai) : 'sekarang'} s/d ${e.waktuSelesai ? formatWaktu(e.waktuSelesai) : 'selesai'}`;
     if (e.durasi > 0) waktuInfo += ` | ⏱ ${e.durasi} menit`;
     const fotoInfo = e.aktifkanFoto === false ? ' | 🚫 Foto off' : ' | 📷 Foto on';
-    const lockInfo = e.lockdownMode === true ? ' | 🔒 Lockdown on' : '';
+    const lockInfo = e.lockdownMode ? ' | <b style="color:#c62828;">🔒 LOCKDOWN</b>' : '';
     return `<div class="exam-item"><h3><svg class="ico"><use href="#i-exam"/></svg> ${escapeHtml(e.judul) || '(Tanpa judul)'} <span class="badge ${e.aktif ? 'green' : 'gray'}">${e.aktif ? 'AKTIF' : 'DITUTUP'}</span></h3><div class="meta">${escapeHtml(e.mapel || '-')}${kelasInfo} | KKM: ${e.kkm}${jenisInfo} | ${jmlHasil} siswa${pembuat}<br>${waktuInfo}${fotoInfo}${lockInfo}</div><div style="font-size:0.82rem; color:#718096; margin-bottom:6px;">Kode Tugas:</div><div class="code-badge">${e.kode}</div><div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"><button class="sm secondary" onclick="salinKode('${e.kode}')"><svg class="ico"><use href="#i-copy"/></svg> Salin Kode</button><button class="sm purple" onclick="bukaDuplikat('${e.id}')"><svg class="ico"><use href="#i-copy"/></svg> Duplikat</button><button class="sm secondary" onclick="bukaEditorTugas('${e.id}')"><svg class="ico"><use href="#i-edit"/></svg> Edit</button><button class="sm ${e.aktif ? 'warning' : 'success'}" onclick="toggleAktif('${e.id}')"><svg class="ico"><use href="${e.aktif ? '#i-pause' : '#i-play'}"/></svg> ${e.aktif ? 'Tutup' : 'Buka'}</button><button class="sm danger" onclick="hapusTugas('${e.id}')"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button></div></div>`;
   }).join('');
 }
@@ -2202,7 +2464,7 @@ function bukaDuplikat(id) {
   const e = state.tugas.find(x => x.id === id);
   if (!e) return;
   duplikatTugasId = id;
-  document.getElementById('duplikatInfo').innerHTML = `<div class="info"><svg class="ico"><use href="#i-info"/></svg><span><b>Asal:</b> ${escapeHtml(e.judul)} <br><b>Kode:</b> ${e.kode} | <b>Kelas:</b> ${escapeHtml(e.kelas || '-')} | <b>Soal:</b> ${e.soal.length}</span></div>`;
+  document.getElementById('duplikatInfo').innerHTML = `<div class="info"><svg class="ico"><use href="#i-info"/></svg><span><b>Asal:</b> ${escapeHtml(e.judul)} <br><b>Kode:</b> ${e.kode} | <b>Kelas:</b> ${escapeHtml(e.kelas || '-')} | <b>Soal:</b> ${e.soal.length}${e.lockdownMode ? ' | <b style="color:#c62828;">🔒 Lockdown</b>' : ''}</span></div>`;
   document.getElementById('duplikatJudul').value = (e.judul || 'Tugas') + ' (Copy)';
   document.getElementById('duplikatKelas').value = '';
   document.getElementById('duplikatWaktuMulai').value = e.waktuMulai || '';
@@ -2696,7 +2958,7 @@ async function simpanTugas() {
     state.tugas.push(newTugas);
     simpanLocal();
     await cloudSaveTugas(newTugas);
-    alert(`Tugas berhasil dibuat!\n\nKODE TUGAS: ${newTugas.kode}\n\nBagikan kode ini ke siswa Anda.`);
+    alert(`Tugas berhasil dibuat!\n\nKODE TUGAS: ${newTugas.kode}\n${lockdownMode ? '\n🔒 Lockdown Mode AKTIF\n' : ''}\nBagikan kode ini ke siswa Anda.`);
   }
   tutupEditorTugas();
 }
@@ -2719,7 +2981,8 @@ function muatHasil() {
     const kkm = (state.tugas.find(e => e.id === h.tugasId)?.kkm) || 75;
     const lulus = h.skorTotal >= kkm; const warna = lulus ? '#38a169' : '#e53e3e';
     const tgl = new Date(h.waktu).toLocaleString('id-ID');
-    return `<div class="result-item" style="border-left-color:${warna};"><div class="name">${escapeHtml(h.nama)} <small style="color:#718096;">(${escapeHtml(h.kelas || '-')})</small><span class="score" style="color:${warna};">${h.skorTotal}/100</span></div><div style="font-size:0.8rem; color:#718096; margin-top:4px;">${escapeHtml(h.tugasJudul || '-')} - ${h.tugasKode} - ${tgl}</div><details style="margin-top:8px;"><summary style="cursor:pointer; color:#0d47a1; font-size:0.85rem;">Lihat detail</summary><div style="margin-top:8px;">${(h.skorPerSoal || []).map(s => `<div style="font-size:0.82rem; margin-bottom:6px;"><b>Soal ${s.nomor}:</b> ${s.skor}/${s.maks} - ${escapeHtml(s.feedback)}</div>`).join('')}<div style="font-size:0.85rem; margin-top:8px; padding-top:8px; border-top:1px solid #e2e8f0;"><b>Kesimpulan:</b> ${escapeHtml(h.kesimpulan)}</div></div></details></div>`;
+    const trig = h.trigger === 'lockdown' ? ' <span class="badge red" style="font-size:0.65rem;">AUTO (Lockdown)</span>' : (h.trigger === 'waktu' ? ' <span class="badge orange" style="font-size:0.65rem;">AUTO (Waktu)</span>' : '');
+    return `<div class="result-item" style="border-left-color:${warna};"><div class="name">${escapeHtml(h.nama)} <small style="color:#718096;">(${escapeHtml(h.kelas || '-')})</small><span class="score" style="color:${warna};">${h.skorTotal}/100</span></div><div style="font-size:0.8rem; color:#718096; margin-top:4px;">${escapeHtml(h.tugasJudul || '-')} - ${h.tugasKode} - ${tgl}${trig}${h.alasanSubmit ? ' <i>('+escapeHtml(h.alasanSubmit)+')</i>' : ''}</div><details style="margin-top:8px;"><summary style="cursor:pointer; color:#0d47a1; font-size:0.85rem;">Lihat detail</summary><div style="margin-top:8px;">${(h.skorPerSoal || []).map(s => `<div style="font-size:0.82rem; margin-bottom:6px;"><b>Soal ${s.nomor}:</b> ${s.skor}/${s.maks} - ${escapeHtml(s.feedback)}</div>`).join('')}<div style="font-size:0.85rem; margin-top:8px; padding-top:8px; border-top:1px solid #e2e8f0;"><b>Kesimpulan:</b> ${escapeHtml(h.kesimpulan)}</div></div></details></div>`;
   }).join('');
 }
 
@@ -2728,11 +2991,12 @@ function exportCSV() {
   let list = state.hasil.filter(h => h.guruEmail === currentUser.email);
   if (filterId) list = list.filter(h => h.tugasId === filterId);
   if (list.length === 0) return alert('Belum ada data.');
-  let csv = 'Nama,Kelas,Tugas,Kode Tugas,Waktu,Skor Total,Status\n';
+  let csv = 'Nama,Kelas,Tugas,Kode Tugas,Waktu,Skor Total,Status,Metode Submit\n';
   list.forEach(h => {
     const kkm = state.tugas.find(e => e.id === h.tugasId)?.kkm || 75;
     const lulus = h.skorTotal >= kkm ? 'LULUS' : 'BELUM LULUS';
-    csv += `"${h.nama}","${h.kelas || '-'}","${h.tugasJudul || '-'}","${h.tugasKode}","${new Date(h.waktu).toLocaleString('id-ID')}",${h.skorTotal},${lulus}\n`;
+    const trig = h.trigger === 'lockdown' ? 'AUTO (Lockdown)' : (h.trigger === 'waktu' ? 'AUTO (Waktu)' : 'Manual');
+    csv += `"${h.nama}","${h.kelas || '-'}","${h.tugasJudul || '-'}","${h.tugasKode}","${new Date(h.waktu).toLocaleString('id-ID')}",${h.skorTotal},${lulus},${trig}\n`;
   });
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = `nilai_${Date.now()}.csv`; a.click(); URL.revokeObjectURL(url);
@@ -2762,8 +3026,13 @@ async function gantiPassword() {
 }
 
 function konfirmasiKeluarTugas() {
+  if (lockdownState.active) {
+    alert('Mode ujian terkunci aktif. Anda harus menyelesaikan tugas terlebih dahulu.');
+    return;
+  }
   if (!confirm('Yakin keluar? Jawaban yang belum dikumpulkan akan hilang.')) return;
   hentikanTimerUjian();
+  nonaktifkanLockdown();
   currentTugas = null;
   currentUser = { role: null, nama: '', kelas: '', email: '' };
   jawabanSementara = {};
@@ -2789,8 +3058,6 @@ function konfirmasiKeluarTugas() {
   } else {
     console.warn('MUARA berjalan dalam mode LOCAL (tanpa Firebase).');
   }
-  // Aktifkan listener lockdown pada container jawaban
-  setupLockdownContainer();
   console.log('MUARA v10 siap. Mode:', firebaseReady ? 'CLOUD' : 'LOCAL', '| Total guru:', state.guruList.length);
 })();
 </script>
