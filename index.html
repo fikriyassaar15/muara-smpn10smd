@@ -1724,6 +1724,31 @@ function prosesFoto(i, event) {
   reader.readAsDataURL(file);
 }
 
+// ============================================================
+// Helper: bangun snapshot soal + jawaban siswa untuk disimpan
+// ============================================================
+function buildSoalSnapshot() {
+  return currentTugas.soal.map(s => ({
+    jenis: s.jenis,
+    pertanyaan: s.pertanyaan || '',
+    opsi: s.jenis === 'pilgan' ? (s.opsi || []) : null,
+    kunci: s.kunci || null,
+    bobot: s.bobot || 0
+  }));
+}
+function buildJawabanSnapshot() {
+  return currentTugas.soal.map((s, i) => {
+    const j = jawabanSementara[i] || {};
+    if (s.jenis === 'pilgan') {
+      return { jenis: 'pilgan', pilgan: j.pilgan || '' };
+    }
+    if (j.mode === 'foto' && j.fotoData) {
+      return { jenis: 'uraian', mode: 'foto', fotoData: j.fotoData, mimeType: j.mimeType || 'image/jpeg' };
+    }
+    return { jenis: 'uraian', mode: 'teks', teks: j.teks || '' };
+  });
+}
+
 async function kirimJawaban(paksa) {
   for (let i = 0; i < currentTugas.soal.length; i++) {
     const j = jawabanSementara[i];
@@ -1743,6 +1768,11 @@ async function kirimJawaban(paksa) {
   hentikanTimerUjian();
   const btn = document.getElementById('btnKirim');
   btn.disabled = true;
+
+  // Snapshot sebelum diubah
+  const soalSnapshot = buildSoalSnapshot();
+  const jawabanSiswaSnapshot = buildJawabanSnapshot();
+
   document.getElementById('hasilSiswa').innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span><span class="msg">Silakan tunggu 1-5 menit, jawaban anda sedang dikoreksi</span><span class="sub">Mohon jangan menutup atau me-refresh halaman ini.</span></div></div>';
   try {
     const hasil = await koreksiAI(currentUser.nama, currentUser.kelas, jawabanSementara);
@@ -1752,8 +1782,23 @@ async function kirimJawaban(paksa) {
       btn.disabled = false;
       return;
     }
-    tampilkanHasilSiswa(hasil);
-    const record = { tugasId: currentTugas.id, tugasKode: currentTugas.kode, tugasJudul: currentTugas.judul, tugasMapel: currentTugas.mapel, tugasKelas: currentTugas.kelas, guruEmail: currentTugas.guruEmail, nama: currentUser.nama, kelas: currentUser.kelas, waktu: new Date().toISOString(), ...hasil };
+    // Susun record lengkap
+    const record = {
+      tugasId: currentTugas.id,
+      tugasKode: currentTugas.kode,
+      tugasJudul: currentTugas.judul,
+      tugasMapel: currentTugas.mapel,
+      tugasKelas: currentTugas.kelas,
+      tugasKkm: currentTugas.kkm,
+      guruEmail: currentTugas.guruEmail,
+      nama: currentUser.nama,
+      kelas: currentUser.kelas,
+      waktu: new Date().toISOString(),
+      ...hasil,
+      soalSnapshot: soalSnapshot,
+      jawabanSiswa: jawabanSiswaSnapshot
+    };
+    tampilkanHasilSiswa(record);
     state.hasil.push(record);
     simpanLocal();
     const pushKey = await cloudAddHasil(record);
@@ -1836,14 +1881,14 @@ Berikut jawaban siswa:
 }
 
 function tampilkanHasilSiswa(hasil) {
-  const lulus = hasil.skorTotal >= currentTugas.kkm;
+  const lulus = hasil.skorTotal >= (hasil.tugasKkm || currentTugas.kkm || 75);
   const warna = lulus ? '#38a169' : '#e53e3e';
   const status = lulus ? 'LULUS' : 'BELUM LULUS';
-  let html = `<div class="card" id="hasilCard"><h2><svg class="ico"><use href="#i-check"/></svg> Hasil Penilaian Anda</h2><div class="score-big" style="color:${warna};">${hasil.skorTotal} / 100</div><p style="text-align:center; color:${warna}; font-weight:700; margin-top:8px;">${status} (KKM: ${currentTugas.kkm})</p><h3><svg class="ico"><use href="#i-doc"/></svg> Rincian Per Soal</h3>`;
+  let html = `<div class="card" id="hasilCard"><h2><svg class="ico"><use href="#i-check"/></svg> Hasil Penilaian Anda</h2><div class="score-big" style="color:${warna};">${hasil.skorTotal} / 100</div><p style="text-align:center; color:${warna}; font-weight:700; margin-top:8px;">${status} (KKM: ${hasil.tugasKkm || currentTugas.kkm})</p><h3><svg class="ico"><use href="#i-doc"/></svg> Rincian Per Soal</h3>`;
   (hasil.skorPerSoal || []).forEach(s => { html += `<div class="result-box"><b>Soal #${s.nomor}</b> — Skor: <b>${s.skor}/${s.maks}</b><div class="feedback">${escapeHtml(s.feedback)}</div></div>`; });
   html += `<h3><svg class="ico"><use href="#i-info"/></svg> Kesimpulan Guru</h3><div class="feedback">${escapeHtml(hasil.kesimpulan)}</div><div class="info green" style="margin-top:16px;"><svg class="ico"><use href="#i-check"/></svg><span>Nilai Anda sudah otomatis terkirim ke guru.</span></div>
     <h3 style="margin-top:20px;"><svg class="ico"><use href="#i-download"/></svg> Unduh Hasil Penilaian</h3>
-    <p style="font-size:0.85rem; color:#718096; margin-bottom:6px;">Pilih format unduhan:</p>
+    <p style="font-size:0.85rem; color:#718096; margin-bottom:6px;">Pilih format unduhan (soal & jawaban Anda akan disertakan):</p>
     <div class="unduh-row">
       <button class="pdf" onclick="unduhHasilPDF()"><svg class="ico"><use href="#i-file-pdf"/></svg> Unduh PDF</button>
       <button class="img" onclick="unduhHasilGambar()"><svg class="ico"><use href="#i-image"/></svg> Unduh Gambar (PNG)</button>
@@ -1853,11 +1898,21 @@ function tampilkanHasilSiswa(hasil) {
   window.scrollTo({ top: document.getElementById('hasilSiswa').offsetTop, behavior: 'smooth' });
 }
 
+// ============================================================
+// BUILD HTML RENDER (untuk PDF & PNG) — DENGAN SOAL & JAWABAN
+// ============================================================
 function buildHasilRenderHTML(hasil) {
-  const lulus = hasil.skorTotal >= currentTugas.kkm;
+  const kkm = hasil.tugasKkm || currentTugas?.kkm || 75;
+  const lulus = hasil.skorTotal >= kkm;
   const warna = lulus ? '#38a169' : '#e53e3e';
   const status = lulus ? 'LULUS' : 'BELUM LULUS';
-  const tgl = new Date(hasil.waktu).toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const tgl = new Date(hasil.waktu).toLocaleString('id-ID', {
+    day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+
+  const huruf = ['A', 'B', 'C', 'D', 'E'];
+
   let html = `
     <div style="font-family:'Segoe UI',Arial,sans-serif;background:#fff;padding:30px;width:720px;color:#222;">
       <div style="text-align:center;border-bottom:3px solid #0d47a1;padding-bottom:12px;margin-bottom:18px;">
@@ -1866,6 +1921,7 @@ function buildHasilRenderHTML(hasil) {
         <div style="font-size:0.78rem;color:#00695c;font-style:italic;margin-top:2px;">Mesin Ujian &amp; Analisis Respons Alternatif</div>
         <div style="font-size:0.95rem;font-weight:700;margin-top:8px;">LAPORAN HASIL PENILAIAN TUGAS</div>
       </div>
+
       <table style="width:100%;font-size:0.88rem;border-collapse:collapse;margin-bottom:14px;">
         <tr><td style="padding:3px 0;width:140px;"><b>Nama Siswa</b></td><td>: ${escapeHtml(hasil.nama)}</td></tr>
         <tr><td style="padding:3px 0;"><b>Kelas</b></td><td>: ${escapeHtml(hasil.kelas)}</td></tr>
@@ -1873,28 +1929,114 @@ function buildHasilRenderHTML(hasil) {
         <tr><td style="padding:3px 0;"><b>Judul Tugas</b></td><td>: ${escapeHtml(hasil.tugasJudul || '-')}</td></tr>
         <tr><td style="padding:3px 0;"><b>Kode Tugas</b></td><td>: ${escapeHtml(hasil.tugasKode || '-')}</td></tr>
         <tr><td style="padding:3px 0;"><b>Waktu Kumpul</b></td><td>: ${tgl}</td></tr>
-        <tr><td style="padding:3px 0;"><b>KKM</b></td><td>: ${currentTugas.kkm}</td></tr>
+        <tr><td style="padding:3px 0;"><b>KKM</b></td><td>: ${kkm}</td></tr>
       </table>
+
       <div style="text-align:center;padding:16px;border:3px solid ${warna};border-radius:10px;background:${lulus?'#f0fff4':'#fff5f5'};margin-bottom:18px;">
         <div style="font-size:2.4rem;font-weight:800;color:${warna};line-height:1.1;">${hasil.skorTotal} / 100</div>
         <div style="font-size:1rem;font-weight:700;color:${warna};margin-top:4px;">${status}</div>
       </div>
-      <h3 style="font-size:1rem;color:#0d47a1;border-bottom:2px solid #0d47a1;padding-bottom:4px;margin-bottom:10px;">Rincian Per Soal</h3>`;
+
+      <h3 style="font-size:1rem;color:#0d47a1;border-bottom:2px solid #0d47a1;padding-bottom:4px;margin-bottom:10px;">Rincian Per Soal (Soal, Jawaban, &amp; Penilaian)</h3>`;
+
+  // ============================================================
+  // LOOP PER SOAL — INI BAGIAN YANG MENYERTAKAN SOAL & JAWABAN
+  // ============================================================
+  const soalList = hasil.soalSnapshot || [];
+  const jawabanList = hasil.jawabanSiswa || [];
+
   (hasil.skorPerSoal || []).forEach(s => {
+    const idx = (s.nomor || 1) - 1;
+    const soal = soalList[idx] || {};
+    const jaw = jawabanList[idx] || {};
+
+    // Header soal: nomor + skor
     html += `
-      <div style="border:1px solid #cbd5e0;border-radius:8px;padding:12px;margin-bottom:10px;background:#f7fafc;">
-        <div style="font-weight:700;color:#0d47a1;display:flex;justify-content:space-between;">
-          <span>Soal #${s.nomor}</span>
-          <span style="color:${warna};">${s.skor} / ${s.maks}</span>
+      <div style="border:1px solid #cbd5e0;border-radius:8px;margin-bottom:12px;overflow:hidden;">
+        <div style="background:#e3f2fd;padding:8px 12px;font-weight:700;color:#0d47a1;display:flex;justify-content:space-between;align-items:center;">
+          <span>Soal #${s.nomor} ${soal.jenis === 'pilgan' ? '<span style="background:#6a1b9a;color:#fff;font-size:0.65rem;padding:2px 8px;border-radius:10px;margin-left:6px;">PILIHAN GANDA</span>' : '<span style="background:#0d47a1;color:#fff;font-size:0.65rem;padding:2px 8px;border-radius:10px;margin-left:6px;">URAIAN</span>'}</span>
+          <span style="color:${warna};font-size:1rem;">${s.skor} / ${s.maks}</span>
         </div>
-        <div style="font-size:0.85rem;line-height:1.5;margin-top:6px;padding-left:8px;border-left:3px solid #38a169;background:#fff;padding:8px;">${escapeHtml(s.feedback)}</div>
+        <div style="padding:12px;">`;
+
+    // ========== PERTANYAAN ==========
+    if (soal.pertanyaan) {
+      html += `<div style="margin-bottom:10px;">
+        <div style="font-size:0.75rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Pertanyaan:</div>
+        <div style="font-size:0.88rem;line-height:1.5;color:#222;">${escapeHtml(soal.pertanyaan).replace(/\n/g, '<br>')}</div>
       </div>`;
+    }
+
+    // ========== OPSI (khusus PG) ==========
+    if (soal.jenis === 'pilgan' && soal.opsi && soal.opsi.length > 0) {
+      html += `<div style="margin-bottom:10px;">
+        <div style="font-size:0.75rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Pilihan:</div>
+        <div style="font-size:0.85rem;line-height:1.6;">`;
+      soal.opsi.forEach((o, j) => {
+        const isKunci = soal.kunci === huruf[j];
+        const isDipilih = jaw.pilgan === huruf[j];
+        let bg = 'transparent';
+        let weight = 'normal';
+        let mark = '';
+        if (isKunci) { bg = '#e8f5e9'; weight = 'bold'; mark = ' ✓'; }
+        if (isDipilih && !isKunci) { bg = '#fff5f5'; weight = 'bold'; mark = ' ✗ (dipilih)'; }
+        if (isDipilih && isKunci) mark = ' ✓ (dipilih - benar)';
+        html += `<div style="padding:3px 8px;border-radius:4px;background:${bg};font-weight:${weight};margin-bottom:2px;">${huruf[j]}. ${escapeHtml(o)}${mark}</div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    // ========== KUNCI ==========
+    if (soal.jenis === 'pilgan' && soal.kunci) {
+      html += `<div style="margin-bottom:10px;font-size:0.85rem;">
+        <span style="color:#718096;">Kunci Jawaban:</span> <b style="color:#38a169;">${escapeHtml(soal.kunci)}</b>
+      </div>`;
+    } else if (soal.jenis === 'uraian' && soal.kunci) {
+      html += `<div style="margin-bottom:10px;">
+        <div style="font-size:0.75rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Kunci / Poin Penting:</div>
+        <div style="font-size:0.82rem;line-height:1.5;color:#4a5568;background:#f7fafc;padding:8px;border-radius:4px;border-left:3px solid #38a169;">${escapeHtml(soal.kunci).replace(/\n/g, '<br>')}</div>
+      </div>`;
+    }
+
+    // ========== JAWABAN SISWA ==========
+    html += `<div style="margin-bottom:10px;">
+      <div style="font-size:0.75rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Jawaban Anda:</div>`;
+
+    if (soal.jenis === 'pilgan') {
+      const ans = jaw.pilgan || '(tidak dijawab)';
+      const benar = jaw.pilgan && jaw.pilgan === soal.kunci;
+      html += `<div style="font-size:0.88rem;padding:6px 10px;border-radius:4px;background:${benar?'#f0fff4':'#fff5f5'};color:${benar?'#22543d':'#742a2a'};font-weight:600;">${escapeHtml(ans)} ${benar?'✓':''}</div>`;
+    } else {
+      if (jaw.mode === 'foto' && jaw.fotoData) {
+        html += `<div style="border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;display:inline-block;max-width:100%;">
+          <img src="${jaw.fotoData}" style="max-width:100%;max-height:320px;display:block;" />
+        </div>`;
+      } else if (jaw.teks) {
+        html += `<div style="font-size:0.86rem;line-height:1.55;white-space:pre-wrap;background:#f7fafc;padding:10px;border-radius:6px;border-left:3px solid #0d47a1;">${escapeHtml(jaw.teks).replace(/\n/g, '<br>')}</div>`;
+      } else {
+        html += `<div style="font-size:0.85rem;color:#a0aec0;font-style:italic;">(tidak dijawab)</div>`;
+      }
+    }
+    html += `</div>`;
+
+    // ========== FEEDBACK AI ==========
+    if (s.feedback) {
+      html += `<div style="margin-top:8px;">
+        <div style="font-size:0.75rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Feedback:</div>
+        <div style="font-size:0.85rem;line-height:1.5;padding:10px;background:#fffaf0;border-left:3px solid #dd6b20;border-radius:4px;">${escapeHtml(s.feedback).replace(/\n/g, '<br>')}</div>
+      </div>`;
+    }
+
+    html += `</div></div>`;
   });
+
+  // ========== KESIMPULAN ==========
   html += `
       <h3 style="font-size:1rem;color:#0d47a1;border-bottom:2px solid #0d47a1;padding-bottom:4px;margin:18px 0 10px;">Kesimpulan</h3>
       <div style="background:#fffaf0;border-left:4px solid #dd6b20;padding:12px;border-radius:6px;font-size:0.88rem;line-height:1.6;">
-        ${escapeHtml(hasil.kesimpulan)}
+        ${escapeHtml(hasil.kesimpulan || '-').replace(/\n/g, '<br>')}
       </div>
+
       <div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #cbd5e0;font-size:0.75rem;color:#718096;">
         Dokumen ini dihasilkan otomatis oleh sistem MUARA — SMP Negeri 10 Samarinda.<br>
         ${new Date().toLocaleString('id-ID')}
@@ -1919,7 +2061,7 @@ async function unduhHasilPDF() {
   const hasil = getHasilSiswa();
   if (!hasil) return;
   if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') { alert('Pustaka PDF belum termuat.'); return; }
-  showUnduhLoading('Menyiapkan PDF...');
+  showUnduhLoading('Menyiapkan PDF... Mohon tunggu, soal & jawaban Anda sedang disusun.');
   try {
     const wrapper = document.createElement('div');
     wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '0'; wrapper.style.background = '#fff';
@@ -1954,7 +2096,7 @@ async function unduhHasilGambar() {
   const hasil = getHasilSiswa();
   if (!hasil) return;
   if (typeof html2canvas === 'undefined') { alert('Pustaka gambar belum termuat.'); return; }
-  showUnduhLoading('Menyiapkan gambar...');
+  showUnduhLoading('Menyiapkan gambar... Mohon tunggu, soal & jawaban Anda sedang disusun.');
   try {
     const wrapper = document.createElement('div');
     wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '0'; wrapper.style.background = '#fff';
@@ -2595,7 +2737,7 @@ function konfirmasiKeluarTugas() {
   } else {
     console.warn('MUARA berjalan dalam mode LOCAL (tanpa Firebase).');
   }
-  console.log('MUARA v8 siap. Mode:', firebaseReady ? 'CLOUD' : 'LOCAL', '| Total guru:', state.guruList.length);
+  console.log('MUARA v9 siap. Mode:', firebaseReady ? 'CLOUD' : 'LOCAL', '| Total guru:', state.guruList.length);
 })();
 </script>
 </body>
