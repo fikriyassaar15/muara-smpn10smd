@@ -295,7 +295,7 @@
   <button onclick="kembaliKeFullscreen()" type="button">🔙 KEMBALI KE MODE UJIAN</button>
 </div>
 
-<!-- ==================== LOGIN ==================== -->
+<!-- LOGIN -->
 <div id="loginPage">
   <div class="login-container">
     <div class="login-logos">
@@ -311,11 +311,11 @@
     <div id="roleChoice">
       <button class="role-btn" onclick="showLogin('guru')">
         <svg class="ico ico-lg" style="color:#0d47a1"><use href="#i-teacher"/></svg>
-        <div><div class="title">Masuk sebagai Guru</div><div class="desc">Login dengan email & password terdaftar</div></div>
+        <div><div class="title">Masuk sebagai Guru</div><div class="desc">Login dengan email & password</div></div>
       </button>
       <button class="role-btn" onclick="showLogin('siswa')">
         <svg class="ico ico-lg" style="color:#00695c"><use href="#i-student"/></svg>
-        <div><div class="title">Masuk sebagai Siswa</div><div class="desc">Masukkan kode tugas dari guru</div></div>
+        <div><div class="title">Masuk sebagai Siswa</div><div class="desc">Masukkan kode tugas</div></div>
       </button>
       <button class="role-btn" onclick="showLogin('admin')">
         <svg class="ico ico-lg" style="color:#dd6b20"><use href="#i-admin"/></svg>
@@ -361,7 +361,7 @@
   </div>
 </div>
 
-<!-- ==================== PREVIEW TUGAS ==================== -->
+<!-- PREVIEW TUGAS -->
 <div id="previewPage" class="hidden">
   <div class="container">
     <div class="card">
@@ -380,12 +380,12 @@
         <optgroup label="Kelas VIII"><option>VIII A</option><option>VIII B</option><option>VIII C</option><option>VIII D</option><option>VIII E</option><option>VIII F</option><option>VIII G</option><option>VIII H</option><option>VIII I</option><option>VIII J</option></optgroup>
         <optgroup label="Kelas IX"><option>IX A</option><option>IX B</option><option>IX C</option><option>IX D</option><option>IX E</option><option>IX F</option><option>IX G</option><option>IX H</option><option>IX I</option><option>IX J</option></optgroup>
       </select>
-      <label style="margin-top:12px;">Nomor WhatsApp <span style="font-weight:400; color:#718096;">(opsional — untuk kirim hasil otomatis)</span></label>
+      <label style="margin-top:12px;">Nomor WhatsApp <span style="font-weight:400; color:#718096;">(opsional)</span></label>
       <div style="display:flex; gap:8px; align-items:center;">
         <span style="font-weight:700; color:#0d47a1; background:#f7fafc; padding:11px 12px; border-radius:8px; border:2px solid #e2e8f0;">+62</span>
         <input type="tel" id="siswaWhatsApp" placeholder="81234567890" inputmode="numeric" style="flex:1;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
       </div>
-      <small style="color:#718096; font-size:0.75rem; display:block; margin-top:4px;">Format: 81234567890 (tanpa 0 di depan, tanpa +62)</small>
+      <small style="color:#718096; font-size:0.75rem; display:block; margin-top:4px;">Format: 81234567890 (tanpa 0 di depan)</small>
       <div class="row" style="margin-top:16px;">
         <button class="success" onclick="mulaiKerjakan()"><svg class="ico"><use href="#i-play"/></svg> Mulai Mengerjakan</button>
         <button class="secondary" onclick="batalPreview()"><svg class="ico"><use href="#i-close"/></svg> Batal</button>
@@ -394,7 +394,7 @@
   </div>
 </div>
 
-<!-- ==================== HALAMAN TUGAS ==================== -->
+<!-- HALAMAN TUGAS -->
 <div id="tugasPage" class="hidden">
   <div class="container">
     <div class="app-header">
@@ -416,7 +416,7 @@
   </div>
 </div>
 
-<!-- ==================== PANEL GURU ==================== -->
+<!-- PANEL GURU -->
 <div id="guruPage" class="hidden">
   <div class="container">
     <div class="app-header">
@@ -438,7 +438,7 @@
           <svg class="ico ico-lg" style="vertical-align:-0.15em;"><use href="#i-teacher"/></svg>
           <span>Selamat datang, <span class="name" id="guruDashboardNama">Guru</span></span>
         </div>
-        <div class="sub-greeting">Ini dashboard pribadi Anda. Data tugas & hasil di bawah hanya milik akun Anda.</div>
+        <div class="sub-greeting">Dashboard pribadi Anda. Data tugas & hasil hanya milik akun Anda.</div>
         <div class="guru-stats">
           <div class="guru-stat-box"><div class="num" id="statTotalTugas">0</div><div class="lbl">Total Tugas Saya</div></div>
           <div class="guru-stat-box"><div class="num" id="statTugasAktif">0</div><div class="lbl">Tugas Aktif</div></div>
@@ -462,7 +462,7 @@
           <div class="choice-row">
             <div class="choice-card" onclick="pilihModeBuat('tempel')">
               <svg class="ico ico-lg" style="color:#38a169;"><use href="#i-clipboard"/></svg>
-              <div class="title">1. Tempel Soal (Tercepat)</div>
+              <div class="title">1. Tempel Soal</div>
               <div class="desc">Copy-paste teks soal dari mana saja.</div>
             </div>
             <div class="choice-card" onclick="pilihModeBuat('manual')">
@@ -471,20 +471,20 @@
               <div class="desc">Ketik langsung soal & kunci jawaban.</div>
             </div>
           </div>
-          <button class="secondary" style="margin-top:14px;" onclick="tutupPilihanBuat()"><svg class="ico"><use href="#i-close"/></svg> Batal</button>
+          <button class="secondary" style="margin-top:14px;" onclick="tutupPilihanBuat()">Batal</button>
         </div>
       </div>
       <div id="tugasTempelView" class="hidden">
         <div class="prompt-panel">
           <h3><svg class="ico" style="color:#6a1b9a;"><use href="#i-sparkles"/></svg> Bantuan Prompt AI</h3>
           <div style="margin-top:8px;">
-            <div class="prompt-tab active" data-prompt="pilgan" onclick="switchPromptTab('pilgan')"><svg class="ico"><use href="#i-check-square"/></svg> Pilihan Ganda</div>
-            <div class="prompt-tab" data-prompt="uraian" onclick="switchPromptTab('uraian')"><svg class="ico"><use href="#i-edit"/></svg> Uraian</div>
-            <div class="prompt-tab" data-prompt="gabungan" onclick="switchPromptTab('gabungan')"><svg class="ico"><use href="#i-layers"/></svg> Gabungan</div>
+            <div class="prompt-tab active" data-prompt="pilgan" onclick="switchPromptTab('pilgan')">Pilihan Ganda</div>
+            <div class="prompt-tab" data-prompt="uraian" onclick="switchPromptTab('uraian')">Uraian</div>
+            <div class="prompt-tab" data-prompt="gabungan" onclick="switchPromptTab('gabungan')">Gabungan</div>
           </div>
           <div id="promptContent" class="prompt-box"></div>
           <div class="prompt-actions">
-            <button class="purple sm" onclick="copyPromptSaatIni()"><svg class="ico"><use href="#i-copy"/></svg> Salin Prompt Ini</button>
+            <button class="purple sm" onclick="copyPromptSaatIni()">Salin Prompt Ini</button>
           </div>
         </div>
         <div class="card">
@@ -494,7 +494,7 @@
             <option value="">-- Pilih Jenis Soal --</option>
             <option value="pilgan">Pilihan Ganda saja</option>
             <option value="uraian">Uraian saja</option>
-            <option value="keduanya">Keduanya (Pilihan Ganda + Uraian)</option>
+            <option value="keduanya">Keduanya</option>
           </select>
           <div id="tempelInfo" class="paste-help hidden" style="margin-top:14px;"></div>
           <div id="tempelBoxPilgan" class="hidden" style="margin-top:14px;">
@@ -510,8 +510,8 @@
             <textarea id="tempelInputKeduanya" class="paste-input" rows="18"></textarea>
           </div>
           <div class="row" style="margin-top:14px;">
-            <button class="success" onclick="prosesTempelSoal()"><svg class="ico"><use href="#i-play"/></svg> Proses & Ubah ke Bentuk Soal</button>
-            <button class="secondary" onclick="tutupPilihanBuat()"><svg class="ico"><use href="#i-close"/></svg> Batal</button>
+            <button class="success" onclick="prosesTempelSoal()">Proses & Ubah ke Bentuk Soal</button>
+            <button class="secondary" onclick="tutupPilihanBuat()">Batal</button>
           </div>
           <div id="tempelStatus" style="margin-top:12px;"></div>
         </div>
@@ -555,13 +555,13 @@
             <div><label>Waktu Selesai (opsional)</label><input type="datetime-local" id="exWaktuSelesai"></div>
           </div>
           <div class="row" style="margin-top:10px;">
-            <div><label>Durasi Pengerjaan (menit) — isi 0 jika tidak ada batas</label><input type="number" id="exDurasi" value="0" min="0" max="600"></div>
+            <div><label>Durasi (menit) — 0 jika tidak ada batas</label><input type="number" id="exDurasi" value="0" min="0" max="600"></div>
           </div>
         </div>
         <div class="card">
           <h2><svg class="ico"><use href="#i-shield"/></svg> Mode Koreksi AI</h2>
-          <div class="info green"><svg class="ico"><use href="#i-check"/></svg><span><b>Koreksi AI Aktif</b> — Menggunakan server terpusat. <b>Anda tidak perlu mengisi API key.</b></span></div>
-          <div class="info wa"><svg class="ico"><use href="#i-whatsapp"/></svg><span><b>Notifikasi WhatsApp:</b> Siswa yang mengisi nomor WA akan menerima notifikasi & hasil otomatis.</span></div>
+          <div class="info green"><svg class="ico"><use href="#i-check"/></svg><span><b>Koreksi AI Aktif</b> — Menggunakan Gemini API terpusat.</span></div>
+          <div class="info wa"><svg class="ico"><use href="#i-whatsapp"/></svg><span><b>Notifikasi WhatsApp:</b> Siswa dengan nomor WA akan menerima notifikasi & hasil otomatis.</span></div>
         </div>
         <div class="card">
           <h2><svg class="ico"><use href="#i-doc"/></svg> Ketentuan Tugas</h2>
@@ -570,14 +570,14 @@
             <option value="">-- Pilih Jenis Tugas --</option>
             <option value="pilgan">Pilihan Ganda saja</option>
             <option value="uraian">Uraian saja</option>
-            <option value="keduanya">Keduanya (Pilihan Ganda + Uraian)</option>
+            <option value="keduanya">Keduanya</option>
           </select>
           <label style="margin-top:14px;">Teks Ketentuan</label>
           <textarea id="exKetentuan" rows="6"></textarea>
-          <button class="secondary sm" onclick="isiTemplateKetentuan()"><svg class="ico"><use href="#i-refresh"/></svg> Isi Ulang Sesuai Jenis</button>
+          <button class="secondary sm" onclick="isiTemplateKetentuan()">Isi Ulang Sesuai Jenis</button>
           <label class="toggle-line" style="margin-top:16px;">
             <input type="checkbox" id="exAktifkanFoto" checked>
-            <div><div class="txt"><svg class="ico" style="vertical-align:-0.15em;"><use href="#i-camera"/></svg> Aktifkan fitur unggah/foto jawaban</div></div>
+            <div><div class="txt">Aktifkan fitur unggah/foto jawaban</div></div>
           </label>
           <label class="toggle-line" style="margin-top:10px; border-color:#e53e3e; background:#fff5f5;">
             <input type="checkbox" id="exLockdownMode" style="accent-color:#c62828;">
@@ -591,7 +591,7 @@
             <div class="answer-tab" id="rubrikTabUraian" onclick="switchRubrikTab('uraian')">Rubrik Uraian</div>
             <div class="answer-tab" id="rubrikTabGabungan" onclick="switchRubrikTab('gabungan')">Rubrik Gabungan</div>
           </div>
-          <div id="rubrikContentPilgan"><div class="rubrik-picker"><div class="rubrik-card" onclick="pakaiRubrik('pilgan')"><div class="title">Pilihan Ganda Standar</div><div class="desc">Benar = nilai penuh, salah = 0.</div></div></div></div>
+          <div id="rubrikContentPilgan"><div class="rubrik-picker"><div class="rubrik-card" onclick="pakaiRubrik('pilgan')"><div class="title">Pilihan Ganda Standar</div></div></div></div>
           <div id="rubrikContentUraian" class="hidden"><div class="rubrik-picker">
             <div class="rubrik-card" onclick="pakaiRubrik('uraian')"><div class="title">Uraian Umum</div></div>
             <div class="rubrik-card" onclick="pakaiRubrik('matematika')"><div class="title">Matematika</div></div>
@@ -618,8 +618,8 @@
         </div>
         <div class="card">
           <div class="row">
-            <button class="success" onclick="simpanTugas()"><svg class="ico"><use href="#i-save"/></svg> Simpan Tugas & Generate Kode</button>
-            <button class="secondary" onclick="tutupEditorTugas()"><svg class="ico"><use href="#i-close"/></svg> Batal</button>
+            <button class="success" onclick="simpanTugas()">Simpan Tugas & Generate Kode</button>
+            <button class="secondary" onclick="tutupEditorTugas()">Batal</button>
           </div>
         </div>
       </div>
@@ -668,7 +668,7 @@
   </div>
 </div>
 
-<!-- ==================== PANEL ADMIN ==================== -->
+<!-- PANEL ADMIN -->
 <div id="adminPage" class="hidden">
   <div class="container">
     <div class="app-header">
@@ -772,7 +772,7 @@
 
 <script>
 // ============================================================
-// KONFIGURASI
+// KONFIGURASI FIREBASE
 // ============================================================
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDfGGkiVl1JPdY1BHWQ31NdmrsjL10ZdWw",
@@ -785,20 +785,20 @@ const FIREBASE_CONFIG = {
 };
 
 // ============================================================
-// KONFIGURASI AI
+// ⚠️ KONFIGURASI AI — ISI API KEY ANDA DI SINI
 // ============================================================
-// MODE 1: 'proxy'  → pakai Vercel serverless function /api/koreksi (RECOMMENDED)
-//                    API key di ENV server, tidak terekspos ke browser.
-// MODE 2: 'direct' → panggil Gemini API langsung dari client.
-//                    Butuh API_KEY_GEMINI di bawah. API key terlihat di DevTools.
+// Cara mendapatkan API key:
+// 1. Buka https://aistudio.google.com/apikey
+// 2. Login dengan akun Google
+// 3. Klik "Create API Key" → Copy
+// 4. Paste di bawah ini (dalam tanda kutip)
 // ============================================================
-const AI_CONFIG = {
-  MODE: 'proxy',                    // 'proxy' atau 'direct'
-  PROXY_ENDPOINT: '/api/koreksi',   // hanya untuk mode proxy
-  API_KEY_GEMINI: '',               // hanya untuk mode direct, isi AQ.xxx
-  MODEL: 'gemini-3.6-flash'
-};
+const GEMINI_API_KEY = "ISI_API_KEY_GEMINI_ANDA_DISINI";
+const GEMINI_MODEL = "gemini-2.0-flash";
 
+// ============================================================
+// KONFIGURASI WHATSAPP
+// ============================================================
 const WA_CONFIG = {
   ENABLED: true,
   FONNTE_TOKEN: 'TOKEN_FONNTE_ANDA_DISINI',
@@ -824,7 +824,7 @@ const GURU_DEFAULT = [
   { nama: "Febiola Tudang", email: "febiolaturdang01@gmail.com", password: "#Smpn10smd" },
   { nama: "Fikri Yassaar Arrazaq", email: "fikriya90@gmail.com", password: "#Smpn10smd" },
   { nama: "Hatija Tihurua", email: "narsia@gmail.com", password: "#Smpn10smd" },
-  { nama: "Henny Kusumastuti", email: "hennykusumastuty15@gmail.com", password: "#Smpn10smd" },
+  { nama: "Henny Kusumastuty", email: "hennykusumastuty15@gmail.com", password: "#Smpn10smd" },
   { nama: "Hermansyah", email: "hermansyah0135@gmail.com", password: "#Smpn10smd" },
   { nama: "I Nengah Sukalana", email: "inengahsukalana9@gmail.com", password: "#Smpn10smd" },
   { nama: "Ida Purwanti", email: "purwaida24@yahoo.com", password: "#Smpn10smd" },
@@ -867,10 +867,8 @@ const ADMIN_DEFAULT = { nama: "Administrator MUARA", email: "admin@muara.local",
 const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/";
 
 let fbApp = null, fbDb = null, firebaseReady = false;
-let cloudStatus = 'loading';
 
 function setCloudStatus(status, text) {
-  cloudStatus = status;
   const el = document.getElementById('cloudStatus');
   const txt = document.getElementById('cloudStatusText');
   if (!el || !txt) return;
@@ -957,7 +955,7 @@ async function initialCloudLoad() {
   } catch (e) { console.error('initialCloudLoad', e); }
 }
 
-// ============ WHATSAPP HELPERS ============
+// WHATSAPP HELPERS
 function normalisasiNomorWA(nomor) {
   let n = String(nomor || '').replace(/[^0-9]/g, '');
   if (n.startsWith('0')) n = n.substring(1);
@@ -1010,24 +1008,24 @@ const PROMPT_AI = {
 const RUBRIK_PRESET = {
   pilgan: `RUBRIK PENILAIAN — PILIHAN GANDA\n1. Jawaban benar: nilai penuh sesuai bobot.\n2. Jawaban salah/kosong: 0 poin.\n\nTotal skor maksimal: 100 poin.`,
   uraian: `RUBRIK PENILAIAN — URAIAN UMUM\n1. Kedalaman analisis dan pemahaman konsep (0-40 poin)\n2. Penggunaan bukti/data/contoh (0-30 poin)\n3. Koherensi dan struktur argumen (0-20 poin)\n4. Penggunaan bahasa Indonesia yang baik (0-10 poin)\n\nTotal skor maksimal: 100 poin.`,
-  matematika: `RUBRIK PENILAIAN — URAIAN MATEMATIKA\n1. Pemahaman soal (0-10 poin)\n2. Ketepatan rumus/konsep (0-30 poin)\n3. Langkah pengerjaan (0-35 poin)\n4. Ketepatan hasil & satuan (0-20 poin)\n5. Kerapian (0-5 poin)\n\nTotal skor maksimal: 100 poin.\nPENTING: Nilai proses, bukan hanya hasil akhir.`,
+  matematika: `RUBRIK PENILAIAN — URAIAN MATEMATIKA\n1. Pemahaman soal (0-10 poin)\n2. Ketepatan rumus/konsep (0-30 poin)\n3. Langkah pengerjaan (0-35 poin)\n4. Ketepatan hasil & satuan (0-20 poin)\n5. Kerapian (0-5 poin)\n\nTotal: 100 poin.\nPENTING: Nilai proses, bukan hanya hasil akhir.`,
   ipa: `RUBRIK PENILAIAN — URAIAN IPA\n1. Pemahaman konsep ilmiah (0-30 poin)\n2. Ketepatan prosedur (0-25 poin)\n3. Istilah ilmiah (0-15 poin)\n4. Analisis data (0-20 poin)\n5. Kesimpulan logis (0-10 poin)\n\nTotal: 100 poin.`,
   informatika: `RUBRIK PENILAIAN — INFORMATIKA\n1. Pemahaman masalah (0-15 poin)\n2. Logika/algoritma (0-30 poin)\n3. Sintaks kode (0-25 poin)\n4. Efisiensi solusi (0-20 poin)\n5. Dokumentasi (0-10 poin)\n\nTotal: 100 poin.`,
   bahasa: `RUBRIK PENILAIAN — BAHASA ASING\n1. Tata bahasa (0-30 poin)\n2. Kosakata (0-25 poin)\n3. Kejelasan makna (0-25 poin)\n4. Struktur kalimat (0-20 poin)\n\nTotal: 100 poin.`,
   hitung: `RUBRIK PENILAIAN — HITUNGAN SINGKAT\n1. Jawaban akhir (0-60 poin)\n2. Cara singkat (0-25 poin)\n3. Satuan/notasi (0-10 poin)\n4. Kerapian (0-5 poin)\n\nTotal: 100 poin.`,
-  gabunganUmum: `RUBRIK GABUNGAN UMUM\n\nA. PILIHAN GANDA: benar = penuh, salah = 0.\nB. URAIAN: kedalaman (40), bukti (30), koherensi (20), bahasa (10).\n\nTotal: 100 poin (disesuaikan bobot).`,
-  gabunganSains: `RUBRIK GABUNGAN SAINS\n\nA. PILIHAN GANDA: benar = penuh, salah = 0.\nB. URAIAN: konsep (15), rumus (30), langkah (35), hasil (15), kerapian (5).\n\nTotal: 100 poin (disesuaikan bobot).`,
-  gabunganBahasa: `RUBRIK GABUNGAN BAHASA\n\nA. PILIHAN GANDA: benar = penuh, salah = 0.\nB. URAIAN: isi (30), struktur (25), kosakata (25), kreativitas (20).\n\nTotal: 100 poin (disesuaikan bobot).`
+  gabunganUmum: `RUBRIK GABUNGAN UMUM\n\nA. PILIHAN GANDA: benar = penuh, salah = 0.\nB. URAIAN: kedalaman (40), bukti (30), koherensi (20), bahasa (10).\n\nTotal: 100 poin.`,
+  gabunganSains: `RUBRIK GABUNGAN SAINS\n\nA. PILIHAN GANDA: benar = penuh, salah = 0.\nB. URAIAN: konsep (15), rumus (30), langkah (35), hasil (15), kerapian (5).\n\nTotal: 100 poin.`,
+  gabunganBahasa: `RUBRIK GABUNGAN BAHASA\n\nA. PILIHAN GANDA: benar = penuh, salah = 0.\nB. URAIAN: isi (30), struktur (25), kosakata (25), kreativitas (20).\n\nTotal: 100 poin.`
 };
 
 const KETENTUAN_PRESET = {
-  pilgan: `1. Tugas bersifat individu, tidak boleh bekerja sama.\n2. Soal berisi Pilihan Ganda. Pilih satu jawaban paling tepat.\n3. Setelah mengumpulkan, nilai muncul otomatis.`,
-  uraian: `1. Tugas bersifat individu, tidak boleh bekerja sama.\n2. Soal berisi Uraian. Tulis dengan bahasa sendiri.\n3. Jawaban boleh diketik atau difoto.\n4. Setelah mengumpulkan, nilai muncul otomatis.`,
-  keduanya: `1. Tugas bersifat individu.\n2. Tugas berisi Pilihan Ganda dan Uraian.\n3. PG: pilih satu jawaban paling tepat.\n4. Uraian: tulis dengan bahasa sendiri (ketik/foto).\n5. Nilai muncul otomatis.`
+  pilgan: `1. Tugas individu.\n2. Pilihan Ganda. Pilih satu jawaban paling tepat.\n3. Nilai muncul otomatis.`,
+  uraian: `1. Tugas individu.\n2. Soal Uraian. Tulis dengan bahasa sendiri.\n3. Jawaban boleh diketik atau difoto.\n4. Nilai muncul otomatis.`,
+  keduanya: `1. Tugas individu.\n2. Berisi Pilihan Ganda dan Uraian.\n3. PG: pilih satu jawaban paling tepat.\n4. Uraian: ketik/foto.\n5. Nilai muncul otomatis.`
 };
 
 let state;
-try { state = JSON.parse(localStorage.getItem('MUARA_v15') || '{}'); } catch (e) { state = {}; }
+try { state = JSON.parse(localStorage.getItem('MUARA_v16') || '{}'); } catch (e) { state = {}; }
 if (!state.tugas) state.tugas = [];
 if (!state.hasil) state.hasil = [];
 if (!state.guruList || state.guruList.length === 0) state.guruList = JSON.parse(JSON.stringify(GURU_DEFAULT));
@@ -1045,7 +1043,7 @@ let duplikatTugasId = null;
 let examTimerInterval = null;
 let examStartTime = null;
 
-function simpanLocal() { try { localStorage.setItem('MUARA_v15', JSON.stringify(state)); } catch (e) { console.error(e); } }
+function simpanLocal() { try { localStorage.setItem('MUARA_v16', JSON.stringify(state)); } catch (e) {} }
 function simpanState() { simpanLocal(); }
 function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escapeAttr(s) { return String(s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
@@ -1057,7 +1055,6 @@ function generateKodeUnik() {
   do { kode = ''; for (let i = 0; i < 6; i++) kode += chars[Math.floor(Math.random() * chars.length)]; attempts++; if (attempts > 500) break; } while (state.tugas.some(t => t.kode === kode));
   return kode;
 }
-
 function togglePass(inputId, btn) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -1065,7 +1062,6 @@ function togglePass(inputId, btn) {
   input.type = isPass ? 'text' : 'password';
   btn.innerHTML = `<svg class="ico"><use href="${isPass ? '#i-eye-off' : '#i-eye'}"/></svg>`;
 }
-
 function showLogin(role) {
   document.getElementById('roleChoice').classList.toggle('hidden', role !== null);
   document.getElementById('loginGuru').classList.toggle('hidden', role !== 'guru');
@@ -1081,16 +1077,14 @@ function showLogin(role) {
   if (role === 'admin') document.getElementById('adminEmailLogin').focus();
   if (role === 'lupaPassword') document.getElementById('lupaEmail').focus();
 }
-
 function loginGuru() {
   const emailInput = document.getElementById('guruEmailLogin').value.trim().toLowerCase();
   const pass = document.getElementById('guruPassLogin').value;
-  const err = document.getElementById('guruError');
-  err.textContent = '';
+  const err = document.getElementById('guruError'); err.textContent = '';
   if (!emailInput) { err.textContent = 'Email belum diisi.'; return; }
   if (!pass) { err.textContent = 'Password belum diisi.'; return; }
   const guru = state.guruList.find(g => g.email.toLowerCase() === emailInput);
-  if (!guru) { err.textContent = 'Email tidak terdaftar sebagai guru.'; return; }
+  if (!guru) { err.textContent = 'Email tidak terdaftar.'; return; }
   const expectedPass = state.customPasswords[encEmail(emailInput)] || guru.password;
   if (pass.trim() !== expectedPass) { err.textContent = 'Password salah.'; return; }
   currentUser = { role: 'guru', nama: guru.nama, email: guru.email, whatsapp: '' };
@@ -1099,9 +1093,8 @@ function loginGuru() {
   document.getElementById('guruUserInfo').innerHTML = `<svg class="ico"><use href="#i-teacher"/></svg> <b>${escapeHtml(guru.nama)}</b> <small>(${escapeHtml(guru.email)})</small>`;
   const infoBox = document.getElementById('guruInfoBox');
   if (infoBox) infoBox.innerHTML = `<b>Nama:</b> ${escapeHtml(guru.nama)}<br><b>Email:</b> ${escapeHtml(guru.email)}<br><b>Password:</b> ${state.customPasswords[encEmail(emailInput)] ? '(sudah diganti)' : '(default)'}`;
-  try { renderTugasList(); renderGuruDashboard(); muatFilterTugas(); } catch (e) { console.error(e); }
+  try { renderTugasList(); renderGuruDashboard(); muatFilterTugas(); } catch (e) {}
 }
-
 async function prosesLupaPassword() {
   const email = document.getElementById('lupaEmail').value.trim().toLowerCase();
   const st = document.getElementById('lupaStatus');
@@ -1119,14 +1112,14 @@ async function prosesLupaPassword() {
   try {
     const res = await fetch(FORMSUBMIT_ENDPOINT + encodeURIComponent(email), {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ _subject: 'MUARA — Password Baru Akun Guru', _template: 'table', _captcha: 'false', Nama: guru.nama, Email: guru.email, PasswordBaru: tempPass, Waktu: new Date().toLocaleString('id-ID') })
+      body: JSON.stringify({ _subject: 'MUARA — Password Baru', _template: 'table', _captcha: 'false', Nama: guru.nama, Email: guru.email, PasswordBaru: tempPass, Waktu: new Date().toLocaleString('id-ID') })
     });
-    if (!res.ok) throw new Error('Gagal kirim');
+    if (!res.ok) throw new Error('Gagal');
     st.className = 'ok-msg';
     st.innerHTML = `Password baru berhasil dikirim ke <b>${escapeHtml(email)}</b>.`;
   } catch (e) {
     st.className = 'error-msg';
-    st.innerHTML = `Gagal kirim email. Password darurat:<br><b style="font-family:monospace; background:#f0fff4; padding:6px 12px; border-radius:6px; display:inline-block; margin-top:8px; font-size:1rem; color:#38a169;">${tempPass}</b>`;
+    st.innerHTML = `Gagal kirim email. Password darurat:<br><b style="font-family:monospace; background:#f0fff4; padding:6px 12px; border-radius:6px; display:inline-block; margin-top:8px; color:#38a169;">${tempPass}</b>`;
   } finally { btn.disabled = false; }
 }
 function generateTempPassword() {
@@ -1134,7 +1127,6 @@ function generateTempPassword() {
   let p = 'TMP-'; for (let i = 0; i < 5; i++) p += chars[Math.floor(Math.random() * chars.length)];
   return p;
 }
-
 function validasiKode() {
   const kode = document.getElementById('kodeInput').value.trim().toUpperCase();
   const err = document.getElementById('siswaError');
@@ -1143,8 +1135,8 @@ function validasiKode() {
   if (!tugas) { err.textContent = 'Kode tidak valid atau belum tersinkron.'; return; }
   if (!tugas.aktif) { err.textContent = 'Tugas ini sudah ditutup.'; return; }
   const now = new Date();
-  if (tugas.waktuMulai && now < new Date(tugas.waktuMulai)) { err.textContent = `Tugas baru bisa dikerjakan mulai ${formatWaktu(tugas.waktuMulai)}.`; return; }
-  if (tugas.waktuSelesai && now > new Date(tugas.waktuSelesai)) { err.textContent = `Waktu pengerjaan sudah berakhir.`; return; }
+  if (tugas.waktuMulai && now < new Date(tugas.waktuMulai)) { err.textContent = `Belum bisa dikerjakan sampai ${formatWaktu(tugas.waktuMulai)}.`; return; }
+  if (tugas.waktuSelesai && now > new Date(tugas.waktuSelesai)) { err.textContent = `Waktu sudah berakhir.`; return; }
   err.textContent = '';
   currentTugas = tugas;
   document.getElementById('loginPage').classList.add('hidden');
@@ -1164,7 +1156,6 @@ function validasiKode() {
   document.getElementById('siswaNama').focus();
 }
 function batalPreview() { currentTugas = null; document.getElementById('previewPage').classList.add('hidden'); document.getElementById('loginPage').classList.remove('hidden'); document.getElementById('kodeInput').value = ''; showLogin('siswa'); }
-
 function loginAdmin() {
   const email = document.getElementById('adminEmailLogin').value.trim().toLowerCase();
   const pass = document.getElementById('adminPassLogin').value;
@@ -1205,7 +1196,7 @@ async function quickReset(email) {
   if (newPass.length < 6) return alert('Minimal 6 karakter.');
   state.customPasswords[encEmail(email)] = newPass; simpanLocal(); renderGuruTable();
   await cloudSavePassword(email, newPass);
-  alert(`Password ${guru.nama} direset menjadi: ${newPass}`);
+  alert(`Password direset menjadi: ${newPass}`);
 }
 async function hapusGuru(email) {
   const guru = state.guruList.find(g => g.email.toLowerCase() === email.toLowerCase()); if (!guru) return;
@@ -1250,11 +1241,11 @@ async function gantiPasswordAdmin() {
   const p1 = document.getElementById('adminNewPass').value;
   const p2 = document.getElementById('adminNewPass2').value;
   if (old !== state.admin.password) return alert('Password lama salah!');
-  if (p1.length < 6) return alert('Password minimal 6 karakter.');
+  if (p1.length < 6) return alert('Minimal 6 karakter.');
   if (p1 !== p2) return alert('Password tidak sama!');
   state.admin.password = p1; simpanLocal(); await cloudSaveAdmin(state.admin);
   document.getElementById('adminOldPass').value = ''; document.getElementById('adminNewPass').value = ''; document.getElementById('adminNewPass2').value = '';
-  alert('Password admin berhasil diganti!');
+  alert('Password admin diganti!');
 }
 function exportGuruCSV() {
   let csv = 'No,Nama,Email,Password Aktif,Status\n';
@@ -1268,7 +1259,6 @@ function exportGuruCSV() {
   const a = document.createElement('a'); a.href = url; a.download = `daftar-guru-MUARA-${new Date().toISOString().slice(0,10)}.csv`; a.click();
   URL.revokeObjectURL(url);
 }
-
 function logout() {
   if (!confirm('Yakin keluar dari panel guru?')) return;
   currentUser = { role: null, nama: '', kelas: '', email: '', whatsapp: '' };
@@ -1280,7 +1270,6 @@ function logout() {
   document.getElementById('loginPage').classList.remove('hidden');
   showLogin(null);
 }
-
 function mulaiKerjakan() {
   const nama = document.getElementById('siswaNama').value.trim();
   const kelas = document.getElementById('siswaKelas').value;
@@ -1303,7 +1292,7 @@ function mulaiKerjakan() {
   document.getElementById('tugasKetentuanSingkat').innerHTML = `<svg class="ico"><use href="#i-info"/></svg><span>${escapeHtml(currentTugas.mapel || '-')} | Kelas: ${escapeHtml(currentTugas.kelas || '-')} | KKM: ${currentTugas.kkm}</span>`;
   renderSoalSiswa();
   mulaiTimerUjian();
-  mulaiPasteWatcher(); // ← WATCHER PASTE MOBILE
+  mulaiPasteWatcher();
   if (currentTugas.lockdownMode) {
     const btnKeluar = document.getElementById('btnKeluarTugas');
     if (btnKeluar) { btnKeluar.disabled = true; btnKeluar.style.opacity = '0.4'; btnKeluar.style.cursor = 'not-allowed'; }
@@ -1313,7 +1302,6 @@ function mulaiKerjakan() {
     if (btnKeluar) { btnKeluar.disabled = false; btnKeluar.style.opacity = '1'; btnKeluar.style.cursor = 'pointer'; }
   }
 }
-
 function hentikanTimerUjian() {
   if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
   examStartTime = null;
@@ -1354,7 +1342,7 @@ async function autoSubmitWaktuHabis() {
 }
 
 // ============================================================
-// BLOKIR PASTE / CLIPBOARD — 6 LAPIS + POLLING WATCHER
+// BLOKIR PASTE / CLIPBOARD — 7 LAPIS
 // ============================================================
 let pasteWatcherInterval = null;
 let _lastKeyTimeMap = new WeakMap();
@@ -1369,38 +1357,31 @@ function shouldBlockClipboard() {
   return currentUser.role === 'siswa' && !!currentTugas && !document.getElementById('tugasPage').classList.contains('hidden');
 }
 
-// LAPIS 1: paste event (desktop & beberapa mobile)
 document.addEventListener('paste', (e) => {
   if (!shouldBlockClipboard()) return;
   if (isAnswerTextarea(e.target)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
 }, true);
 
-// LAPIS 2: drop event
 document.addEventListener('drop', (e) => {
   if (!shouldBlockClipboard()) return;
   if (isAnswerTextarea(e.target)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
 }, true);
 
-// LAPIS 3: beforeinput — blokir paste + paste-kuat + deteksi panjang data
 document.addEventListener('beforeinput', (e) => {
   if (!shouldBlockClipboard()) return;
   if (!isAnswerTextarea(e.target)) return;
   const t = e.inputType || '';
-  // Blokir semua tipe insert dari paste
   if (t === 'insertFromPaste' || t === 'insertFromPasteAsQuotation' || t === 'insertFromDrop' || t === 'insertReplacementText' || t === 'insertFromYank') {
     e.preventDefault(); e.stopImmediatePropagation(); return false;
   }
-  // LAPIS BARU: blokir insertText dengan data > 5 karakter (paste via Gboard/SwiftKey)
   if (t === 'insertText' && e.data && e.data.length > 5) {
     e.preventDefault(); e.stopImmediatePropagation(); return false;
   }
-  // Blokir composition (voice/autocomplete)
   if (t === 'insertCompositionText' && e.data && e.data.length > 5) {
     e.preventDefault(); e.stopImmediatePropagation(); return false;
   }
 }, true);
 
-// LAPIS 4: keydown shortcut paste
 document.addEventListener('keydown', (e) => {
   if (shouldBlockClipboard() && isAnswerTextarea(e.target)) {
     _lastKeyTimeMap.set(e.target, Date.now());
@@ -1413,20 +1394,17 @@ document.addEventListener('keydown', (e) => {
   }
 }, true);
 
-// LAPIS 5: contextmenu — cegah menu paste muncul
 document.addEventListener('contextmenu', (e) => {
   if (!shouldBlockClipboard()) return;
   if (isAnswerTextarea(e.target)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
 }, true);
 
-// LAPIS 6: input event — delta check (fallback)
 document.addEventListener('input', (e) => {
   if (!shouldBlockClipboard()) return;
   if (!isAnswerTextarea(e.target)) return;
   const el = e.target;
   const prev = _lastValueSnapshot.get(el) || '';
   const cur = el.value || '';
-  // Kalau lonjakan > 3 dan tidak ada keydown dalam 400ms → revert
   const lastKeyTime = _lastKeyTimeMap.get(el) || 0;
   const timeSinceKey = Date.now() - lastKeyTime;
   if (cur.length - prev.length > 3 && timeSinceKey > 400) {
@@ -1437,7 +1415,6 @@ document.addEventListener('input', (e) => {
   _lastValueSnapshot.set(el, cur);
 }, true);
 
-// LAPIS 7 (BARU): POLLING WATCHER — deteksi paste yang lolos dari semua event di atas
 function mulaiPasteWatcher() {
   hentikanPasteWatcher();
   if (!shouldBlockClipboard()) return;
@@ -1448,7 +1425,6 @@ function mulaiPasteWatcher() {
       const last = _lastValueSnapshot.get(ta) || '';
       const lastKeyTime = _lastKeyTimeMap.get(ta) || 0;
       const timeSinceKey = Date.now() - lastKeyTime;
-      // Kalau ada lonjakan > 3 karakter tapi tidak ada keydown dalam 600ms → REVERT
       if (now.length - last.length > 3 && timeSinceKey > 600) {
         ta.value = last;
         try { ta.dispatchEvent(new Event('change', { bubbles: true })); } catch(_) {}
@@ -1456,15 +1432,11 @@ function mulaiPasteWatcher() {
         _lastValueSnapshot.set(ta, now);
       }
     });
-  }, 150); // cek tiap 150ms
+  }, 150);
 }
 function hentikanPasteWatcher() {
   if (pasteWatcherInterval) { clearInterval(pasteWatcherInterval); pasteWatcherInterval = null; }
 }
-
-// Handler inline untuk atribut HTML (dipakai di renderSoalSiswa)
-window.onAnswerPaste = function(e) { e.preventDefault(); return false; };
-window.onAnswerDrop = function(e) { e.preventDefault(); return false; };
 
 // ============================================================
 // LOCKDOWN MODE
@@ -1584,7 +1556,7 @@ async function autoSubmitLockdown(alasan) {
   if (lockdownState.autoSubmitTriggered) return;
   lockdownState.autoSubmitTriggered = true;
   hideLockdownOverlay();
-  try { await kirimJawaban(true, 'lockdown', alasan || ''); } catch(e) { console.error(e); }
+  try { await kirimJawaban(true, 'lockdown', alasan || ''); } catch(e) {}
   nonaktifkanLockdown();
 }
 
@@ -1625,7 +1597,6 @@ function renderSoalSiswa() {
         </div>`;
     }
   });
-  // Mulai watcher kalau belum jalan
   setTimeout(() => { if (!pasteWatcherInterval) mulaiPasteWatcher(); }, 100);
 }
 function pilihJawabanPilgan(i, val) { jawabanSementara[i].pilgan = val; renderSoalSiswa(); }
@@ -1748,9 +1719,13 @@ function cobaLagiKoreksi() {
 }
 
 // ============================================================
-// KOREKSI AI — PROXY atau DIRECT (tanpa Puter.js)
+// KOREKSI AI — DIRECT KE GEMINI (TANPA PROXY, TANPA 404)
 // ============================================================
 async function koreksiAI(nama, kelas, jawaban, onProgress, onQueueNotify) {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY.includes('ISI_API_KEY')) {
+    throw new Error('API Key Gemini belum diisi. Hubungi admin/guru untuk setup.');
+  }
+
   let promptText = `Anda guru ${currentTugas.mapel || 'umum'} yang adil menilai tugas siswa.
 
 RUBRIK PENILAIAN:
@@ -1775,7 +1750,7 @@ Jika semua dapat dinilai, "perluUploadUlang": [].
 Berikut jawaban siswa:
 `;
 
-  const images = [];
+  const parts = [{ text: promptText }];
   for (let i = 0; i < currentTugas.soal.length; i++) {
     const s = currentTugas.soal[i];
     const j = jawaban[i];
@@ -1784,18 +1759,21 @@ Berikut jawaban siswa:
       const opsiList = (s.opsi || []).map((o, idx) => `  ${huruf[idx]}. ${o}`).join('\n');
       const kunciIdx = huruf.indexOf(s.kunci);
       const kunciTeks = kunciIdx >= 0 ? s.opsi[kunciIdx] : '-';
-      promptText += `\n\n--- SOAL ${i+1} (Bobot ${s.bobot}) [PG] ---\nPERTANYAAN: ${s.pertanyaan}\nOPSI:\n${opsiList}\nKUNCI: ${s.kunci}. ${kunciTeks}\nJAWABAN: ${j.pilgan || '(kosong)'}\n`;
+      parts.push({ text: `\n\n--- SOAL ${i+1} (Bobot ${s.bobot}) [PG] ---\nPERTANYAAN: ${s.pertanyaan}\nOPSI:\n${opsiList}\nKUNCI: ${s.kunci}. ${kunciTeks}\nJAWABAN: ${j.pilgan || '(kosong)'}\n` });
     } else {
-      promptText += `\n\n--- SOAL ${i+1} (Bobot ${s.bobot}) [URAIAN] ---\nPERTANYAAN: ${s.pertanyaan}\nKUNCI: ${s.kunci || '(tidak ada)'}\n`;
-      if (j.mode === 'teks') promptText += `JAWABAN (TEKS):\n${j.teks}\n`;
-      else if (j.mode === 'foto' && j.fotoData) {
-        promptText += `JAWABAN: (Lihat gambar soal #${i+1})\n`;
-        images.push(j.fotoData);
+      parts.push({ text: `\n\n--- SOAL ${i+1} (Bobot ${s.bobot}) [URAIAN] ---\nPERTANYAAN: ${s.pertanyaan}\nKUNCI: ${s.kunci || '(tidak ada)'}\n` });
+      if (j.mode === 'teks') {
+        parts.push({ text: `JAWABAN (TEKS):\n${j.teks}\n` });
+      } else if (j.mode === 'foto' && j.fotoData) {
+        parts.push({ text: `JAWABAN: (Lihat gambar soal #${i+1})\n` });
+        const base64 = j.fotoData.split(',')[1];
+        const mime = (j.fotoData.match(/^data:([^;]+);/) || [])[1] || 'image/jpeg';
+        parts.push({ inline_data: { mime_type: mime, data: base64 } });
       }
     }
   }
 
-  // Random jitter anti thundering herd
+  // Random jitter 0-2 detik
   await new Promise(r => setTimeout(r, Math.floor(Math.random() * 2000)));
 
   const MAX_ATTEMPTS = 5;
@@ -1807,50 +1785,23 @@ Berikut jawaban siswa:
       try { onProgress(attempt, MAX_ATTEMPTS, lastErrorMsg); } catch (_) {}
     }
     try {
-      let text = '';
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: { temperature: 0.3, responseMimeType: 'application/json' }
+        })
+      });
 
-      if (AI_CONFIG.MODE === 'proxy') {
-        // ============ VIA SERVERLESS PROXY ============
-        const parts = [{ text: promptText }];
-        for (const imgData of images) {
-          const base64 = imgData.split(',')[1];
-          const mime = (imgData.match(/^data:([^;]+);/) || [])[1] || 'image/jpeg';
-          parts.push({ inline_data: { mime_type: mime, data: base64 } });
-        }
-        const res = await fetch(AI_CONFIG.PROXY_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ parts, model: AI_CONFIG.MODEL })
-        });
-        if (!res.ok) {
-          let errMsg = `Server error (${res.status})`;
-          try { const j = await res.json(); errMsg = j.error || errMsg; } catch (_) {}
-          throw new Error(errMsg);
-        }
-        const data = await res.json();
-        text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-      } else {
-        // ============ DIRECT KE GEMINI ============
-        if (!AI_CONFIG.API_KEY_GEMINI) throw new Error('API_KEY_GEMINI belum diisi di config');
-        const parts = [{ text: promptText }];
-        for (const imgData of images) {
-          const base64 = imgData.split(',')[1];
-          const mime = (imgData.match(/^data:([^;]+);/) || [])[1] || 'image/jpeg';
-          parts.push({ inline_data: { mime_type: mime, data: base64 } });
-        }
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${AI_CONFIG.MODEL}:generateContent?key=${AI_CONFIG.API_KEY_GEMINI}`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts }], generationConfig: { temperature: 0.3, responseMimeType: 'application/json' } })
-        });
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`Gemini error (${res.status}): ${errText.substring(0, 150)}`);
-        }
-        const data = await res.json();
-        text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Gemini error (${res.status}): ${errText.substring(0, 150)}`);
       }
 
+      const data = await res.json();
+      let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       text = String(text).replace(/```json|```/g, '').trim();
       if (!text) throw new Error('AI tidak mengembalikan jawaban.');
 
@@ -1862,12 +1813,12 @@ Berikut jawaban siswa:
     } catch (err) {
       const msg = (err && err.message) ? err.message : String(err);
       lastErrorMsg = msg;
-      console.warn(`[Koreksi AI] Attempt ${attempt}/${MAX_ATTEMPTS} gagal: ${msg}`);
+      console.warn(`[Koreksi AI] Attempt ${attempt}/${MAX_ATTEMPTS}: ${msg}`);
 
       const isRetryable = /usage-limited|rate.limit|quota|429|502|503|504|timeout|network|failed to fetch|sibuk|busy|overload/i.test(msg);
       const isJSONError = /JSON|Unexpected token/i.test(msg);
 
-      if (isJSONError && attempt >= 2) throw new Error('Format jawaban AI tidak valid.');
+      if (isJSONError && attempt >= 2) throw new Error('Format jawaban AI tidak valid. Coba lagi.');
       if (!isRetryable && !isJSONError) throw err;
 
       if (attempt < MAX_ATTEMPTS) {
@@ -1876,10 +1827,9 @@ Berikut jawaban siswa:
         }
         const delay = Math.min(BASE_DELAY * Math.pow(2, attempt - 1), 20000);
         const jitter = Math.floor(Math.random() * 500);
-        console.log(`[Koreksi AI] Tunggu ${(delay + jitter) / 1000}s sebelum retry ${attempt + 1}...`);
         await new Promise(r => setTimeout(r, delay + jitter));
       } else {
-        throw new Error('Server AI masih sibuk setelah beberapa percobaan. Klik "Coba Lagi".');
+        throw new Error('Server AI masih sibuk. Klik "Coba Lagi".');
       }
     }
   }
@@ -1957,11 +1907,9 @@ function buildHasilRenderHTML(hasil) {
   html += `<h3 style="font-size:1rem;color:#0d47a1;border-bottom:2px solid #0d47a1;padding-bottom:4px;margin:18px 0 10px;">Kesimpulan</h3><div style="background:#fffaf0;border-left:4px solid #dd6b20;padding:12px;border-radius:6px;font-size:0.88rem;line-height:1.6;">${escapeHtml(hasil.kesimpulan || '-').replace(/\n/g, '<br>')}</div><div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #cbd5e0;font-size:0.75rem;color:#718096;">Dokumen ini dihasilkan otomatis oleh sistem MUARA — SMP Negeri 10 Samarinda.<br>${new Date().toLocaleString('id-ID')}</div></div>`;
   return html;
 }
-
 function getHasilSiswa() { const hasilList = state.hasil.filter(h => h.nama === currentUser.nama && h.kelas === currentUser.kelas && h.tugasId === currentTugas.id); if (hasilList.length === 0) { alert('Data hasil tidak ditemukan.'); return null; } return hasilList[hasilList.length - 1]; }
 function showUnduhLoading(pesan) { document.getElementById('hasilSiswa').insertAdjacentHTML('afterbegin', `<div id="unduhLoading" class="card info green" style="text-align:center;"><svg class="ico"><use href="#i-info"/></svg><span>${pesan}</span></div>`); }
 function hideUnduhLoading() { const el = document.getElementById('unduhLoading'); if (el) el.remove(); }
-
 async function unduhHasilPDF() {
   const hasil = getHasilSiswa(); if (!hasil) return;
   if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') { alert('Pustaka PDF belum termuat.'); return; }
@@ -1979,7 +1927,7 @@ async function unduhHasilPDF() {
     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight); heightLeft -= pdfHeight;
     while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight); heightLeft -= pdfHeight; }
     pdf.save(`Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.pdf`);
-  } catch (e) { console.error(e); alert('Gagal PDF: ' + e.message); }
+  } catch (e) { alert('Gagal PDF: ' + e.message); }
   finally { hideUnduhLoading(); }
 }
 async function unduhHasilGambar() {
@@ -1992,13 +1940,10 @@ async function unduhHasilGambar() {
     const canvas = await html2canvas(wrapper.firstElementChild, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
     document.body.removeChild(wrapper);
     const link = document.createElement('a'); link.download = `Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.png`; link.href = canvas.toDataURL('image/png'); link.click();
-  } catch (e) { console.error(e); alert('Gagal gambar: ' + e.message); }
+  } catch (e) { alert('Gagal gambar: ' + e.message); }
   finally { hideUnduhLoading(); }
 }
 
-// ============================================================
-// PANEL GURU
-// ============================================================
 function switchGTab(tab) {
   document.querySelectorAll('#guruPage .tab').forEach(t => { t.classList.remove('active'); if (t.dataset.gtab === tab) t.classList.add('active'); });
   document.querySelectorAll('.gtab-content').forEach(t => t.classList.add('hidden'));
@@ -2043,7 +1988,6 @@ function renderTugasList() {
 function salinKode(code) { navigator.clipboard.writeText(code).then(() => alert('Kode ' + code + ' tersalin!')).catch(() => prompt('Salin manual:', code)); }
 async function toggleAktif(id) { const e = state.tugas.find(x => x.id === id); if (!e) return; if (e.guruEmail !== currentUser.email) return alert('Bukan tugas Anda.'); e.aktif = !e.aktif; simpanLocal(); renderTugasList(); renderGuruDashboard(); await cloudSaveTugas(e); }
 async function hapusTugas(id) { const e = state.tugas.find(x => x.id === id); if (!e) return; if (e.guruEmail !== currentUser.email) return alert('Bukan tugas Anda.'); if (!confirm('Hapus tugas ini?')) return; state.tugas = state.tugas.filter(x => x.id !== id); simpanLocal(); renderTugasList(); renderGuruDashboard(); await cloudRemoveTugas(id); }
-
 function bukaDuplikat(id) {
   const e = state.tugas.find(x => x.id === id); if (!e) return;
   if (e.guruEmail !== currentUser.email) return alert('Bukan tugas Anda.');
@@ -2081,7 +2025,7 @@ async function konfirmasiDuplikat() {
   baru.guruNama = currentUser.nama;
   state.tugas.push(baru); simpanLocal(); renderTugasList(); renderGuruDashboard(); tutupDuplikat();
   await cloudSaveTugas(baru);
-  alert(`Tugas diduplikat!\n\nKelas: ${kelasBaru}\nKode: ${baru.kode}\nStatus: ${bukaSekarang ? 'AKTIF' : 'DITUTUP'}`);
+  alert(`Tugas diduplikat!\n\nKelas: ${kelasBaru}\nKode: ${baru.kode}`);
 }
 function mulaiInputSoal() { document.getElementById('tugasListView').classList.add('hidden'); document.getElementById('tugasChoiceView').classList.remove('hidden'); document.getElementById('tugasTempelView').classList.add('hidden'); document.getElementById('tugasEditorView').classList.add('hidden'); }
 function tutupPilihanBuat() { document.getElementById('tugasListView').classList.remove('hidden'); document.getElementById('tugasChoiceView').classList.add('hidden'); document.getElementById('tugasTempelView').classList.add('hidden'); document.getElementById('tugasEditorView').classList.add('hidden'); }
@@ -2115,7 +2059,7 @@ function pilihModeBuat(mode) {
 function switchPromptTab(tab) { promptTabAktif = tab; document.querySelectorAll('.prompt-tab').forEach(t => { t.classList.toggle('active', t.dataset.prompt === tab); }); document.getElementById('promptContent').textContent = PROMPT_AI[tab] || ''; }
 function copyPromptSaatIni() {
   const teks = PROMPT_AI[promptTabAktif] || '';
-  navigator.clipboard.writeText(teks).then(() => alert('Prompt berhasil disalin!')).catch(() => { const ta = document.createElement('textarea'); ta.value = teks; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('Prompt disalin!'); });
+  navigator.clipboard.writeText(teks).then(() => alert('Prompt disalin!')).catch(() => { const ta = document.createElement('textarea'); ta.value = teks; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('Prompt disalin!'); });
 }
 function toggleLangkahPraktis() { const el = document.getElementById('langkahPraktis'); if (el) el.classList.toggle('hidden'); }
 function ubahTempelJenis() {
@@ -2282,7 +2226,6 @@ function tambahOpsi(i) { if (!editorSoal[i].opsi) editorSoal[i].opsi = ['', '', 
 function hapusOpsi(i, j) { if (!editorSoal[i].opsi) return; if (editorSoal[i].opsi.length <= 2) return alert('Minimal 2 opsi.'); editorSoal[i].opsi.splice(j, 1); renderEditorSoal(); }
 function updateOpsi(i, j, val) { if (!editorSoal[i].opsi) editorSoal[i].opsi = []; editorSoal[i].opsi[j] = val; }
 function setKunciPilgan(i, huruf) { editorSoal[i].kunci = huruf; renderEditorSoal(); }
-
 async function simpanTugas() {
   const mapel = document.getElementById('exMapel').value;
   const judul = document.getElementById('exJudul').value.trim();
@@ -2509,7 +2452,7 @@ function konfirmasiKeluarTugas() {
     setupFirebaseListeners();
     setCloudStatus('online', '☁️ Cloud tersinkron');
   } else { console.warn('MUARA dalam mode LOCAL.'); }
-  console.log('MUARA v15 siap. AI Mode:', AI_CONFIG.MODE, '| Firebase:', firebaseReady ? 'CLOUD' : 'LOCAL');
+  console.log('MUARA v16 siap. Model:', GEMINI_MODEL, '| Firebase:', firebaseReady ? 'CLOUD' : 'LOCAL');
 })();
 </script>
 </body>
