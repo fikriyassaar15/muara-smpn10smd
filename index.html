@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MUARA - Mesin Ujian & Analisis Respons Alternatif</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -23,6 +23,16 @@
   input:focus, textarea:focus, select:focus { outline: none; border-color: #0d47a1; }
   textarea { resize: vertical; min-height: 80px; }
   select { cursor: pointer; }
+  #jawabanContainer textarea {
+    -webkit-touch-callout: none;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    -webkit-user-modify: read-write-plaintext-only;
+    caret-color: #0d47a1;
+  }
   button { background: linear-gradient(135deg, #0d47a1, #00695c); color: #fff; border: none; padding: 11px 18px; border-radius: 8px; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
   button:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(13,71,161,0.4); }
   button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
@@ -171,6 +181,30 @@
   .lockdown-badge { position: fixed; top: 12px; left: 12px; z-index: 99998; background: linear-gradient(135deg, #c62828, #e53935); color: #fff; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; box-shadow: 0 4px 14px rgba(198,40,40,0.45); letter-spacing: 0.4px; pointer-events: none; animation: pulse-lockdown 2s infinite; display: flex; align-items: center; gap: 6px; }
   .lockdown-badge.hidden { display: none; }
   @keyframes pulse-lockdown { 50% { opacity: 0.78; } }
+  #lockdownOverlay {
+    position: fixed; inset: 0; z-index: 2147483647;
+    background: linear-gradient(135deg, #b71c1c 0%, #c62828 100%);
+    color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px; text-align: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none; user-select: none;
+  }
+  #lockdownOverlay .lock-icon { font-size: 5rem; margin-bottom: 20px; animation: pulse-lockdown 1.2s infinite; }
+  #lockdownOverlay h2 { color: #fff !important; font-size: 1.6rem; margin-bottom: 16px; letter-spacing: 1px; }
+  #lockdownOverlay p { font-size: 0.98rem; line-height: 1.75; max-width: 500px; margin-bottom: 22px; }
+  #lockdownOverlay .cd { font-size: 2.5rem; font-weight: 800; display: inline-block; min-width: 60px; margin: 0 6px; }
+  #lockdownOverlay button { background: #fff; color: #b71c1c; font-size: 1rem; padding: 14px 30px; font-weight: 800; letter-spacing: 0.5px; border-radius: 10px; margin-top: 8px; }
+  #lockdownOverlay button:hover { background: #ffebee; transform: scale(1.03); }
+  #lockdownOverlay .alert-info { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); padding: 14px 20px; border-radius: 10px; max-width: 520px; font-size: 0.86rem; line-height: 1.6; margin-top: 20px; }
+  /* ============ DASHBOARD GURU ============ */
+  .guru-dashboard { background: linear-gradient(135deg, #0d47a1 0%, #00695c 100%); color: #fff; border-radius: 16px; padding: 22px 26px; margin-bottom: 18px; box-shadow: 0 10px 30px rgba(13,71,161,0.35); }
+  .guru-dashboard .greeting { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+  .guru-dashboard .greeting .name { background: rgba(255,255,255,0.15); padding: 3px 12px; border-radius: 20px; }
+  .guru-dashboard .sub-greeting { font-size: 0.82rem; opacity: 0.9; margin-bottom: 18px; }
+  .guru-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .guru-stat-box { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 14px 16px; text-align: center; }
+  .guru-stat-box .num { font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .guru-stat-box .lbl { font-size: 0.75rem; opacity: 0.92; letter-spacing: 0.3px; }
   @media (max-width: 600px) {
     .tabs { flex-direction: column; }
     .score-big { font-size: 2rem; }
@@ -181,59 +215,6 @@
     .admin-table { font-size: 0.75rem; }
     .admin-table th, .admin-table td { padding: 6px; }
     .choice-card { min-width: 100%; }
-  }
-  /* ============================================================
-     BLOKIR COPY/PASTE + LOCKDOWN STYLE
-     ============================================================ */
-  #jawabanContainer textarea,
-  #jawabanContainer input[type="text"] {
-    -webkit-touch-callout: none !important;
-    -webkit-user-drag: none !important;
-    -khtml-user-drag: none !important;
-    -moz-user-drag: none !important;
-    -o-user-drag: none !important;
-    user-drag: none !important;
-    -webkit-user-select: text;
-    user-select: text;
-  }
-  body.lockdown-active {
-    overscroll-behavior: none;
-    -webkit-overflow-scrolling: touch;
-    touch-action: manipulation;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  body.lockdown-active #jawabanContainer textarea,
-  body.lockdown-active #jawabanContainer input[type="text"] {
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: text !important;
-    user-select: text !important;
-  }
-  #lockdownWarnOverlay {
-    position: fixed; inset: 0; z-index: 2147483647;
-    background: rgba(198,40,40,0.98); color: #fff;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 30px; text-align: center;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    touch-action: none;
-  }
-  #lockdownWarnOverlay .big {
-    font-size: 1.6rem; font-weight: 800; margin-bottom: 14px;
-    letter-spacing: 0.5px;
-  }
-  #lockdownWarnOverlay .sub {
-    font-size: 0.95rem; line-height: 1.7; max-width: 480px;
-    opacity: 0.95;
-  }
-  #lockdownWarnOverlay .count {
-    font-size: 3.4rem; font-weight: 800; margin: 18px 0;
-    font-variant-numeric: tabular-nums;
-  }
-  #lockdownWarnOverlay button {
-    margin-top: 22px; background: #fff; color: #c62828;
-    border: none; padding: 12px 26px; border-radius: 10px;
-    font-weight: 800; font-size: 0.95rem; cursor: pointer;
   }
 </style>
 </head>
@@ -287,6 +268,17 @@
 </svg>
 
 <div id="cloudStatus" class="cloud-status loading"><span class="dot"></span><span id="cloudStatusText">Menghubungkan...</span></div>
+
+<div id="lockdownOverlay" class="hidden">
+  <div class="lock-icon">🔒</div>
+  <h2>UJIAN TERKUNCI</h2>
+  <p>Anda keluar dari mode ujian. Kembali ke mode ujian dalam <span class="cd" id="lockdownCountdown">3</span> detik, atau jawaban Anda akan <b>otomatis dikumpulkan</b>.</p>
+  <button onclick="kembaliKeFullscreen()" type="button">🔙 KEMBALI KE MODE UJIAN</button>
+  <div class="alert-info">
+    Mode ini mencegah Anda keluar dari ujian. Jika Anda tidak sengaja keluar, segera tekan tombol di atas.<br>
+    Setelah waktu habis, jawaban yang telah terisi akan otomatis tersimpan dan dinilai.
+  </div>
+</div>
 
 <!-- ==================== LOGIN ==================== -->
 <div id="loginPage">
@@ -439,10 +431,38 @@
     </div>
 
     <div id="gtab-tugas" class="gtab-content">
+      <!-- ========== DASHBOARD PRIBADI GURU ========== -->
+      <div id="guruDashboard" class="guru-dashboard">
+        <div class="greeting">
+          <svg class="ico ico-lg" style="vertical-align:-0.15em;"><use href="#i-teacher"/></svg>
+          <span>Selamat datang, <span class="name" id="guruDashboardNama">Guru</span></span>
+        </div>
+        <div class="sub-greeting">Ini dashboard pribadi Anda. Data tugas & hasil di bawah hanya milik akun Anda.</div>
+        <div class="guru-stats">
+          <div class="guru-stat-box">
+            <div class="num" id="statTotalTugas">0</div>
+            <div class="lbl">Total Tugas Saya</div>
+          </div>
+          <div class="guru-stat-box">
+            <div class="num" id="statTugasAktif">0</div>
+            <div class="lbl">Tugas Aktif</div>
+          </div>
+          <div class="guru-stat-box">
+            <div class="num" id="statSiswaMengumpulkan">0</div>
+            <div class="lbl">Siswa Mengumpulkan</div>
+          </div>
+          <div class="guru-stat-box">
+            <div class="num" id="statRataNilai">-</div>
+            <div class="lbl">Rata-rata Nilai</div>
+          </div>
+        </div>
+      </div>
+      <!-- ========== END DASHBOARD ========== -->
+
       <div id="tugasListView">
         <div class="card">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-            <h2 style="margin:0"><svg class="ico"><use href="#i-exam"/></svg> Daftar Tugas</h2>
+            <h2 style="margin:0"><svg class="ico"><use href="#i-exam"/></svg> Tugas Saya</h2>
             <button onclick="mulaiInputSoal()"><svg class="ico"><use href="#i-plus"/></svg> Input Soal</button>
           </div>
           <div id="tugasList" style="margin-top:16px;"></div>
@@ -548,7 +568,18 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama..."></textarea>
               <b>Mode Keduanya (1 Kotak):</b> Paste soal <b>Pilihan Ganda</b> dan <b>Uraian</b> dalam satu kotak. Sistem otomatis mendeteksi jenis tiap soal — soal PG dikenali dari adanya opsi <code>A. B. C. D.</code>, soal Uraian dikenali dari label <code>Jawaban Ideal:</code> / <code>Kunci:</code> / <code>Pembahasan:</code>.
             </div>
             <label>Teks Soal — Gabungan (Pilihan Ganda + Uraian)</label>
-            <textarea id="tempelInputKeduanya" class="paste-input" rows="18" placeholder="Paste soal pilihan ganda & uraian di sini..."></textarea>
+            <textarea id="tempelInputKeduanya" class="paste-input" rows="18" placeholder="Paste soal pilihan ganda & uraian di sini...
+
+Contoh:
+1. Apa ibu kota Indonesia?
+A. Bandung
+B. Jakarta
+C. Surabaya
+D. Medan
+Kunci Jawaban: B
+
+2. Jelaskan pengertian gotong royong!
+Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama."></textarea>
           </div>
 
           <div class="row" style="margin-top:14px;">
@@ -654,7 +685,7 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama..."></textarea>
             <input type="checkbox" id="exLockdownMode" style="accent-color:#c62828;">
             <div>
               <div class="txt" style="color:#c62828;">🔒 Lockdown Mode (Ujian Terkunci)</div>
-              <div class="sub">Saat aktif, siswa <b>terkunci di halaman ujian</b>. Tidak dapat pindah tab, minimize, atau keluar browser sebelum menyelesaikan tugas. Keluar dari halaman ujian → <b>jawaban otomatis dikumpulkan</b>.</div>
+              <div class="sub">Saat aktif, siswa terkunci penuh — auto fullscreen, tidak bisa pindah tab/app, minimize, atau keluar browser. Keluar dari layar ujian → <b>auto-submit</b>. Berlaku di HP, tablet, iPad, dan desktop.</div>
             </div>
           </label>
         </div>
@@ -727,13 +758,13 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama..."></textarea>
 
     <div id="gtab-hasil" class="gtab-content hidden">
       <div class="card">
-        <h2><svg class="ico"><use href="#i-chart"/></svg> Hasil Penilaian Siswa</h2>
-        <label>Filter Berdasarkan Tugas</label>
-        <select id="filterTugas" onchange="muatHasil()"><option value="">-- Semua Tugas --</option></select>
+        <h2><svg class="ico"><use href="#i-chart"/></svg> Hasil Penilaian Siswa (Milik Saya)</h2>
+        <label>Filter Berdasarkan Tugas Saya</label>
+        <select id="filterTugas" onchange="muatHasil()"><option value="">-- Semua Tugas Saya --</option></select>
         <div class="row" style="margin-top:12px;">
           <button class="secondary" onclick="muatHasil()"><svg class="ico"><use href="#i-play"/></svg> Refresh</button>
           <button class="success" onclick="exportCSV()"><svg class="ico"><use href="#i-download"/></svg> Export CSV</button>
-          <button class="danger" onclick="hapusSemuaHasil()"><svg class="ico"><use href="#i-trash"/></svg> Hapus Semua Hasil</button>
+          <button class="danger" onclick="hapusSemuaHasil()"><svg class="ico"><use href="#i-trash"/></svg> Hapus Semua Hasil Saya</button>
         </div>
         <div id="hasilContainer" style="margin-top:16px;"></div>
       </div>
@@ -885,7 +916,7 @@ Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama..."></textarea>
       </div>
     </label>
 
-    <div class="info" style="margin-top:12px;"><svg class="ico"><use href="#i-info"/></svg><span>Seluruh soal, kunci, rubrik, ketentuan, API Key, pengaturan foto, dan pengaturan <b>Lockdown Mode</b> akan ikut diduplikat. Kode tugas baru akan digenerate otomatis.</span></div>
+    <div class="info" style="margin-top:12px;"><svg class="ico"><use href="#i-info"/></svg><span>Seluruh soal, kunci, rubrik, ketentuan, API Key, pengaturan foto, dan <b>Lockdown Mode</b> akan ikut diduplikat. Kode tugas baru akan digenerate otomatis.</span></div>
 
     <div class="row" style="margin-top:14px;">
       <button class="success" onclick="konfirmasiDuplikat()"><svg class="ico"><use href="#i-copy"/></svg> Duplikat Sekarang</button>
@@ -1007,11 +1038,8 @@ async function cloudSaveTugas(t) { if (!firebaseReady) return; try { await fbDb.
 async function cloudRemoveTugas(id) { if (!firebaseReady) return; try { await fbDb.ref('muara/tugas/' + id).remove(); } catch (e) {} }
 async function cloudAddHasil(hasil) {
   if (!firebaseReady) return null;
-  try {
-    const ref = fbDb.ref('muara/hasil').push();
-    await ref.set(hasil);
-    return ref.key;
-  } catch (e) { return null; }
+  try { const ref = fbDb.ref('muara/hasil').push(); await ref.set(hasil); return ref.key; }
+  catch (e) { return null; }
 }
 async function cloudRemoveHasilGuru(guruEmail) {
   if (!firebaseReady) return;
@@ -1032,23 +1060,21 @@ function setupFirebaseListeners() {
   });
   fbDb.ref('muara/admin').on('value', snap => { const v = snap.val(); if (v) { state.admin = v; simpanLocal(); } });
   fbDb.ref('muara/guru').on('value', snap => {
-    const v = snap.val() || {};
-    state.guruList = Object.values(v);
-    simpanLocal();
+    const v = snap.val() || {}; state.guruList = Object.values(v); simpanLocal();
     if (currentUser.role === 'admin') renderGuruTable();
   });
   fbDb.ref('muara/passwords').on('value', snap => { state.customPasswords = snap.val() || {}; simpanLocal(); });
   fbDb.ref('muara/tugas').on('value', snap => {
-    const v = snap.val() || {};
-    state.tugas = Object.values(v);
-    simpanLocal();
-    if (currentUser.role === 'guru') { try { renderTugasList(); muatFilterTugas(); } catch(e) {} }
+    const v = snap.val() || {}; state.tugas = Object.values(v); simpanLocal();
+    if (currentUser.role === 'guru') {
+      try { renderTugasList(); renderGuruDashboard(); muatFilterTugas(); } catch(e) {}
+    }
   });
   fbDb.ref('muara/hasil').on('value', snap => {
-    const v = snap.val() || {};
-    state.hasil = Object.values(v);
-    simpanLocal();
-    if (currentUser.role === 'guru') { try { muatHasil(); } catch(e) {} }
+    const v = snap.val() || {}; state.hasil = Object.values(v); simpanLocal();
+    if (currentUser.role === 'guru') {
+      try { muatHasil(); renderGuruDashboard(); } catch(e) {}
+    }
   });
 }
 
@@ -1071,7 +1097,7 @@ async function initialCloudLoad() {
       state.hasil = data.hasil ? Object.values(data.hasil) : [];
       simpanLocal();
     }
-  } catch (e) {}
+  } catch (e) { console.error('initialCloudLoad', e); }
 }
 
 const PROMPT_AI = {
@@ -1222,7 +1248,7 @@ const KETENTUAN_PRESET = {
 };
 
 let state;
-try { state = JSON.parse(localStorage.getItem('MUARA_v9') || '{}'); } catch (e) { state = {}; }
+try { state = JSON.parse(localStorage.getItem('MUARA_v10') || '{}'); } catch (e) { state = {}; }
 if (!state.tugas) state.tugas = [];
 if (!state.hasil) state.hasil = [];
 if (!state.guruList || state.guruList.length === 0) state.guruList = JSON.parse(JSON.stringify(GURU_DEFAULT));
@@ -1240,7 +1266,9 @@ let duplikatTugasId = null;
 let examTimerInterval = null;
 let examStartTime = null;
 
-function simpanLocal() { try { localStorage.setItem('MUARA_v9', JSON.stringify(state)); } catch (e) {} }
+function simpanLocal() {
+  try { localStorage.setItem('MUARA_v10', JSON.stringify(state)); } catch (e) { console.error(e); }
+}
 function simpanState() { simpanLocal(); }
 
 function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -1304,7 +1332,7 @@ function loginGuru() {
   document.getElementById('guruUserInfo').innerHTML = `<svg class="ico"><use href="#i-teacher"/></svg> <b>${escapeHtml(guru.nama)}</b> <small>(${escapeHtml(guru.email)})</small>`;
   const infoBox = document.getElementById('guruInfoBox');
   if (infoBox) infoBox.innerHTML = `<b>Nama:</b> ${escapeHtml(guru.nama)}<br><b>Email:</b> ${escapeHtml(guru.email)}<br><b>Password:</b> ${state.customPasswords[encEmail(emailInput)] ? '(sudah diganti)' : '(default)'}`;
-  try { renderTugasList(); muatFilterTugas(); } catch (e) {}
+  try { renderTugasList(); renderGuruDashboard(); muatFilterTugas(); } catch (e) { console.error(e); }
 }
 
 async function prosesLupaPassword() {
@@ -1382,7 +1410,9 @@ function validasiKode() {
     if (tugas.waktuMulai || tugas.waktuSelesai) {
       wStr += `<b>Jendela Pengerjaan:</b> ${tugas.waktuMulai ? formatWaktu(tugas.waktuMulai) : 'sekarang'} s/d ${tugas.waktuSelesai ? formatWaktu(tugas.waktuSelesai) : 'selesai'}<br>`;
     }
-    if (tugas.durasi && tugas.durasi > 0) wStr += `<b>Durasi Maksimal:</b> ${tugas.durasi} menit dari mulai mengerjakan`;
+    if (tugas.durasi && tugas.durasi > 0) {
+      wStr += `<b>Durasi Maksimal:</b> ${tugas.durasi} menit dari mulai mengerjakan`;
+    }
     wrapWaktu.innerHTML = `<div class="info teal"><svg class="ico"><use href="#i-clock"/></svg><span>${wStr}</span></div>`;
   } else { wrapWaktu.innerHTML = ''; }
 
@@ -1580,22 +1610,13 @@ function mulaiKerjakan() {
   renderSoalSiswa();
   mulaiTimerUjian();
 
-  const btnKeluar = document.getElementById('btnKeluarTugas');
   if (currentTugas.lockdownMode) {
-    if (btnKeluar) {
-      btnKeluar.disabled = true;
-      btnKeluar.style.opacity = '0.4';
-      btnKeluar.style.cursor = 'not-allowed';
-      btnKeluar.title = 'Mode Ujian Terkunci aktif';
-    }
-    setTimeout(() => aktifkanLockdown(), 300);
+    const btnKeluar = document.getElementById('btnKeluarTugas');
+    if (btnKeluar) { btnKeluar.disabled = true; btnKeluar.style.opacity = '0.4'; btnKeluar.style.cursor = 'not-allowed'; }
+    aktifkanLockdown();
   } else {
-    if (btnKeluar) {
-      btnKeluar.disabled = false;
-      btnKeluar.style.opacity = '1';
-      btnKeluar.style.cursor = 'pointer';
-      btnKeluar.title = '';
-    }
+    const btnKeluar = document.getElementById('btnKeluarTugas');
+    if (btnKeluar) { btnKeluar.disabled = false; btnKeluar.style.opacity = '1'; btnKeluar.style.cursor = 'pointer'; }
   }
 }
 
@@ -1649,18 +1670,12 @@ async function autoSubmitWaktuHabis() {
   if (!currentTugas) return;
   if (document.getElementById('btnKirim')?.disabled) return;
   alert('Waktu pengerjaan telah habis. Jawaban Anda akan dikumpulkan otomatis.');
-  await kirimJawaban(true, 'waktu', 'waktu habis');
+  await kirimJawaban(true, 'waktu');
 }
 
 // ============================================================
-// BLOKIR COPY / PASTE / CLIPBOARD KEYBOARD — VERSI AGRESIF
+// BLOKIR PASTE / CLIPBOARD (SILENT)
 // ============================================================
-const _lastValueMap = new WeakMap();
-let _lastLegitKeyTime = 0;
-let _inComposition = false;
-let _compositionBaseline = 0;
-let _touchHoldTimer = null;
-
 function isAnswerTextarea(el) {
   if (!el) return false;
   if (el.tagName !== 'TEXTAREA' && el.tagName !== 'INPUT') return false;
@@ -1671,173 +1686,75 @@ function shouldBlockClipboard() {
       && !!currentTugas
       && !document.getElementById('tugasPage').classList.contains('hidden');
 }
-function _revertAnswerInput(el, prevValue) {
-  try {
-    el.value = prevValue;
-    el.dispatchEvent(new Event('input',  { bubbles: true }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-  } catch (_) {}
-}
-
-// Baseline saat fokus
-document.addEventListener('focusin', (e) => {
-  if (!shouldBlockClipboard()) return;
-  if (!isAnswerTextarea(e.target)) return;
-  if (!_lastValueMap.has(e.target)) _lastValueMap.set(e.target, e.target.value || '');
-}, true);
-
-// Composition (IME mobile)
-document.addEventListener('compositionstart', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  _inComposition = true;
-  _lastLegitKeyTime = Date.now();
-  _compositionBaseline = (e.target.value || '').length;
-}, true);
-document.addEventListener('compositionupdate', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  _lastLegitKeyTime = Date.now();
-}, true);
-document.addEventListener('compositionend', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  _inComposition = false;
-  _lastLegitKeyTime = Date.now();
-  _lastValueMap.set(e.target, e.target.value || '');
-}, true);
-
-// paste/copy/cut
 document.addEventListener('paste', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  e.preventDefault(); e.stopImmediatePropagation(); return false;
+  if (!shouldBlockClipboard()) return;
+  if (isAnswerTextarea(e.target)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
 }, true);
-document.addEventListener('copy', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  e.preventDefault(); e.stopImmediatePropagation(); return false;
-}, true);
-document.addEventListener('cut', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  e.preventDefault(); e.stopImmediatePropagation(); return false;
-}, true);
-
-// drop/drag
 document.addEventListener('drop', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  e.preventDefault(); e.stopImmediatePropagation(); return false;
+  if (!shouldBlockClipboard()) return;
+  if (isAnswerTextarea(e.target)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
 }, true);
-document.addEventListener('dragstart', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  e.preventDefault(); return false;
-}, true);
-
-// beforeinput — jalur utama
 document.addEventListener('beforeinput', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  const t = e.inputType || '';
-  // Block explicit paste types
-  if (t === 'insertFromPaste' || t === 'insertFromPasteAsQuotation' ||
-      t === 'insertFromDrop' || t === 'insertReplacementText' ||
-      t === 'insertFromYank') {
-    e.preventDefault(); e.stopImmediatePropagation(); return false;
-  }
-  // insertText: cek panjang data. Kalau lebih dari 1 karakter & bukan composition → curigakan (Gboard clipboard)
-  if (t === 'insertText' && !_inComposition) {
-    const data = e.data || '';
-    if (data.length > 1) {
+  if (!shouldBlockClipboard()) return;
+  if (isAnswerTextarea(e.target)) {
+    const t = e.inputType || '';
+    if (t === 'insertFromPaste' || t === 'insertFromPasteAsQuotation' || t === 'insertFromDrop' || t === 'insertReplacementText') {
       e.preventDefault(); e.stopImmediatePropagation(); return false;
     }
   }
-  if (t.startsWith('insert') || t.startsWith('delete')) {
-    _lastLegitKeyTime = Date.now();
-  }
 }, true);
-
-// keydown — perbarui waktu legal + blokir shortcut
 document.addEventListener('keydown', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  _lastLegitKeyTime = Date.now();
-  _lastValueMap.set(e.target, e.target.value || '');
+  if (!shouldBlockClipboard()) return;
+  if (!isAnswerTextarea(e.target)) return;
   const key = (e.key || '').toLowerCase();
   const ctrl = e.ctrlKey || e.metaKey;
-  if ((ctrl && (key === 'v' || key === 'c' || key === 'x' || key === 'a' || key === 'z' || key === 'y')) ||
-      (ctrl && e.shiftKey && key === 'v') ||
-      (e.shiftKey && key === 'insert') ||
-      (ctrl && key === 'insert')) {
+  if ((ctrl && key === 'v') || (ctrl && e.shiftKey && key === 'v') || (e.shiftKey && key === 'insert') || (ctrl && key === 'insert')) {
     e.preventDefault(); e.stopImmediatePropagation(); return false;
   }
 }, true);
-
-// input — penjaga terakhir
-document.addEventListener('input', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  const el = e.target;
-  const prev = _lastValueMap.get(el) || '';
-  const cur  = el.value || '';
-  const now  = Date.now();
-
-  if (_inComposition) { _lastValueMap.set(el, cur); return; }
-  if ((now - _lastLegitKeyTime) < 250) { _lastValueMap.set(el, cur); return; }
-
-  const delta = cur.length - prev.length;
-  // Tidak ada keydown baru-baru ini, dan tiba-tiba nambah > 1 karakter → paste
-  if (delta > 1) {
-    _revertAnswerInput(el, prev);
-    return;
-  }
-  _lastValueMap.set(el, cur);
-}, true);
-
-// contextmenu
 document.addEventListener('contextmenu', (e) => {
-  if (!shouldBlockClipboard() || !isAnswerTextarea(e.target)) return;
-  e.preventDefault(); e.stopImmediatePropagation(); return false;
+  if (!shouldBlockClipboard()) return;
+  if (isAnswerTextarea(e.target)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
 }, true);
-
-// long-press touch → blok
-document.addEventListener('touchstart', (e) => {
+const _lastValueMap = new WeakMap();
+document.addEventListener('input', (e) => {
   if (!shouldBlockClipboard()) return;
   if (!isAnswerTextarea(e.target)) return;
-  if (_touchHoldTimer) clearTimeout(_touchHoldTimer);
-  const targetEl = e.target;
-  _touchHoldTimer = setTimeout(() => {
-    try { e.preventDefault(); } catch (_) {}
-    try {
-      const baseline = _lastValueMap.get(targetEl) || '';
-      if (targetEl.value !== baseline) _revertAnswerInput(targetEl, baseline);
-    } catch (_) {}
-  }, 400);
-}, { passive: false, capture: true });
-document.addEventListener('touchend', () => {
-  if (_touchHoldTimer) { clearTimeout(_touchHoldTimer); _touchHoldTimer = null; }
+  const el = e.target;
+  const prev = _lastValueMap.get(el) || '';
+  const cur = el.value || '';
+  if (cur.length - prev.length > 15) {
+    el.value = prev;
+    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch(_) {}
+  } else {
+    _lastValueMap.set(el, cur);
+  }
 }, true);
-document.addEventListener('touchcancel', () => {
-  if (_touchHoldTimer) { clearTimeout(_touchHoldTimer); _touchHoldTimer = null; }
+document.addEventListener('keydown', (e) => {
+  if (!shouldBlockClipboard()) return;
+  if (!isAnswerTextarea(e.target)) return;
+  _lastValueMap.set(e.target, e.target.value || '');
 }, true);
-document.addEventListener('touchmove', () => {
-  if (_touchHoldTimer) { clearTimeout(_touchHoldTimer); _touchHoldTimer = null; }
-}, { passive: true, capture: true });
 
 // ============================================================
-// LOCKDOWN MODE — VERSI MAKSIMAL
+// LOCKDOWN MODE
 // ============================================================
 const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const isAndroidDevice = /Android/i.test(navigator.userAgent);
-const isMobileDevice = isIOSDevice || isAndroidDevice;
 
 let lockdownState = {
   active: false,
   violations: 0,
   hiddenTimer: null,
-  blurTimer: null,
   fullscreenRetryTimer: null,
-  fullscreenPollTimer: null,
-  fullscreenRetries: 0,
+  reenterInterval: null,
+  overlayCountdownTimer: null,
   autoSubmitTriggered: false,
   originalOpen: null,
-  wakeLock: null,
-  historyArmed: false,
-  lastFullscreenAt: 0
+  originalClose: null,
+  originalPushState: null
 };
 
-// ---------- Fullscreen ----------
 function requestFullscreenLockdown() {
   const el = document.documentElement;
   const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
@@ -1845,40 +1762,20 @@ function requestFullscreenLockdown() {
   try {
     const p = req.call(el);
     if (p && typeof p.catch === 'function') p.catch(() => {});
-    lockdownState.lastFullscreenAt = Date.now();
-  } catch (e) {}
+  } catch(e) {}
 }
+
 function exitFullscreenIfAny() {
   const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
   if (!exit) return;
   const isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
-  if (isFs) { try { exit.call(document); } catch (e) {} }
+  if (isFs) { try { exit.call(document); } catch(e) {} }
 }
+
 function isFullscreenNow() {
   return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
 }
 
-// ---------- Wake Lock ----------
-async function requestWakeLockLockdown() {
-  if (!('wakeLock' in navigator)) return;
-  try {
-    lockdownState.wakeLock = await navigator.wakeLock.request('screen');
-    lockdownState.wakeLock.addEventListener('release', () => { lockdownState.wakeLock = null; });
-  } catch (e) {}
-}
-async function releaseWakeLockLockdown() {
-  try { if (lockdownState.wakeLock) { await lockdownState.wakeLock.release(); lockdownState.wakeLock = null; } } catch (e) {}
-}
-
-// ---------- Orientation ----------
-async function lockOrientationLockdown() {
-  try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('portrait'); } catch (e) {}
-}
-async function unlockOrientationLockdown() {
-  try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
-}
-
-// ---------- Badge & Overlay ----------
 function tampilLockdownBadge() {
   let el = document.getElementById('lockdownBadge');
   if (!el) {
@@ -1887,138 +1784,109 @@ function tampilLockdownBadge() {
     el.className = 'lockdown-badge';
     el.innerHTML = '🔒 Mode Ujian Terkunci';
     document.body.appendChild(el);
-  } else el.classList.remove('hidden');
+  } else {
+    el.classList.remove('hidden');
+  }
 }
 function sembunyiLockdownBadge() {
   const el = document.getElementById('lockdownBadge');
   if (el) el.classList.add('hidden');
 }
-function tampilLockdownWarnOverlay(alasan) {
-  let el = document.getElementById('lockdownWarnOverlay');
-  if (el) return;
-  el = document.createElement('div');
-  el.id = 'lockdownWarnOverlay';
-  el.innerHTML = `
-    <div class="big">⚠️ UJIAN TERKUNCI</div>
-    <div class="sub">Anda terdeteksi <b>${alasan}</b>.<br>Jawaban Anda akan dikumpulkan otomatis dalam:</div>
-    <div class="count" id="lockdownWarnCount">3</div>
-    <div class="sub">Segera kembali ke halaman ujian.</div>
-  `;
-  document.body.appendChild(el);
-  let n = 3;
-  const intv = setInterval(() => {
-    n--;
-    const c = document.getElementById('lockdownWarnCount');
-    if (c) c.textContent = n;
-    if (n <= 0) clearInterval(intv);
+
+// OVERLAY ketika keluar dari fullscreen atau pindah tab
+function showLockdownOverlay() {
+  const overlay = document.getElementById('lockdownOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('hidden');
+  let cd = 3;
+  const cdEl = document.getElementById('lockdownCountdown');
+  if (cdEl) cdEl.textContent = cd;
+  if (lockdownState.overlayCountdownTimer) clearInterval(lockdownState.overlayCountdownTimer);
+  lockdownState.overlayCountdownTimer = setInterval(() => {
+    cd--;
+    if (cdEl) cdEl.textContent = cd > 0 ? cd : 0;
+    if (cd <= 0) {
+      clearInterval(lockdownState.overlayCountdownTimer);
+      lockdownState.overlayCountdownTimer = null;
+      if (lockdownState.active && !lockdownState.autoSubmitTriggered) {
+        lockdownState.violations++;
+        autoSubmitLockdown('keluar layar ujian (overlay timeout)');
+      }
+    }
   }, 1000);
 }
-function sembunyiLockdownWarnOverlay() {
-  const el = document.getElementById('lockdownWarnOverlay');
-  if (el) el.remove();
+function hideLockdownOverlay() {
+  const overlay = document.getElementById('lockdownOverlay');
+  if (overlay) overlay.classList.add('hidden');
+  if (lockdownState.overlayCountdownTimer) {
+    clearInterval(lockdownState.overlayCountdownTimer);
+    lockdownState.overlayCountdownTimer = null;
+  }
 }
 
-// ---------- Handlers ----------
+function kembaliKeFullscreen() {
+  // Dipanggil dari tombol overlay
+  hideLockdownOverlay();
+  requestFullscreenLockdown();
+  // Coba focus lagi ke window
+  try { window.focus(); } catch(e) {}
+}
+
 function handleVisibilityLockdown() {
   if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-  const hidden = document.hidden || document.visibilityState !== 'visible';
+  const hidden = document.hidden || document.visibilityState === 'hidden';
   if (hidden) {
-    // Mobile: langsung submit tanpa grace period
-    if (isMobileDevice) {
-      lockdownState.violations++;
-      autoSubmitLockdown('pindah aplikasi / buka notifikasi');
-      return;
-    }
-    // Desktop: 400ms grace
+    // Tampilkan overlay segera — siswa harus kembali cepat
+    showLockdownOverlay();
     if (lockdownState.hiddenTimer) clearTimeout(lockdownState.hiddenTimer);
     lockdownState.hiddenTimer = setTimeout(() => {
-      if ((document.hidden || document.visibilityState !== 'visible') && !lockdownState.autoSubmitTriggered) {
+      const stillHidden = document.hidden || document.visibilityState === 'hidden';
+      if (lockdownState.active && stillHidden && !lockdownState.autoSubmitTriggered) {
         lockdownState.violations++;
-        autoSubmitLockdown('pindah tab');
+        autoSubmitLockdown('pindah tab / minimize');
       }
-    }, 400);
+    }, 3000);
   } else {
     if (lockdownState.hiddenTimer) { clearTimeout(lockdownState.hiddenTimer); lockdownState.hiddenTimer = null; }
-    sembunyiLockdownWarnOverlay();
-    // Kalau fullscreen hilang, langsung minta lagi
-    if (!isFullscreenNow()) requestFullscreenLockdown();
-  }
-}
-
-function handleWindowBlurLockdown() {
-  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-  // Mobile: langsung
-  if (isMobileDevice) {
-    lockdownState.violations++;
-    autoSubmitLockdown('keluar dari jendela ujian');
-    return;
-  }
-  if (lockdownState.blurTimer) clearTimeout(lockdownState.blurTimer);
-  lockdownState.blurTimer = setTimeout(() => {
-    if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-    if (!document.hasFocus()) {
-      lockdownState.violations++;
-      autoSubmitLockdown('keluar dari jendela ujian');
+    // Kalau balik ke visible, cek fullscreen
+    if (!isFullscreenNow()) {
+      requestFullscreenLockdown();
     }
-  }, 400);
-}
-function handleWindowFocusLockdown() {
-  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-  if (lockdownState.blurTimer) { clearTimeout(lockdownState.blurTimer); lockdownState.blurTimer = null; }
-  sembunyiLockdownWarnOverlay();
-  if (!isFullscreenNow()) requestFullscreenLockdown();
-}
-
-function handlePageHideLockdown() {
-  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-  lockdownState.violations++;
-  autoSubmitLockdown('meninggalkan halaman ujian');
-}
-function handlePageFreezeLockdown() {
-  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-  lockdownState.violations++;
-  autoSubmitLockdown('halaman dibekukan sistem');
+  }
 }
 
 function handleFullscreenChangeLockdown() {
   if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
   if (isFullscreenNow()) {
-    lockdownState.fullscreenRetries = 0;
+    // Sudah fullscreen lagi — sembunyikan overlay
+    hideLockdownOverlay();
     return;
   }
-  // Coba re-enter berkali-kali sangat cepat
+  // Keluar dari fullscreen → overlay + coba re-enter
+  showLockdownOverlay();
   let attempts = 0;
   const tryReenter = () => {
     if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-    if (isFullscreenNow()) return;
+    if (isFullscreenNow()) { hideLockdownOverlay(); return; }
     attempts++;
-    if (attempts <= 8) {
+    if (attempts <= 3) {
       requestFullscreenLockdown();
-      setTimeout(tryReenter, 150);
-    } else {
-      // Gagal 8x → auto-submit
-      if (lockdownState.fullscreenRetryTimer) clearTimeout(lockdownState.fullscreenRetryTimer);
-      lockdownState.fullscreenRetryTimer = setTimeout(() => {
-        if (lockdownState.active && !isFullscreenNow() && !lockdownState.autoSubmitTriggered) {
-          lockdownState.violations++;
-          autoSubmitLockdown('keluar dari mode fullscreen');
-        }
-      }, 800);
+      setTimeout(tryReenter, 400);
     }
   };
-  setTimeout(tryReenter, 100);
+  setTimeout(tryReenter, 150);
 }
 
 function handleKeydownLockdown(e) {
   if (!lockdownState.active) return;
   const k = (e.key || '').toLowerCase();
   const ctrl = e.ctrlKey || e.metaKey;
-  // Blokir ESC (best-effort — browser mungkin masih keluar)
-  if (k === 'escape') { e.preventDefault(); e.stopImmediatePropagation(); return false; }
-  if (ctrl && ['t','n','w','r','p','s','o','u','l'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
-  if (ctrl && e.shiftKey && ['t','n','w','r','i','j','c','q'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  // Blokir shortcut browser
+  if (ctrl && ['t','n','w','r','p','s','o','u'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  if (ctrl && e.shiftKey && ['t','n','w','r','i','j','c'].includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
   if (k === 'f5' || k === 'f11' || k === 'f12') { e.preventDefault(); e.stopImmediatePropagation(); return false; }
-  if (e.altKey && (k === 'f4' || k === 'tab')) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  // Blokir alt+left (back), alt+right (forward), alt+tab tidak bisa diblock tapi ada visibility
+  if (e.altKey && (k === 'arrowleft' || k === 'arrowright')) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
 }
 
 function blockContextMenuLockdown(e) {
@@ -2034,57 +1902,43 @@ function handleBeforeUnloadLockdown(e) {
   return '';
 }
 
-// History trap
-function armHistoryTrapLockdown() {
-  if (lockdownState.historyArmed) return;
-  try {
-    history.pushState({ lockdown: Date.now() }, '', location.href);
-    lockdownState.historyArmed = true;
-  } catch (e) {}
-}
-function handlePopstateLockdown() {
+// Handler back button (Android / browser history)
+function handlePopstateLockdown(e) {
   if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-  try { history.pushState({ lockdown: Date.now() }, '', location.href); } catch (e) {}
-  lockdownState.violations++;
-  autoSubmitLockdown('menekan tombol kembali');
+  // Push state lagi supaya tidak bisa keluar
+  try { history.pushState(null, '', location.href); } catch(e2) {}
+  showLockdownOverlay();
 }
 
-// Poll fullscreen (jaga fullscreen terus aktif)
-function startFullscreenPollLockdown() {
-  if (lockdownState.fullscreenPollTimer) clearInterval(lockdownState.fullscreenPollTimer);
-  lockdownState.fullscreenPollTimer = setInterval(() => {
-    if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-    if (!isFullscreenNow()) {
-      requestFullscreenLockdown();
-    }
-  }, 1000);
+// Cegah gesture back pada beberapa browser
+function handleBackButtonLockdown() {
+  if (!lockdownState.active) return;
+  // Push state agar back pertama hanya memicu popstate, tidak keluar
+  try { history.pushState({muara: 1}, '', location.href); } catch(e) {}
 }
 
-// Auto re-request fullscreen setiap ada interaksi user (karena gesture)
-function handleUserInteractionLockdown() {
-  if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
-  if (!isFullscreenNow()) requestFullscreenLockdown();
-}
-
-// ---------- Aktifkan / Non-aktifkan ----------
 function aktifkanLockdown() {
   if (lockdownState.active) return;
   lockdownState.active = true;
   lockdownState.violations = 0;
   lockdownState.autoSubmitTriggered = false;
-  lockdownState.fullscreenRetries = 0;
 
-  document.body.classList.add('lockdown-active');
   tampilLockdownBadge();
-
-  // Fullscreen + wake lock + orientasi
   requestFullscreenLockdown();
-  requestWakeLockLockdown();
-  lockOrientationLockdown();
-  armHistoryTrapLockdown();
+
+  // Attempt re-enter fullscreen periodically jika tidak fullscreen
+  if (lockdownState.reenterInterval) clearInterval(lockdownState.reenterInterval);
+  lockdownState.reenterInterval = setInterval(() => {
+    if (!lockdownState.active || lockdownState.autoSubmitTriggered) return;
+    if (!isFullscreenNow()) {
+      requestFullscreenLockdown();
+    }
+  }, 1500);
+
+  // Push history state untuk mencegat back button
+  handleBackButtonLockdown();
 
   document.addEventListener('visibilitychange', handleVisibilityLockdown, true);
-  document.addEventListener('webkitvisibilitychange', handleVisibilityLockdown, true);
   document.addEventListener('keydown', handleKeydownLockdown, true);
   document.addEventListener('contextmenu', blockContextMenuLockdown, true);
   document.addEventListener('fullscreenchange', handleFullscreenChangeLockdown, true);
@@ -2092,38 +1946,24 @@ function aktifkanLockdown() {
   document.addEventListener('mozfullscreenchange', handleFullscreenChangeLockdown, true);
   document.addEventListener('MSFullscreenChange', handleFullscreenChangeLockdown, true);
   window.addEventListener('beforeunload', handleBeforeUnloadLockdown, true);
-  window.addEventListener('blur', handleWindowBlurLockdown, true);
-  window.addEventListener('focus', handleWindowFocusLockdown, true);
-  window.addEventListener('pagehide', handlePageHideLockdown, true);
-  window.addEventListener('pageshow', handleWindowFocusLockdown, true);
-  document.addEventListener('freeze', handlePageFreezeLockdown, true);
   window.addEventListener('popstate', handlePopstateLockdown, true);
-  // Re-request fullscreen on user interaction
-  document.addEventListener('click', handleUserInteractionLockdown, true);
-  document.addEventListener('touchstart', handleUserInteractionLockdown, true);
-  document.addEventListener('keydown', handleUserInteractionLockdown, true);
 
+  // Blokir window.open
   try {
     lockdownState.originalOpen = window.open;
     window.open = function() { return null; };
-  } catch (e) {}
-
-  try { document.documentElement.style.overscrollBehavior = 'none'; } catch (e) {}
-  startFullscreenPollLockdown();
+  } catch(e) {}
 }
 
 function nonaktifkanLockdown() {
   if (!lockdownState.active) return;
   lockdownState.active = false;
   if (lockdownState.hiddenTimer) { clearTimeout(lockdownState.hiddenTimer); lockdownState.hiddenTimer = null; }
-  if (lockdownState.blurTimer) { clearTimeout(lockdownState.blurTimer); lockdownState.blurTimer = null; }
   if (lockdownState.fullscreenRetryTimer) { clearTimeout(lockdownState.fullscreenRetryTimer); lockdownState.fullscreenRetryTimer = null; }
-  if (lockdownState.fullscreenPollTimer) { clearInterval(lockdownState.fullscreenPollTimer); lockdownState.fullscreenPollTimer = null; }
-  if (_touchHoldTimer) { clearTimeout(_touchHoldTimer); _touchHoldTimer = null; }
+  if (lockdownState.reenterInterval) { clearInterval(lockdownState.reenterInterval); lockdownState.reenterInterval = null; }
+  if (lockdownState.overlayCountdownTimer) { clearInterval(lockdownState.overlayCountdownTimer); lockdownState.overlayCountdownTimer = null; }
 
-  document.body.classList.remove('lockdown-active');
   document.removeEventListener('visibilitychange', handleVisibilityLockdown, true);
-  document.removeEventListener('webkitvisibilitychange', handleVisibilityLockdown, true);
   document.removeEventListener('keydown', handleKeydownLockdown, true);
   document.removeEventListener('contextmenu', blockContextMenuLockdown, true);
   document.removeEventListener('fullscreenchange', handleFullscreenChangeLockdown, true);
@@ -2131,34 +1971,23 @@ function nonaktifkanLockdown() {
   document.removeEventListener('mozfullscreenchange', handleFullscreenChangeLockdown, true);
   document.removeEventListener('MSFullscreenChange', handleFullscreenChangeLockdown, true);
   window.removeEventListener('beforeunload', handleBeforeUnloadLockdown, true);
-  window.removeEventListener('blur', handleWindowBlurLockdown, true);
-  window.removeEventListener('focus', handleWindowFocusLockdown, true);
-  window.removeEventListener('pagehide', handlePageHideLockdown, true);
-  window.removeEventListener('pageshow', handleWindowFocusLockdown, true);
-  document.removeEventListener('freeze', handlePageFreezeLockdown, true);
   window.removeEventListener('popstate', handlePopstateLockdown, true);
-  document.removeEventListener('click', handleUserInteractionLockdown, true);
-  document.removeEventListener('touchstart', handleUserInteractionLockdown, true);
-  document.removeEventListener('keydown', handleUserInteractionLockdown, true);
 
-  if (lockdownState.originalOpen) { try { window.open = lockdownState.originalOpen; } catch (e) {} lockdownState.originalOpen = null; }
+  if (lockdownState.originalOpen) { try { window.open = lockdownState.originalOpen; } catch(e) {} lockdownState.originalOpen = null; }
 
-  releaseWakeLockLockdown();
-  unlockOrientationLockdown();
+  hideLockdownOverlay();
   exitFullscreenIfAny();
   sembunyiLockdownBadge();
-  sembunyiLockdownWarnOverlay();
-
-  try { document.documentElement.style.overscrollBehavior = ''; } catch (e) {}
-  lockdownState.historyArmed = false;
 }
 
 async function autoSubmitLockdown(alasan) {
   if (lockdownState.autoSubmitTriggered) return;
   lockdownState.autoSubmitTriggered = true;
-  tampilLockdownWarnOverlay(alasan || '');
-  try { await kirimJawaban(true, 'lockdown', alasan || ''); } catch (e) {}
-  setTimeout(() => { nonaktifkanLockdown(); }, 600);
+  hideLockdownOverlay();
+  try {
+    await kirimJawaban(true, 'lockdown', alasan || '');
+  } catch(e) { console.error('autoSubmitLockdown error:', e); }
+  nonaktifkanLockdown();
 }
 
 function renderSoalSiswa() {
@@ -2191,7 +2020,9 @@ function renderSoalSiswa() {
       const showTeks = jawab.mode === 'teks';
       const showFoto = allowFoto && jawab.mode === 'foto';
       let tabsHtml = `<div class="answer-tab ${showTeks ? 'active' : ''}" onclick="gantiMode(${i}, 'teks')"><svg class="ico"><use href="#i-edit"/></svg> Ketik Jawaban</div>`;
-      if (allowFoto) tabsHtml += `<div class="answer-tab ${showFoto ? 'active' : ''}" onclick="gantiMode(${i}, 'foto')"><svg class="ico"><use href="#i-camera"/></svg> Foto / Upload Gambar</div>`;
+      if (allowFoto) {
+        tabsHtml += `<div class="answer-tab ${showFoto ? 'active' : ''}" onclick="gantiMode(${i}, 'foto')"><svg class="ico"><use href="#i-camera"/></svg> Foto / Upload Gambar</div>`;
+      }
       let fotoHtml = '';
       if (allowFoto) {
         fotoHtml = `
@@ -2224,7 +2055,6 @@ function renderSoalSiswa() {
 }
 
 function pilihJawabanPilgan(i, val) { jawabanSementara[i].pilgan = val; renderSoalSiswa(); }
-
 function gantiMode(i, mode) {
   const allowFoto = currentTugas.aktifkanFoto !== false;
   if (mode === 'foto' && !allowFoto) return;
@@ -2239,9 +2069,7 @@ function gantiMode(i, mode) {
   if (mode === 'teks' && tabs[0]) tabs[0].classList.add('active');
   if (mode === 'foto' && tabs[1]) tabs[1].classList.add('active');
 }
-
 function simpanTeks(i, val) { jawabanSementara[i].teks = val; }
-
 function prosesFoto(i, event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -2259,11 +2087,9 @@ function prosesFoto(i, event) {
 
 function buildSoalSnapshot() {
   return currentTugas.soal.map(s => ({
-    jenis: s.jenis,
-    pertanyaan: s.pertanyaan || '',
+    jenis: s.jenis, pertanyaan: s.pertanyaan || '',
     opsi: s.jenis === 'pilgan' ? (s.opsi || []) : null,
-    kunci: s.kunci || null,
-    bobot: s.bobot || 0
+    kunci: s.kunci || null, bobot: s.bobot || 0
   }));
 }
 function buildJawabanSnapshot() {
@@ -2322,6 +2148,7 @@ async function kirimJawaban(paksa, trigger, alasan) {
     document.getElementById('jawabanContainer').innerHTML = '';
     document.getElementById('examTimerWrap').innerHTML = '';
     btn.classList.add('hidden');
+
     nonaktifkanLockdown();
     const btnKeluar = document.getElementById('btnKeluarTugas');
     if (btnKeluar) { btnKeluar.disabled = false; btnKeluar.style.opacity = '1'; btnKeluar.style.cursor = 'pointer'; }
@@ -2491,9 +2318,7 @@ function buildHasilRenderHTML(hasil) {
     }
 
     if (soal.jenis === 'pilgan' && soal.kunci) {
-      html += `<div style="margin-bottom:10px;font-size:0.85rem;">
-        <span style="color:#718096;">Kunci Jawaban:</span> <b style="color:#38a169;">${escapeHtml(soal.kunci)}</b>
-      </div>`;
+      html += `<div style="margin-bottom:10px;font-size:0.85rem;"><span style="color:#718096;">Kunci Jawaban:</span> <b style="color:#38a169;">${escapeHtml(soal.kunci)}</b></div>`;
     } else if (soal.jenis === 'uraian' && soal.kunci) {
       html += `<div style="margin-bottom:10px;">
         <div style="font-size:0.75rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Kunci / Poin Penting:</div>
@@ -2510,9 +2335,7 @@ function buildHasilRenderHTML(hasil) {
       html += `<div style="font-size:0.88rem;padding:6px 10px;border-radius:4px;background:${benar?'#f0fff4':'#fff5f5'};color:${benar?'#22543d':'#742a2a'};font-weight:600;">${escapeHtml(ans)} ${benar?'✓':''}</div>`;
     } else {
       if (jaw.mode === 'foto' && jaw.fotoData) {
-        html += `<div style="border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;display:inline-block;max-width:100%;">
-          <img src="${jaw.fotoData}" style="max-width:100%;max-height:320px;display:block;" />
-        </div>`;
+        html += `<div style="border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;display:inline-block;max-width:100%;"><img src="${jaw.fotoData}" style="max-width:100%;max-height:320px;display:block;" /></div>`;
       } else if (jaw.teks) {
         html += `<div style="font-size:0.86rem;line-height:1.55;white-space:pre-wrap;background:#f7fafc;padding:10px;border-radius:6px;border-left:3px solid #0d47a1;">${escapeHtml(jaw.teks).replace(/\n/g, '<br>')}</div>`;
       } else {
@@ -2533,9 +2356,7 @@ function buildHasilRenderHTML(hasil) {
 
   html += `
       <h3 style="font-size:1rem;color:#0d47a1;border-bottom:2px solid #0d47a1;padding-bottom:4px;margin:18px 0 10px;">Kesimpulan</h3>
-      <div style="background:#fffaf0;border-left:4px solid #dd6b20;padding:12px;border-radius:6px;font-size:0.88rem;line-height:1.6;">
-        ${escapeHtml(hasil.kesimpulan || '-').replace(/\n/g, '<br>')}
-      </div>
+      <div style="background:#fffaf0;border-left:4px solid #dd6b20;padding:12px;border-radius:6px;font-size:0.88rem;line-height:1.6;">${escapeHtml(hasil.kesimpulan || '-').replace(/\n/g, '<br>')}</div>
 
       <div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #cbd5e0;font-size:0.75rem;color:#718096;">
         Dokumen ini dihasilkan otomatis oleh sistem MUARA — SMP Negeri 10 Samarinda.<br>
@@ -2550,7 +2371,6 @@ function getHasilSiswa() {
   if (hasilList.length === 0) { alert('Data hasil tidak ditemukan.'); return null; }
   return hasilList[hasilList.length - 1];
 }
-
 function showUnduhLoading(pesan) {
   document.getElementById('hasilSiswa').insertAdjacentHTML('afterbegin',
     `<div id="unduhLoading" class="card info green" style="text-align:center;"><svg class="ico"><use href="#i-info"/></svg><span>${pesan}</span></div>`);
@@ -2561,14 +2381,13 @@ async function unduhHasilPDF() {
   const hasil = getHasilSiswa();
   if (!hasil) return;
   if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') { alert('Pustaka PDF belum termuat.'); return; }
-  showUnduhLoading('Menyiapkan PDF... Mohon tunggu.');
+  showUnduhLoading('Menyiapkan PDF...');
   try {
     const wrapper = document.createElement('div');
     wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '0'; wrapper.style.background = '#fff';
     wrapper.innerHTML = buildHasilRenderHTML(hasil);
     document.body.appendChild(wrapper);
-    const target = wrapper.firstElementChild;
-    const canvas = await html2canvas(target, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+    const canvas = await html2canvas(wrapper.firstElementChild, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
     document.body.removeChild(wrapper);
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
@@ -2588,7 +2407,7 @@ async function unduhHasilPDF() {
       heightLeft -= pdfHeight;
     }
     pdf.save(`Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.pdf`);
-  } catch (e) { alert('Gagal membuat PDF: ' + e.message); }
+  } catch (e) { console.error(e); alert('Gagal membuat PDF: ' + e.message); }
   finally { hideUnduhLoading(); }
 }
 
@@ -2596,38 +2415,79 @@ async function unduhHasilGambar() {
   const hasil = getHasilSiswa();
   if (!hasil) return;
   if (typeof html2canvas === 'undefined') { alert('Pustaka gambar belum termuat.'); return; }
-  showUnduhLoading('Menyiapkan gambar... Mohon tunggu.');
+  showUnduhLoading('Menyiapkan gambar...');
   try {
     const wrapper = document.createElement('div');
     wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '0'; wrapper.style.background = '#fff';
     wrapper.innerHTML = buildHasilRenderHTML(hasil);
     document.body.appendChild(wrapper);
-    const target = wrapper.firstElementChild;
-    const canvas = await html2canvas(target, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+    const canvas = await html2canvas(wrapper.firstElementChild, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
     document.body.removeChild(wrapper);
     const link = document.createElement('a');
     link.download = `Hasil-MUARA-${currentUser.nama.replace(/\s+/g,'_')}-${currentTugas.kode}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-  } catch (e) { alert('Gagal membuat gambar: ' + e.message); }
+  } catch (e) { console.error(e); alert('Gagal membuat gambar: ' + e.message); }
   finally { hideUnduhLoading(); }
 }
 
+// ============================================================
+// PANEL GURU — SEMUA DATA DIFILTER BERDASARKAN currentUser.email
+// ============================================================
 function switchGTab(tab) {
   document.querySelectorAll('#guruPage .tab').forEach(t => { t.classList.remove('active'); if (t.dataset.gtab === tab) t.classList.add('active'); });
   document.querySelectorAll('.gtab-content').forEach(t => t.classList.add('hidden'));
   const target = document.getElementById('gtab-' + tab); if (target) target.classList.remove('hidden');
   if (tab === 'hasil') { muatFilterTugas(); muatHasil(); }
+  if (tab === 'tugas') { renderGuruDashboard(); }
+}
+
+// Helper: ambil tugas milik guru yang login
+function getTugasSaya() {
+  return state.tugas.filter(e => e.guruEmail === currentUser.email);
+}
+// Helper: ambil hasil milik guru yang login
+function getHasilSaya() {
+  return state.hasil.filter(h => h.guruEmail === currentUser.email);
+}
+
+// ============= DASHBOARD PRIBADI GURU =============
+function renderGuruDashboard() {
+  const namaEl = document.getElementById('guruDashboardNama');
+  if (!namaEl) return;
+  namaEl.textContent = currentUser.nama || 'Guru';
+
+  const tugasSaya = getTugasSaya();
+  const hasilSaya = getHasilSaya();
+
+  const totalTugas = tugasSaya.length;
+  const tugasAktif = tugasSaya.filter(t => t.aktif).length;
+  const siswaMengumpulkan = hasilSaya.length;
+  let rataNilai = '-';
+  if (hasilSaya.length > 0) {
+    const sum = hasilSaya.reduce((a, h) => a + (Number(h.skorTotal) || 0), 0);
+    rataNilai = (sum / hasilSaya.length).toFixed(1);
+  }
+
+  const el1 = document.getElementById('statTotalTugas'); if (el1) el1.textContent = totalTugas;
+  const el2 = document.getElementById('statTugasAktif'); if (el2) el2.textContent = tugasAktif;
+  const el3 = document.getElementById('statSiswaMengumpulkan'); if (el3) el3.textContent = siswaMengumpulkan;
+  const el4 = document.getElementById('statRataNilai'); if (el4) el4.textContent = rataNilai;
 }
 
 function renderTugasList() {
   const c = document.getElementById('tugasList'); if (!c) return;
-  if (state.tugas.length === 0) { c.innerHTML = '<div class="info warning"><svg class="ico"><use href="#i-warn"/></svg><span>Belum ada tugas. Klik "Input Soal" untuk memulai.</span></div>'; return; }
-  c.innerHTML = state.tugas.slice().reverse().map(e => {
+  // FILTER: hanya tugas milik guru yang login
+  const tugasSaya = getTugasSaya();
+  if (tugasSaya.length === 0) {
+    c.innerHTML = '<div class="info warning"><svg class="ico"><use href="#i-warn"/></svg><span>Anda belum memiliki tugas. Klik <b>"Input Soal"</b> di atas untuk membuat tugas pertama Anda.</span></div>';
+    return;
+  }
+  c.innerHTML = tugasSaya.slice().reverse().map(e => {
+    // Hasil hanya dari tugas ini (dan otomatis guru ini karena guruEmail-nya sama)
     const jmlHasil = state.hasil.filter(h => h.tugasId === e.id).length;
     const jmlPilgan = e.soal.filter(s => s.jenis === 'pilgan').length;
     const jmlUraian = e.soal.filter(s => s.jenis !== 'pilgan').length;
-    const pembuat = e.guruNama ? ` | Dibuat oleh: ${escapeHtml(e.guruNama)}` : '';
     const kelasInfo = e.kelas ? ` | Kelas: ${escapeHtml(e.kelas)}` : '';
     const jenisInfo = ` | ${jmlPilgan} pilgan + ${jmlUraian} uraian`;
     let waktuInfo = '';
@@ -2635,25 +2495,31 @@ function renderTugasList() {
     if (e.durasi > 0) waktuInfo += ` | ⏱ ${e.durasi} menit`;
     const fotoInfo = e.aktifkanFoto === false ? ' | 🚫 Foto off' : ' | 📷 Foto on';
     const lockInfo = e.lockdownMode ? ' | <b style="color:#c62828;">🔒 LOCKDOWN</b>' : '';
-    return `<div class="exam-item"><h3><svg class="ico"><use href="#i-exam"/></svg> ${escapeHtml(e.judul) || '(Tanpa judul)'} <span class="badge ${e.aktif ? 'green' : 'gray'}">${e.aktif ? 'AKTIF' : 'DITUTUP'}</span></h3><div class="meta">${escapeHtml(e.mapel || '-')}${kelasInfo} | KKM: ${e.kkm}${jenisInfo} | ${jmlHasil} siswa${pembuat}<br>${waktuInfo}${fotoInfo}${lockInfo}</div><div style="font-size:0.82rem; color:#718096; margin-bottom:6px;">Kode Tugas:</div><div class="code-badge">${e.kode}</div><div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"><button class="sm secondary" onclick="salinKode('${e.kode}')"><svg class="ico"><use href="#i-copy"/></svg> Salin Kode</button><button class="sm purple" onclick="bukaDuplikat('${e.id}')"><svg class="ico"><use href="#i-copy"/></svg> Duplikat</button><button class="sm secondary" onclick="bukaEditorTugas('${e.id}')"><svg class="ico"><use href="#i-edit"/></svg> Edit</button><button class="sm ${e.aktif ? 'warning' : 'success'}" onclick="toggleAktif('${e.id}')"><svg class="ico"><use href="${e.aktif ? '#i-pause' : '#i-play'}"/></svg> ${e.aktif ? 'Tutup' : 'Buka'}</button><button class="sm danger" onclick="hapusTugas('${e.id}')"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button></div></div>`;
+    return `<div class="exam-item"><h3><svg class="ico"><use href="#i-exam"/></svg> ${escapeHtml(e.judul) || '(Tanpa judul)'} <span class="badge ${e.aktif ? 'green' : 'gray'}">${e.aktif ? 'AKTIF' : 'DITUTUP'}</span></h3><div class="meta">${escapeHtml(e.mapel || '-')}${kelasInfo} | KKM: ${e.kkm}${jenisInfo} | ${jmlHasil} siswa mengumpulkan<br>${waktuInfo}${fotoInfo}${lockInfo}</div><div style="font-size:0.82rem; color:#718096; margin-bottom:6px;">Kode Tugas:</div><div class="code-badge">${e.kode}</div><div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"><button class="sm secondary" onclick="salinKode('${e.kode}')"><svg class="ico"><use href="#i-copy"/></svg> Salin Kode</button><button class="sm purple" onclick="bukaDuplikat('${e.id}')"><svg class="ico"><use href="#i-copy"/></svg> Duplikat</button><button class="sm secondary" onclick="bukaEditorTugas('${e.id}')"><svg class="ico"><use href="#i-edit"/></svg> Edit</button><button class="sm ${e.aktif ? 'warning' : 'success'}" onclick="toggleAktif('${e.id}')"><svg class="ico"><use href="${e.aktif ? '#i-pause' : '#i-play'}"/></svg> ${e.aktif ? 'Tutup' : 'Buka'}</button><button class="sm danger" onclick="hapusTugas('${e.id}')"><svg class="ico"><use href="#i-trash"/></svg> Hapus</button></div></div>`;
   }).join('');
 }
 
 function salinKode(code) { navigator.clipboard.writeText(code).then(() => alert('Kode ' + code + ' tersalin!')).catch(() => prompt('Salin manual:', code)); }
 async function toggleAktif(id) {
-  const e = state.tugas.find(x => x.id === id); if (!e) return;
-  e.aktif = !e.aktif; simpanLocal(); renderTugasList();
+  const e = state.tugas.find(x => x.id === id);
+  if (!e) return;
+  if (e.guruEmail !== currentUser.email) return alert('Anda tidak berhak mengubah tugas ini.');
+  e.aktif = !e.aktif; simpanLocal(); renderTugasList(); renderGuruDashboard();
   await cloudSaveTugas(e);
 }
 async function hapusTugas(id) {
+  const e = state.tugas.find(x => x.id === id);
+  if (!e) return;
+  if (e.guruEmail !== currentUser.email) return alert('Anda tidak berhak menghapus tugas ini.');
   if (!confirm('Hapus tugas ini?')) return;
-  state.tugas = state.tugas.filter(x => x.id !== id); simpanLocal(); renderTugasList();
+  state.tugas = state.tugas.filter(x => x.id !== id); simpanLocal(); renderTugasList(); renderGuruDashboard();
   await cloudRemoveTugas(id);
 }
 
 function bukaDuplikat(id) {
   const e = state.tugas.find(x => x.id === id);
   if (!e) return;
+  if (e.guruEmail !== currentUser.email) return alert('Anda tidak berhak menduplikat tugas ini.');
   duplikatTugasId = id;
   document.getElementById('duplikatInfo').innerHTML = `<div class="info"><svg class="ico"><use href="#i-info"/></svg><span><b>Asal:</b> ${escapeHtml(e.judul)} <br><b>Kode:</b> ${e.kode} | <b>Kelas:</b> ${escapeHtml(e.kelas || '-')} | <b>Soal:</b> ${e.soal.length}${e.lockdownMode ? ' | <b style="color:#c62828;">🔒 Lockdown</b>' : ''}</span></div>`;
   document.getElementById('duplikatJudul').value = (e.judul || 'Tugas') + ' (Copy)';
@@ -2669,6 +2535,7 @@ function tutupDuplikat() { duplikatTugasId = null; document.getElementById('dupl
 async function konfirmasiDuplikat() {
   const e = state.tugas.find(x => x.id === duplikatTugasId);
   if (!e) return;
+  if (e.guruEmail !== currentUser.email) return alert('Anda tidak berhak menduplikat tugas ini.');
   const kelasBaru = document.getElementById('duplikatKelas').value;
   const judulBaru = document.getElementById('duplikatJudul').value.trim();
   const waktuMulaiBaru = document.getElementById('duplikatWaktuMulai').value || '';
@@ -2686,10 +2553,15 @@ async function konfirmasiDuplikat() {
   baru.waktuSelesai = waktuSelesaiBaru;
   baru.aktif = bukaSekarang;
   baru.createdAt = new Date().toISOString();
+  // Pastikan tetap milik guru yang sama
+  baru.guruEmail = currentUser.email;
+  baru.guruNama = currentUser.nama;
   state.tugas.push(baru);
-  simpanLocal(); renderTugasList(); tutupDuplikat();
+  simpanLocal();
+  renderTugasList(); renderGuruDashboard();
+  tutupDuplikat();
   await cloudSaveTugas(baru);
-  alert(`Tugas berhasil diduplikat!\n\nKelas Baru: ${kelasBaru}\nKode Tugas Baru: ${baru.kode}\nStatus: ${bukaSekarang ? 'AKTIF' : 'DITUTUP (draf)'}`);
+  alert(`Tugas berhasil diduplikat!\n\nKelas Baru: ${kelasBaru}\nKode Tugas Baru: ${baru.kode}\nStatus: ${bukaSekarang ? 'AKTIF' : 'DITUTUP (draf)'}\n\nBagikan kode baru ini ke siswa kelas ${kelasBaru}.`);
 }
 
 function mulaiInputSoal() {
@@ -2774,15 +2646,17 @@ A. Bandung
 B. Jakarta
 C. Surabaya
 D. Medan
-Kunci Jawaban: B</pre>`;
+Kunci Jawaban: B</pre>
+Format didukung: <code>1.</code> <code>1)</code> <code>(1)</code> <code>Soal 1</code>, opsi <code>A.</code> <code>a)</code> <code>(A)</code> <code>A-</code>, dan label <code>Kunci Jawaban:</code> <code>Jawaban:</code> <code>Kunci:</code> <code>Answer:</code> — semua dideteksi otomatis.`;
   } else if (jenis === 'uraian') {
     boxUraian.classList.remove('hidden'); info.classList.remove('hidden');
     info.innerHTML = `<b>Sistem Deteksi Otomatis — Uraian:</b>
 <pre>1. Jelaskan pengertian gotong royong!
-Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama...</pre>`;
+Jawaban Ideal: Kerja sama untuk mencapai tujuan bersama...</pre>
+Format didukung: <code>1.</code> <code>1)</code> <code>(1)</code> <code>Soal 1</code>, dan label <code>Jawaban Ideal:</code> <code>Jawaban:</code> <code>Kunci:</code> <code>Pembahasan:</code> — semua dideteksi otomatis.`;
   } else if (jenis === 'keduanya') {
     boxKeduanya.classList.remove('hidden'); info.classList.remove('hidden');
-    info.innerHTML = `<b>Mode Keduanya (1 Kotak):</b> Paste soal <b>Pilihan Ganda</b> dan <b>Uraian</b> dalam satu kotak.`;
+    info.innerHTML = `<b>Mode Keduanya (1 Kotak):</b> Paste soal <b>Pilihan Ganda</b> dan <b>Uraian</b> dalam satu kotak. Sistem otomatis mendeteksi jenis tiap soal.`;
   }
 }
 
@@ -2813,6 +2687,7 @@ function prosesTempelSoal() {
 
     const jmlPilgan = semuaSoal.filter(s => s.jenis === 'pilgan').length;
     const jmlUraian = semuaSoal.filter(s => s.jenis === 'uraian').length;
+
     const totalBobot = semuaSoal.reduce((sum, s) => sum + (s.bobot || 0), 0);
     if (totalBobot === 0 || Math.abs(totalBobot - 100) > 0.01) {
       const bobotPerSoal = Math.round(100 / semuaSoal.length);
@@ -2839,7 +2714,7 @@ function prosesTempelSoal() {
     else switchRubrikTab('gabungan');
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    alert(`Berhasil memproses!\n\n- ${jmlPilgan} soal Pilihan Ganda\n- ${jmlUraian} soal Uraian\n\nSilakan periksa & lengkapi.`);
+    alert(`Berhasil memproses!\n\n- ${jmlPilgan} soal Pilihan Ganda\n- ${jmlUraian} soal Uraian\n\nSilakan periksa & lengkapi (mapel, judul, kelas, API key, kunci jawaban).`);
   } catch (e) {
     status.innerHTML = `<div class="info red"><svg class="ico"><use href="#i-warn"/></svg><div><b>Gagal memproses:</b><br>${escapeHtml(e.message)}</div></div>`;
   }
@@ -2869,7 +2744,10 @@ function parseTeksSoal(teks, jenisMode) {
     if (jenisMode === 'pilgan') {
       const p = cobaParsePilgan(blockText);
       if (p) hasil.push(p);
-      else { const u = cobaParseUraian(blockText); if (u) { u.jenis = 'pilgan'; u.opsi = ['Opsi A', 'Opsi B', 'Opsi C', 'Opsi D']; u.kunci = 'A'; hasil.push(u); } }
+      else {
+        const u = cobaParseUraian(blockText);
+        if (u) { u.jenis = 'pilgan'; u.opsi = ['Opsi A', 'Opsi B', 'Opsi C', 'Opsi D']; u.kunci = 'A'; hasil.push(u); }
+      }
     } else if (jenisMode === 'uraian') {
       const u = cobaParseUraian(blockText);
       if (u) { u.jenis = 'uraian'; delete u.opsi; hasil.push(u); }
@@ -2972,8 +2850,10 @@ function isiTemplateKetentuan() {
 }
 
 function bukaEditorTugas(id) {
+  const tugasAsli = state.tugas.find(x => x.id === id);
+  if (tugasAsli && tugasAsli.guruEmail !== currentUser.email) return alert('Anda tidak berhak mengedit tugas ini.');
   editingTugasId = id;
-  const e = id ? state.tugas.find(x => x.id === id) : null;
+  const e = id ? tugasAsli : null;
   document.getElementById('tugasListView').classList.add('hidden');
   document.getElementById('tugasChoiceView').classList.add('hidden');
   document.getElementById('tugasTempelView').classList.add('hidden');
@@ -3009,7 +2889,7 @@ function tutupEditorTugas() {
   editingTugasId = null;
   document.getElementById('tugasEditorView').classList.add('hidden');
   document.getElementById('tugasListView').classList.remove('hidden');
-  renderTugasList();
+  renderTugasList(); renderGuruDashboard();
 }
 
 function renderEditorSoal() {
@@ -3125,6 +3005,7 @@ async function simpanTugas() {
 
   if (editingTugasId) {
     const e = state.tugas.find(x => x.id === editingTugasId);
+    if (e && e.guruEmail !== currentUser.email) return alert('Anda tidak berhak mengubah tugas ini.');
     Object.assign(e, { mapel, judul, kelas, durasi, kkm, apiKey, jenisTugas, ketentuan, rubrik, soal: editorSoal, waktuMulai, waktuSelesai, aktifkanFoto, lockdownMode });
     simpanLocal();
     await cloudSaveTugas(e);
@@ -3149,17 +3030,17 @@ async function simpanTugas() {
 function muatFilterTugas() {
   const sel = document.getElementById('filterTugas'); if (!sel) return;
   const current = sel.value;
-  const tugasSaya = state.tugas.filter(e => e.guruEmail === currentUser.email);
+  const tugasSaya = getTugasSaya();
   sel.innerHTML = '<option value="">-- Semua Tugas Saya --</option>' + tugasSaya.map(e => `<option value="${e.id}">${escapeHtml(e.judul)} [${e.kode}] - ${escapeHtml(e.kelas || '-')}</option>`).join('');
   sel.value = current;
 }
 
 function muatHasil() {
   const filterId = document.getElementById('filterTugas').value;
-  let list = state.hasil.filter(h => h.guruEmail === currentUser.email);
+  let list = getHasilSaya(); // FILTER: hanya hasil dari tugas milik guru ini
   if (filterId) list = list.filter(h => h.tugasId === filterId);
   const c = document.getElementById('hasilContainer');
-  if (list.length === 0) { c.innerHTML = '<div class="info"><svg class="ico"><use href="#i-info"/></svg><span>Belum ada siswa yang mengumpulkan jawaban.</span></div>'; return; }
+  if (list.length === 0) { c.innerHTML = '<div class="info"><svg class="ico"><use href="#i-info"/></svg><span>Belum ada siswa yang mengumpulkan jawaban untuk tugas-tugas Anda.</span></div>'; return; }
   c.innerHTML = list.slice().reverse().map(h => {
     const kkm = (state.tugas.find(e => e.id === h.tugasId)?.kkm) || 75;
     const lulus = h.skorTotal >= kkm; const warna = lulus ? '#38a169' : '#e53e3e';
@@ -3171,7 +3052,7 @@ function muatHasil() {
 
 function exportCSV() {
   const filterId = document.getElementById('filterTugas').value;
-  let list = state.hasil.filter(h => h.guruEmail === currentUser.email);
+  let list = getHasilSaya();
   if (filterId) list = list.filter(h => h.tugasId === filterId);
   if (list.length === 0) return alert('Belum ada data.');
   let csv = 'Nama,Kelas,Tugas,Kode Tugas,Waktu,Skor Total,Status,Metode Submit\n';
@@ -3182,13 +3063,13 @@ function exportCSV() {
     csv += `"${h.nama}","${h.kelas || '-'}","${h.tugasJudul || '-'}","${h.tugasKode}","${new Date(h.waktu).toLocaleString('id-ID')}",${h.skorTotal},${lulus},${trig}\n`;
   });
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = `nilai_${Date.now()}.csv`; a.click(); URL.revokeObjectURL(url);
+  const a = document.createElement('a'); a.href = url; a.download = `nilai_${currentUser.nama.replace(/\s+/g,'_')}_${Date.now()}.csv`; a.click(); URL.revokeObjectURL(url);
 }
 
 async function hapusSemuaHasil() {
-  if (!confirm('Hapus SEMUA hasil penilaian Anda?')) return;
+  if (!confirm('Hapus SEMUA hasil penilaian untuk tugas-tugas Anda? (Hasil guru lain tidak terpengaruh)')) return;
   state.hasil = state.hasil.filter(h => h.guruEmail !== currentUser.email);
-  simpanLocal(); muatHasil();
+  simpanLocal(); muatHasil(); renderGuruDashboard();
   await cloudRemoveHasilGuru(currentUser.email);
 }
 
@@ -3241,7 +3122,7 @@ function konfirmasiKeluarTugas() {
   } else {
     console.warn('MUARA berjalan dalam mode LOCAL (tanpa Firebase).');
   }
-  console.log('MUARA v12 (hard-lock) siap. Mode:', firebaseReady ? 'CLOUD' : 'LOCAL', '| Total guru:', state.guruList.length);
+  console.log('MUARA v11 siap. Mode:', firebaseReady ? 'CLOUD' : 'LOCAL', '| Total guru:', state.guruList.length);
 })();
 </script>
 </body>
